@@ -7,7 +7,7 @@
 - 目标：开发开源、可二次开发的奥维同类地图平台。
 - V0：扫描真实奥维图源二维码或导入 `.ovmap`，安全预览后真实出图并保存。
 - 形态：全平台为长期方向；若原生拖慢，Web UI 可接受；重点是能实际拉起运行。
-- 2026-08-27 用户已批准聊天中的 V0 方向；书面 `goal.md` 与设计规格等待用户复核。
+- 2026-08-27 用户已批准聊天中的 V0 方向，并明确回复“书面规格批准”；当前阶段为 `spec-approved / plan-ready`。
 
 ### 本轮回答
 
@@ -99,7 +99,8 @@
 | 既有同类本地仓库 | 未发现 | `find /Users/assis/Documents/Codex -maxdepth 2` 仅命中既有 VegFlow mapping 目录，无 Ovi/OpenMapBridge 项目 | 2026-08-27 |
 | Git 仓库 | 已初始化本地 `main`；首个规格 commit `5abe01b`；无 remote | `git log -1 --oneline`、`git status --short` | 2026-08-27 |
 | 根卷空间 | 最近一次复核约 25 GiB 可用；此前同日曾低至约 484 MiB | `df -h /` | 2026-08-27 |
-| Node/Docker/浏览器工具链 | unknown，实施任务 0 核验 | 尚未执行版本命令 | 2026-08-27 |
+| Node/Docker 工具链 | 本机 Node `v26.7.0`、npm `11.19.0`、Docker `29.4.0`、Compose `5.1.2`；计划冻结 Node `24.20.0` LTS 作为目标运行时 | 版本命令；[Node 官方发布表](https://nodejs.org/en/about/previous-releases) | 2026-08-27 |
+| 奥维桌面客户端 | `/Applications` 未发现 Ovital/奥维应用 | 应用目录名称检索 | 2026-08-27 |
 
 ### GitHub 与远端
 
@@ -127,6 +128,8 @@ python3 -c 'read bytes; inspect header; zlib.decompress(bytes[24:]); list ASCII 
 - 解压后 4209 bytes。
 - 解压内容中出现多个主机和 URL 模板，包括 `{$serverpart}`、`{$z}`、`{$x}`、`{$y}` 以及分块表达式。
 - 文件名和内容共同支持“一个 `.ovmap` 可装多个图源配置”。
+- 解压 payload 的五条记录起点为 `0x0000/0x0347/0x0695/0x09e2/0x0d25`；每条总长度等于首个 little-endian `recordLength + 8`，最后一条准确结束于 4209 bytes。
+- 当前样本中，记录偏移 24 是地图 ID、偏移 32 是最大级别；偏移 128 起连续四个 little-endian 长度前缀 UTF-8 字符串依次表现为名称、主机、URL 模板和系列名。这些仅作为 `record37-zlib` 家族证据，不外推到所有版本。
 
 ### 不得跨越的推断
 
@@ -138,7 +141,7 @@ python3 -c 'read bytes; inspect header; zlib.decompress(bytes[24:]); list ASCII 
 ## 8. 二维码当前证据
 
 - 官方确认二维码可以导入自定义地图，但没有公开线协议。
-- 此前同线程对公开样本的最小观察显示存在 `ovobj?...` 风格载荷；本轮尚未建立可重复 fixture 和字段映射，因此状态为 `discovered`，不能进入已验证实现结论。
+- 使用 macOS Vision 对公开二维码做内存级结构检查：QR payload 长 271 bytes，头为 `ovobj`，查询键顺序为 `t,id,na,po,he,oy,df,hn,ul`；没有输出或保存这些键的值。字段 `id/na/hn/ul` 的业务表现可作为首版候选，其他代码保持原值，待差分证据确认。
 - 星图云官方二维码场景需要用户导入后替换自己的 token，证明二维码可能只含模板或占位凭证。
 - V0 必须同时支持摄像头和图片上传；无摄像头不得阻断旅程。
 
@@ -158,6 +161,8 @@ python3 -c 'read bytes; inspect header; zlib.decompress(bytes[24:]); list ASCII 
 | OpenLayers | 多投影、自定义瓦片矩阵、传统栅格协议适合 V0 | 具体版本、许可证和安全公告实施前复核 | 推荐二维渲染器，状态 `discovered` |
 | Node/TypeScript 本地网关 | 可共用 schema，内置 zlib，易以 Web UI 快速拉起 | 框架和版本未锁定 | 推荐实现方向，实施计划前核验 |
 | SQLite | 单机配置/回执存储，易迁移和备份 | 驱动与迁移方案未锁定 | 推荐 V0 持久层 |
+
+2026-08-27 计划阶段通过 npm registry 当前元数据核验并冻结：OpenLayers `10.10.0`（BSD-2-Clause）、ZXing Browser `0.2.1`（MIT）、Fastify `5.12.1`（MIT）、better-sqlite3 `13.0.3`（MIT）、React `19.2.8`（MIT）、Vite `8.2.2`（MIT）、Zod `4.4.3`（MIT）、Vitest `4.1.11`（MIT）和 Playwright `1.62.1`（Apache-2.0）。实施任务 0 仍须生成锁文件并复核传递依赖与安全公告。
 
 ## 10. 方案、假设与裁决
 
@@ -200,8 +205,9 @@ QR/文件 → 纯本地 inspect → version adapter → MapSourceDefinition prev
 
 | 层 | 事实 | 阶段 | 证据 |
 |---|---|---|---|
-| 产品裁决 | V0 方向获用户聊天批准 | discovered/spec-chat-approved | 当前线程 |
-| 书面规格 | `goal.md`、`research.md`、设计文档已落盘并提交于本地 `main`（根 commit `5abe01b`） | local-candidate，待用户复核 | 本地文件与 Git commit |
+| 产品裁决 | V0 方向和书面规格均获用户明确批准 | spec-approved | 当前线程 |
+| 书面规格与实施计划 | `goal.md`、`research.md`、设计文档和 10 项实施计划已落盘 | spec-approved / plan-ready | 本地文件、Git commit 与用户回复 |
+| 实施计划 | `docs/superpowers/plans/2026-08-27-open-map-bridge-v0-import.md`，10 个任务、81 个步骤 | plan-ready，待选择执行方式 | 本地计划文件与计划自检 |
 | 现有产品 | 无 OpenMapBridge 运行入口 | missing | 本地目录盘点 |
 | `.ovmap` 魔数/压缩 | 一个公开样本完成内存级观察 | discovered | 第 7 节命令与结果 |
 | 二维码协议 | 官方确认流程；私有载荷字段未建 fixture | discovered | 官方文档、同线程观察 |
