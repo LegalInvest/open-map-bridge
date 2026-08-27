@@ -274,7 +274,7 @@ fixtures/synthetic/temporal  无外网的 20 年彩色/带标签时序瓦片
 | AC-001 至 AC-010 | 业务验收 | 均未运行 | E2E + 真实浏览器 | 对应 AC | missing | 无代码入口 | 2026-08-27 |
 | JRN-007 / FR-009 | 历史源日期和真实瓦片 | 日期事实、合成 20 年源、安全 OviBridge、注册源瓦片 API 已本地验证；官方客户端仅导入成功 | `packages/temporal-source`、`apps/gateway/src/{temporal,routes/temporal}.ts` | gateway/contract suite 22 tests；AC-011 未运行 | synthetic local-verified / real adapter blocked | 官方日期目录仍下载；Web 服务未启用 | 2026-08-27 |
 | JRN-008 / FR-010 | 双湖 AOI 确认 | GeoJSON 校验、两个独立 approximate 预设和不可变版本追加已本地验证 | `packages/aois/src/{schema,presets}.ts`；editor planned | 5 unit tests；AC-012/013/014 未运行 | contract local-verified / UI missing | 预设不是精确边界；缺地图编辑确认 | 2026-08-27 |
-| JRN-009 / FR-011/012 | 四屏、卷帘和播放 | 开源原语已发现，无本地实现 | `apps/web/src/map`、`apps/web/src/history` | AC-014/015 | planned | 缺代码、测试和真实源 | 2026-08-27 |
+| JRN-009 / FR-011/012 | 四屏、卷帘和播放 | 四屏、逐屏日期/加载状态和共享 ViewState 已本地构建；卷帘/播放未实现 | `apps/web/src/history/{HistoryWorkspace,MapGrid,MapPane,view-sync}.tsx` | 5 UI/sync tests；build passed；AC-014/015 未跑 | UI local-candidate | 缺浏览器 E2E、卷帘、播放和真实源 | 2026-08-27 |
 | FR-013 / BR-014 | 变化观察证据等级 | 用户目标与风险已定义 | `apps/web/src/history/observations` | AC-016 | planned | 缺模型、UI 和反例测试 | 2026-08-27 |
 
 阶段计数不能跨级汇总：当前只有规格与候选证据，没有 `local-verified`、`main`、`deployed` 或 `accepted`。

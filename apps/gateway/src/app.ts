@@ -1,6 +1,7 @@
 import Fastify, { type FastifyInstance } from 'fastify';
 import { lakeAoiPresets } from '@omb/aois';
 import { registerTemporalRoutes } from './routes/temporal.js';
+import { registerAoiRoutes } from './routes/aois.js';
 import { TemporalStateRepository } from './storage/temporal-state.js';
 import { TemporalSourceRegistry } from './temporal/registry.js';
 import { SyntheticTemporalAdapter } from './temporal/synthetic-adapter.js';
@@ -33,8 +34,8 @@ export async function buildApp(options: BuildAppOptions): Promise<FastifyInstanc
   }
 
   app.get('/api/health', async () => ({ ok: true, persistence: options.dataPath === null ? 'memory' : 'atomic-json' }));
-  app.get('/api/aois', async () => repository.listAoIs());
   app.get('/api/comparisons', async () => repository.listComparisons());
+  registerAoiRoutes(app, repository);
   registerTemporalRoutes(app, registry);
   return app;
 }
