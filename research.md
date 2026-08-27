@@ -197,14 +197,14 @@ python3 -c 'read bytes; inspect header; zlib.decompress(bytes[24:]); list ASCII 
 | DEC-005 | 内部格式 | 继续以 `.ovmap` 为真值 / 开放 schema 为真值 | 选开放 schema，Ovi 是边界适配器 | 需要设计迁移，但避免再次锁定 |
 | DEC-006 | 品牌 | 使用奥维名称 / 独立品牌 | 工作名 OpenMapBridge，正式独立品牌 | 避免商标和官方关联风险 |
 | DEC-007 | 历史源接入 | 直接复现私有 GEE / 官方客户端桥接 / 只用开放遥感源 | 用户批准官方客户端本机桥接＋开放适配器 | 桥接受官方客户端运行态约束，但最快验证真实二维码且不绕过认证 |
-| DEC-008 | 20 年口径 | 滚动 20 年 / 2006–2025 / 2000–2025 | 首批验收固定 2006–2025 共 20 个完整自然年 | 若用户需要 2000–2025，日期模型可扩展但测试规模增大 |
+| DEC-008 | 20 年口径 | 滚动 20 年 / 2006–2025 / 2000–2025 | 用户批准最近 20 个完整 UTC 自然年；2026 年运行时为 2006–2025 | 年界由纯函数和网关默认窗口测试保护 |
 | DEC-009 | 双湖边界 | 直接像素转经纬度 / approximate 预设后用户确认 | 选后者；截图无空间参考，不冒充精确边界 | 首次多一步确认，但避免错区验收 |
 | DEC-010 | 环境结论 | 影像自动判定污染 / 影像观察＋外部证据门 | 选证据门 | 结论更慢，但避免把季节、水色、传感器差异写成污染因果 |
 | DEC-011 | 产品入口 | 固定双湖 / 任意框选区域 | 用户明确纠偏并批准任意框选；双湖为样例 | 需要 AOI 创建和几何自适应，但系统真正通用 |
 | DEC-012 | 默认输出 | 全时间轴 / 一次四张跨 20 年 | 用户明确要求一次四张；采用最近 20 个完整自然年和四个等距锚点 | 长序列播放退为次要，不阻塞主结果 |
 | DEC-013 | 实现主线 | 合并腾讯云 satmap / 开放适配器优先 / 直接逆向私有 GEE | 用户批准开放适配器优先；腾讯云应用只作后续消费端 | 最快形成真实合法闭环并降低私有协议耦合 |
 
-## 11. 推荐系统与代码地图（绿地 planned）
+## 11. 推荐系统与代码地图（当前实施状态）
 
 目标目录边界：
 
@@ -228,7 +228,7 @@ QR/文件 → 纯本地 inspect → version adapter → MapSourceDefinition prev
 → tile proxy → OpenLayers render → receipt + persisted state
 ```
 
-上述时序路径中的日期事实、AOI 版本、网关、四屏、卷帘、播放和观察面板已经实现；任意 AOI 创建、动态 20 年窗口、自动四期和真实奥维瓦片仍缺失。QR/`.ovmap` 通用导入主线仍是 planned。当前没有 CI、远端制品、公网部署或真实奥维瓦片验收。
+上述时序路径中的日期事实、AOI 创建/版本、动态 20 年窗口、自动唯一四期、几何自适应、网关、四屏、卷帘、播放和观察面板已经实现；真实奥维瓦片仍被第三方接口监听确认门阻塞。QR/`.ovmap` 通用导入主线仍是 planned。当前没有 CI、远端制品、公网部署或真实奥维瓦片验收。
 
 历史影像增量目标路径：
 
@@ -237,12 +237,12 @@ packages/temporal-source     日期事实、适配器、帧回执
 packages/aois                GeoJSON 验证、版本和双湖预设
 apps/gateway/src/temporal    OviBridge、合成 fixture、受控日期瓦片路由
 apps/gateway/src/aois        AOI 版本和比较持久化
-apps/web/src/history         双湖工作台、日期目录、播放与观察
+apps/web/src/history         任意区域工作台、日期目录、四期选择、播放与观察
 apps/web/src/map             共享 ViewState、四屏和卷帘
 fixtures/synthetic/temporal  无外网的 20 年彩色/带标签时序瓦片
 ```
 
-这些路径在本次文档更新时仍为 `planned`，不得写成已实现。
+这些路径已经形成通用时序 `local-candidate`；真实源、QR/`.ovmap` 导入与用户独立签收必须分开晋级，不得因合成 E2E 写成业务已接受。
 
 ## 12. 已核验基线
 
@@ -283,7 +283,7 @@ fixtures/synthetic/temporal  无外网的 20 年彩色/带标签时序瓦片
 | JRN-008 / FR-010 | 双湖 AOI 确认 | GeoJSON 校验、两个独立 approximate 预设和不可变版本追加已本地验证 | `packages/aois/src/{schema,presets}.ts`；editor planned | 5 unit tests；AC-012/013/014 未运行 | contract local-verified / UI missing | 预设不是精确边界；缺地图编辑确认 | 2026-08-27 |
 | JRN-009 / FR-011/012 | 四屏、卷帘和播放 | 四屏、逐屏状态、共享/回放 ViewState、卷帘、播放和缺年隔离均已本地构建 | `apps/web/src/history` | UI/sync tests + Chrome E2E passed | synthetic local-verified | 真实奥维源和用户 AOI 未接受 | 2026-08-27 |
 | FR-013 / BR-014 | 变化观察证据等级 | 可见对象、原因假设和独立证据门已实现 | `apps/web/src/history/ObservationPanel.tsx` | component tests passed；AC-016 synthetic-only | UI local-verified | 尚无真实观察、外部逐年证据或用户接受 | 2026-08-27 |
-| JRN-007/008 / FR-010/014 | 任意框选后自动四期 | 现有 AOI 模型允许 string ID，但只有双湖预设、PUT 修订和写死 2006–2025/湖泊 zoom | `packages/aois`、`packages/temporal-source`、`apps/gateway/src/routes/aois.ts`、`apps/web/src/history` | 新 TDD 与非湖区 E2E | approved / planned | 缺 POST 创建、动态窗口、唯一四期、Draw UI 和几何 fit | 2026-08-27 19:52 |
+| JRN-007/008 / FR-010/014 | 任意框选后自动四期 | POST 创建、服务端 `area-*` 身份、矩形拖拽/多边形绘制、动态 20 年窗口、唯一四期、几何 fit 和真实浏览器非湖区旅程均已实现 | `packages/aois`、`packages/temporal-source`、`apps/gateway/src/routes/aois.ts`、`apps/web/src/history` | 单元/组件/路由测试 + 非湖区 Chrome E2E | synthetic local-verified / generic UI local-candidate | 真实奥维四日期闸门与用户独立签收未完成 | 2026-08-27 20:09 |
 
 阶段计数不能跨级汇总：合成链路已有 `local-verified`；开放工作台整体为 `local-candidate`；真实奥维、`main`、`deployed` 和用户 `accepted` 均未达到。
 

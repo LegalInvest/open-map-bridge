@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 export function evaluateEnvironment({ nodeMajor, freeBytes }) {
   const errors = [];
   if (nodeMajor < 24 || nodeMajor > 26) errors.push(`unsupported Node ${nodeMajor}`);
-  if (freeBytes < 5n * 1024n ** 3n) errors.push('at least 5 GiB free disk is required');
+  if (freeBytes < 8n * 1024n ** 3n) errors.push('at least 8 GiB free disk is required');
   return { ok: errors.length === 0, errors };
 }
 
