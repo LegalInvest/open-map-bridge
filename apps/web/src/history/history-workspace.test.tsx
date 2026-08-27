@@ -45,7 +45,14 @@ describe('HistoryWorkspace', () => {
   it('shows four independent dates and keeps one failed pane isolated', async () => {
     render(<HistoryWorkspace api={api} MapPaneComponent={TestMapPane} />);
     expect(await screen.findByRole('heading', { name: '双湖历史影像' })).toBeVisible();
-    expect(await screen.findAllByLabelText('面板日期')).toHaveLength(4);
+    const selectors = await screen.findAllByLabelText('面板日期');
+    expect(selectors).toHaveLength(4);
+    expect(selectors.map((selector) => (selector as HTMLSelectElement).value)).toEqual([
+      'scene-2006',
+      'scene-2011',
+      'scene-2018',
+      'scene-2025',
+    ]);
     expect(await screen.findByText('面板 3：加载失败')).toBeVisible();
     expect(screen.getByText('面板 1：已加载')).toBeVisible();
     expect(screen.getByText('范围待确认')).toBeVisible();

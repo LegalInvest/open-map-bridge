@@ -78,12 +78,26 @@ export function MapPane({ panelIndex, sourceId, date, aoi, viewSync, onStatus }:
       view,
       controls: [],
     });
+    const exposeViewState = (state: ViewState) => {
+      target.dataset.viewState = JSON.stringify(state);
+    };
+    const initialCenter = view.getCenter();
+    const initialZoom = view.getZoom();
+    if (initialCenter && initialZoom !== undefined) {
+      exposeViewState({
+        center: [initialCenter[0] ?? 0, initialCenter[1] ?? 0],
+        zoom: initialZoom,
+        rotation: view.getRotation(),
+        projection: 'EPSG:3857',
+      });
+    }
     const paneId = `pane-${panelIndex}`;
     const unsubscribe = viewSync.subscribe(paneId, (state: ViewState) => {
       applyingRemote = true;
       view.setCenter(state.center);
       view.setZoom(state.zoom);
       view.setRotation(state.rotation);
+      exposeViewState(state);
       map.render();
       applyingRemote = false;
     });
@@ -94,12 +108,14 @@ export function MapPane({ panelIndex, sourceId, date, aoi, viewSync, onStatus }:
       if (!center || zoom === undefined) return;
       const [centerX, centerY] = center;
       if (centerX === undefined || centerY === undefined) return;
-      viewSync.publish(paneId, {
+      const state: ViewState = {
         center: [centerX, centerY],
         zoom,
         rotation: view.getRotation(),
         projection: 'EPSG:3857',
-      });
+      };
+      exposeViewState(state);
+      viewSync.publish(paneId, state);
     });
     return () => {
       unsubscribe();

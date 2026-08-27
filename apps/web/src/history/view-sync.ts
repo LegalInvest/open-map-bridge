@@ -7,13 +7,16 @@ export interface ViewSync {
 
 export function createViewSync(): ViewSync {
   const listeners = new Map<string, (state: ViewState) => void>();
+  let current: ViewState | null = null;
   return {
     subscribe(id, listener) {
       listeners.set(id, listener);
+      if (current) listener(structuredClone(current));
       return () => listeners.delete(id);
     },
     publish(originId, state) {
       const normalized = normalizeViewState(state);
+      current = structuredClone(normalized);
       for (const [id, listener] of listeners) {
         if (id !== originId) listener(structuredClone(normalized));
       }

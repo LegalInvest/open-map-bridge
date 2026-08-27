@@ -17,7 +17,9 @@ interface HistoryWorkspaceProps {
   MapPaneComponent?: ComponentType<MapPaneProps>;
 }
 
-const initialStatuses: PaneStatus[] = Array.from({ length: 4 }, () => ({ state: 'waiting', loaded: 0, failed: 0 }));
+function createInitialStatuses(): PaneStatus[] {
+  return Array.from({ length: 4 }, () => ({ state: 'waiting', loaded: 0, failed: 0 }));
+}
 
 function latestAois(entries: AreaOfInterest[]): AreaOfInterest[] {
   const byId = new Map<string, AreaOfInterest>();
@@ -29,8 +31,16 @@ function latestAois(entries: AreaOfInterest[]): AreaOfInterest[] {
 }
 
 function chooseInitialDates(dates: TemporalDateEntry[]): string[] {
-  const indexes = [0, 6, 12, 19];
-  return indexes.map((index) => dates[index]?.id ?? dates[0]?.id ?? '');
+  const available = dates.filter((date) => date.availability === 'available');
+  const targets = [2006, 2012, 2018, 2025];
+  return targets.map((target) => {
+    const nearest = [...available].sort((left, right) => {
+      const leftDistance = Math.abs(Number(left.requestDate.slice(0, 4)) - target);
+      const rightDistance = Math.abs(Number(right.requestDate.slice(0, 4)) - target);
+      return leftDistance - rightDistance || left.requestDate.localeCompare(right.requestDate);
+    })[0];
+    return nearest?.id ?? dates[0]?.id ?? '';
+  });
 }
 
 function statusLabel(index: number, status: PaneStatus): string {
@@ -46,7 +56,7 @@ export function HistoryWorkspace({ api, MapPaneComponent = MapPane }: HistoryWor
   const [aoiId, setAoiId] = useState('baoying-lake');
   const [dates, setDates] = useState<TemporalDateEntry[]>([]);
   const [panelDateIds, setPanelDateIds] = useState<string[]>([]);
-  const [paneStatuses, setPaneStatuses] = useState<PaneStatus[]>(initialStatuses);
+  const [paneStatuses, setPaneStatuses] = useState<PaneStatus[]>(createInitialStatuses);
   const [error, setError] = useState<string | null>(null);
   const [confirming, setConfirming] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'swipe'>('grid');
@@ -73,13 +83,15 @@ export function HistoryWorkspace({ api, MapPaneComponent = MapPane }: HistoryWor
   useEffect(() => {
     if (!selectedSource || !selectedAoi) return;
     let active = true;
+    setDates([]);
+    setPanelDateIds([]);
+    setPaneStatuses(createInitialStatuses());
     void api
       .listDates(selectedSource.id, selectedAoi.id)
       .then((rows) => {
         if (!active) return;
         setDates(rows);
         setPanelDateIds(chooseInitialDates(rows));
-        setPaneStatuses(initialStatuses);
       })
       .catch((cause: unknown) => active && setError((cause as Error).message));
     return () => {

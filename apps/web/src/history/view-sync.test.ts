@@ -23,3 +23,13 @@ it('unsubscribes listeners and keeps subscriber state isolated', () => {
   sync.publish('pane-a', { center: [1, 2], zoom: 8, rotation: 0.1, projection: 'EPSG:3857' });
   expect(received).toEqual([]);
 });
+
+it('replays the last shared view to a pane that remounts after a date change', () => {
+  const sync = createViewSync();
+  sync.publish('pane-a', { center: [13_260_000, 3_880_000], zoom: 10, rotation: 0, projection: 'EPSG:3857' });
+  const received: ViewState[] = [];
+  sync.subscribe('pane-b', (state) => received.push(state));
+  expect(received).toEqual([
+    { center: [13_260_000, 3_880_000], zoom: 10, rotation: 0, projection: 'EPSG:3857' },
+  ]);
+});

@@ -6,7 +6,7 @@
 - 2026-08-27：用户批准官方奥维本机桥接＋OpenLayers 开放对比核心。
 - 2026-08-27：首批验收固定宝应湖、高邮湖 2006–2025；截图红框是 approximate，需在地图确认 GeoJSON。
 - 2026-08-27：新增历史影像设计 `docs/superpowers/specs/2026-08-27-temporal-lakes-v0-design.md`，旧导入安全契约保留。
-- 当前阶段：temporal spec-approved / implementation-prep；`local-verified/main/deployed/accepted` 均为 0。
+- 当前阶段：开放工作台 `local-candidate`，合成链路 `local-verified`；真实奥维、用户 AOI 确认、`main/deployed/accepted` 仍为 0。
 - 当前最大风险：官方 Web 服务能否仅监听回环、特殊 GEE 源能否按日期出图、真实拍摄日期可能不可得。
-- 当前下一步：增加一键本地启动和浏览器 E2E，再执行官方奥维本机 Web 服务的回环安全门。
-- Task 0–5：四屏 Web、共享 ViewState、AOI 拖点/确认、卷帘、2006–2025 时间轴、缺年跳过和分级观察记录已构建；31 tests/typecheck/build 通过；尚未浏览器 E2E。
+- 当前下一步：在操作时确认后启用官方“第三方接口”，只在回环监听通过时运行两日期真实瓦片探测。
+- Task 0–6（合成门）：四屏 Web、共享 ViewState、AOI 拖点/确认、卷帘、2006–2025 时间轴、缺年跳过、分级观察记录、一键启动和 Chrome E2E 已构建；32 tests/typecheck/build/E2E 通过。

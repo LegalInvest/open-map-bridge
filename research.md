@@ -222,7 +222,7 @@ QR/文件 → 纯本地 inspect → version adapter → MapSourceDefinition prev
 → tile proxy → OpenLayers render → receipt + persisted state
 ```
 
-当前路径均为 planned；没有代码、schema、测试、CI、制品或部署可以声称存在。
+上述时序路径中的日期事实、AOI、网关、四屏、卷帘、播放和观察面板已经实现；QR/`.ovmap` 通用导入主线仍是 planned。当前没有 CI、远端制品、公网部署或真实奥维瓦片验收。
 
 历史影像增量目标路径：
 
@@ -245,15 +245,15 @@ fixtures/synthetic/temporal  无外网的 20 年彩色/带标签时序瓦片
 | 产品裁决 | V0 方向和书面规格均获用户明确批准 | spec-approved | 当前线程 |
 | 书面规格与实施计划 | `goal.md`、`research.md`、设计文档和 10 项实施计划已落盘 | spec-approved / plan-ready | 本地文件、Git commit 与用户回复 |
 | 实施计划 | `docs/superpowers/plans/2026-08-27-open-map-bridge-v0-import.md`，10 个任务、81 个步骤 | plan-ready，待选择执行方式 | 本地计划文件与计划自检 |
-| 现有产品 | 无 OpenMapBridge 运行入口 | missing | 本地目录盘点 |
+| 现有产品 | Web＋本地网关已有一键运行入口 | local-candidate | `npm run dev`；仅回环监听 |
 | `.ovmap` 魔数/压缩 | 一个公开样本完成内存级观察 | discovered | 第 7 节命令与结果 |
 | 二维码协议 | 官方确认流程；私有载荷字段未建 fixture | discovered | 官方文档、同线程观察 |
 | 用户历史二维码 | 官方奥维 10.6.0 已真实导入并识别 GEE 历史协议，时间轴出现 | discovered / official-client-imported | 官方客户端可见行为；具体日期与瓦片尚未返回 |
 | 双湖 AOI | 用户提供含两块红框的参考图 | discovered / approximate | 当前附件；无空间参考，尚未形成确认 GeoJSON |
 | Ovi Web 桥接 | 官方文档证明接口形态；本地适配器已验证只接受回环 origin、年度请求日期和 5 MiB 上限；本机官方服务尚未启用和请求 | adapter local-verified / real compatibility-gate blocked | `apps/gateway/src/temporal/ovi-bridge.ts` 与 6 个相关测试；需验证官方监听和特殊历史源出图 |
-| 时序 Web UI | 新增批准设计，仍无代码 | planned | `docs/superpowers/specs/2026-08-27-temporal-lakes-v0-design.md` |
+| 时序 Web UI | 四屏、卷帘、播放、AOI 编辑和观察面板已实现 | local-candidate | Chrome E2E 通过；真实源未过门 |
 | 时序工作区基线 | 隔离分支已建立；环境门、精确依赖锁和四个空 workspace typecheck 通过 | local-candidate / scaffold-only | `npm run env:check && npm test && npm run typecheck`；Node 26.7.0、npm 11.19.0、197 packages、0 vulnerabilities；2026-08-27 |
-| 自动测试 | 无 | missing | 绿地项目 |
+| 自动测试 | 单元/组件/网关/环境门和 Chrome E2E 均已运行 | local-verified | `npm test`、`npm run typecheck`、`npm run build`、`npm run test:e2e` |
 | GitHub main | 无主仓 | missing | 未创建远端 |
 | 部署 | 无 | missing | 未授权/未实施 |
 | 业务验收 | 无真实 Web UI 旅程 | missing | 未实施 |
@@ -275,10 +275,10 @@ fixtures/synthetic/temporal  无外网的 20 年彩色/带标签时序瓦片
 | AC-001 至 AC-010 | 业务验收 | 均未运行 | E2E + 真实浏览器 | 对应 AC | missing | 无代码入口 | 2026-08-27 |
 | JRN-007 / FR-009 | 历史源日期和真实瓦片 | 日期事实、合成 20 年源、安全 OviBridge、注册源瓦片 API 已本地验证；官方客户端仅导入成功 | `packages/temporal-source`、`apps/gateway/src/{temporal,routes/temporal}.ts` | gateway/contract suite 22 tests；AC-011 未运行 | synthetic local-verified / real adapter blocked | 官方日期目录仍下载；Web 服务未启用 | 2026-08-27 |
 | JRN-008 / FR-010 | 双湖 AOI 确认 | GeoJSON 校验、两个独立 approximate 预设和不可变版本追加已本地验证 | `packages/aois/src/{schema,presets}.ts`；editor planned | 5 unit tests；AC-012/013/014 未运行 | contract local-verified / UI missing | 预设不是精确边界；缺地图编辑确认 | 2026-08-27 |
-| JRN-009 / FR-011/012 | 四屏、卷帘和播放 | 四屏、逐屏日期/加载状态和共享 ViewState 已本地构建；卷帘/播放未实现 | `apps/web/src/history/{HistoryWorkspace,MapGrid,MapPane,view-sync}.tsx` | 5 UI/sync tests；build passed；AC-014/015 未跑 | UI local-candidate | 缺浏览器 E2E、卷帘、播放和真实源 | 2026-08-27 |
-| FR-013 / BR-014 | 变化观察证据等级 | 用户目标与风险已定义 | `apps/web/src/history/observations` | AC-016 | planned | 缺模型、UI 和反例测试 | 2026-08-27 |
+| JRN-009 / FR-011/012 | 四屏、卷帘和播放 | 四屏、逐屏状态、共享/回放 ViewState、卷帘、播放和缺年隔离均已本地构建 | `apps/web/src/history` | UI/sync tests + Chrome E2E passed | synthetic local-verified | 真实奥维源和用户 AOI 未接受 | 2026-08-27 |
+| FR-013 / BR-014 | 变化观察证据等级 | 可见对象、原因假设和独立证据门已实现 | `apps/web/src/history/ObservationPanel.tsx` | component tests passed；AC-016 synthetic-only | UI local-verified | 尚无真实观察、外部逐年证据或用户接受 | 2026-08-27 |
 
-阶段计数不能跨级汇总：当前只有规格与候选证据，没有 `local-verified`、`main`、`deployed` 或 `accepted`。
+阶段计数不能跨级汇总：合成链路已有 `local-verified`；开放工作台整体为 `local-candidate`；真实奥维、`main`、`deployed` 和用户 `accepted` 均未达到。
 
 ## 14. 风险与未决项
 
