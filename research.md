@@ -249,7 +249,7 @@ fixtures/synthetic/temporal  无外网的 20 年彩色/带标签时序瓦片
 | 二维码协议 | 官方确认流程；私有载荷字段未建 fixture | discovered | 官方文档、同线程观察 |
 | 用户历史二维码 | 官方奥维 10.6.0 已真实导入并识别 GEE 历史协议，时间轴出现 | discovered / official-client-imported | 官方客户端可见行为；具体日期与瓦片尚未返回 |
 | 双湖 AOI | 用户提供含两块红框的参考图 | discovered / approximate | 当前附件；无空间参考，尚未形成确认 GeoJSON |
-| Ovi Web 桥接 | 官方文档证明接口形态；本机尚未启用和请求 | planned / compatibility-gate | 需先验证回环监听和特殊历史源出图 |
+| Ovi Web 桥接 | 官方文档证明接口形态；本地适配器已验证只接受回环 origin、年度请求日期和 5 MiB 上限；本机官方服务尚未启用和请求 | adapter local-verified / real compatibility-gate blocked | `apps/gateway/src/temporal/ovi-bridge.ts` 与 6 个相关测试；需验证官方监听和特殊历史源出图 |
 | 时序 Web UI | 新增批准设计，仍无代码 | planned | `docs/superpowers/specs/2026-08-27-temporal-lakes-v0-design.md` |
 | 时序工作区基线 | 隔离分支已建立；环境门、精确依赖锁和四个空 workspace typecheck 通过 | local-candidate / scaffold-only | `npm run env:check && npm test && npm run typecheck`；Node 26.7.0、npm 11.19.0、197 packages、0 vulnerabilities；2026-08-27 |
 | 自动测试 | 无 | missing | 绿地项目 |
@@ -272,7 +272,7 @@ fixtures/synthetic/temporal  无外网的 20 年彩色/带标签时序瓦片
 | NFR-001 | SSRF/解压/开放代理防护 | 风险已识别 | security/gateway | 恶意反例套件 | planned | 缺实现与红→绿证据 | 2026-08-27 |
 | NFR-007 | 合法开源依赖 | 候选已发现 | lockfiles、THIRD_PARTY | license audit | discovered | 版本/许可证/安全公告待任务0复核 | 2026-08-27 |
 | AC-001 至 AC-010 | 业务验收 | 均未运行 | E2E + 真实浏览器 | 对应 AC | missing | 无代码入口 | 2026-08-27 |
-| JRN-007 / FR-009 | 历史源日期和真实瓦片 | 日期事实/20 年请求目录/ViewState 合约已本地验证；官方客户端仅导入成功 | `packages/temporal-source/src/{schema,annual-catalog,view-state}.ts`；adapter planned | 4 unit tests；AC-011 未运行 | contract local-verified / adapter missing | 日期目录仍下载；Web 服务未启用 | 2026-08-27 |
+| JRN-007 / FR-009 | 历史源日期和真实瓦片 | 日期事实、合成 20 年源、安全 OviBridge、注册源瓦片 API 已本地验证；官方客户端仅导入成功 | `packages/temporal-source`、`apps/gateway/src/{temporal,routes/temporal}.ts` | gateway/contract suite 22 tests；AC-011 未运行 | synthetic local-verified / real adapter blocked | 官方日期目录仍下载；Web 服务未启用 | 2026-08-27 |
 | JRN-008 / FR-010 | 双湖 AOI 确认 | GeoJSON 校验、两个独立 approximate 预设和不可变版本追加已本地验证 | `packages/aois/src/{schema,presets}.ts`；editor planned | 5 unit tests；AC-012/013/014 未运行 | contract local-verified / UI missing | 预设不是精确边界；缺地图编辑确认 | 2026-08-27 |
 | JRN-009 / FR-011/012 | 四屏、卷帘和播放 | 开源原语已发现，无本地实现 | `apps/web/src/map`、`apps/web/src/history` | AC-014/015 | planned | 缺代码、测试和真实源 | 2026-08-27 |
 | FR-013 / BR-014 | 变化观察证据等级 | 用户目标与风险已定义 | `apps/web/src/history/observations` | AC-016 | planned | 缺模型、UI 和反例测试 | 2026-08-27 |

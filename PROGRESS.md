@@ -8,5 +8,5 @@
 - 2026-08-27：新增历史影像设计 `docs/superpowers/specs/2026-08-27-temporal-lakes-v0-design.md`，旧导入安全契约保留。
 - 当前阶段：temporal spec-approved / implementation-prep；`local-verified/main/deployed/accepted` 均为 0。
 - 当前最大风险：官方 Web 服务能否仅监听回环、特殊 GEE 源能否按日期出图、真实拍摄日期可能不可得。
-- 当前下一步：TDD 实现合成 20 年瓦片、只允许回环地址的 OviBridge 和防开放代理路由。
-- Task 0–2：工作区、日期事实、ViewState、双湖 AOI 校验/预设/版本 9 tests 通过；预设仍是 approximate，UI/真实瓦片未实现。
+- 当前下一步：TDD 实现四屏 Web 工作台、逐屏日期/加载事实和共享 ViewState，再接 AOI 编辑确认。
+- Task 0–3：合成 20 年源、安全 OviBridge、日期/瓦片 API、原子状态恢复已完成；22 tests 通过；真实 Ovi 瓦片仍 blocked。
