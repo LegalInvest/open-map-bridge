@@ -13,7 +13,15 @@ function parseSceneYear(dateId: string): number | null {
   const match = /^scene-(\d{4})$/.exec(dateId);
   if (!match?.[1]) return null;
   const year = Number(match[1]);
-  return year >= 2006 && year <= 2025 ? year : null;
+  return year >= 1000 && year <= 9999 ? year : null;
+}
+
+function boundaryYear(value: string): number {
+  const match = /^(\d{4})-\d{2}-\d{2}$/.exec(value);
+  if (!match?.[1] || Number.isNaN(Date.parse(`${value}T00:00:00Z`))) {
+    throw new TypeError('date range must use valid ISO calendar dates');
+  }
+  return Number(match[1]);
 }
 
 function validTileCoordinate(value: number, zoom: number): boolean {
@@ -33,8 +41,11 @@ export class SyntheticTemporalAdapter implements TemporalSourceAdapter {
 
   async listDates(input: { aoiId: string; from: string; to: string }): Promise<TemporalDateEntry[]> {
     if (!input.aoiId) throw new Error('aoiId is required');
-    return Array.from({ length: 20 }, (_, offset) => {
-      const year = 2006 + offset;
+    const fromYear = boundaryYear(input.from);
+    const toYear = boundaryYear(input.to);
+    if (toYear < fromYear || toYear - fromYear > 200) throw new RangeError('date range is invalid or too large');
+    return Array.from({ length: toYear - fromYear + 1 }, (_, offset) => {
+      const year = fromYear + offset;
       const date = `${year}-07-15`;
       return parseTemporalDateEntry({
         id: `scene-${year}`,
@@ -59,7 +70,7 @@ export class SyntheticTemporalAdapter implements TemporalSourceAdapter {
       return { status: 400, contentType: 'application/json', body: new TextEncoder().encode('{"error":"bad-coordinate"}') };
     }
 
-    const progress = (year - 2006) / 19;
+    const progress = (year % 20) / 19;
     const hue = Math.round(205 - progress * 95);
     const landWidth = Math.round(42 + progress * 88);
     const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">

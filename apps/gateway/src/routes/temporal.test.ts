@@ -38,3 +38,29 @@ it.each(['url=https%3A%2F%2Fevil.test', 'host=evil.test', 'token=canary', 'mapTy
     expect(response.body).not.toContain('canary');
   },
 );
+
+it('defaults date discovery to the previous twenty complete calendar years', async () => {
+  const app = await buildApp({ dataPath: null });
+  apps.push(app);
+  const response = await app.inject({
+    method: 'GET',
+    url: '/api/temporal/sources/synthetic-lakes/dates?aoiId=arbitrary-area',
+  });
+  const dates = response.json<Array<{ requestDate: string }>>();
+  const previousYear = new Date().getUTCFullYear() - 1;
+  expect(response.statusCode).toBe(200);
+  expect(dates).toHaveLength(20);
+  expect(dates.at(0)?.requestDate).toBe(`${previousYear - 19}-07-15`);
+  expect(dates.at(-1)?.requestDate).toBe(`${previousYear}-07-15`);
+});
+
+it('does not silently substitute a lake when arbitrary-area date discovery omits its AOI', async () => {
+  const app = await buildApp({ dataPath: null });
+  apps.push(app);
+  const response = await app.inject({
+    method: 'GET',
+    url: '/api/temporal/sources/synthetic-lakes/dates',
+  });
+  expect(response.statusCode).toBe(400);
+  expect(response.json()).toEqual({ error: 'aoi-id-required' });
+});

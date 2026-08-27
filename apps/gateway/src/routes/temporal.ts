@@ -1,4 +1,5 @@
 import type { FastifyInstance } from 'fastify';
+import { completeYearWindow } from '@omb/temporal-source';
 import type { TemporalSourceRegistry } from '../temporal/registry.js';
 
 export function registerTemporalRoutes(app: FastifyInstance, registry: TemporalSourceRegistry): void {
@@ -11,10 +12,12 @@ export function registerTemporalRoutes(app: FastifyInstance, registry: TemporalS
     const record = registry.get(id);
     if (!record) return reply.code(404).send({ error: 'source-not-found' });
     const query = request.query as Record<string, string | undefined>;
+    if (!query.aoiId) return reply.code(400).send({ error: 'aoi-id-required' });
+    const defaultWindow = completeYearWindow(new Date().getUTCFullYear());
     return record.adapter.listDates({
-      aoiId: query.aoiId ?? 'baoying-lake',
-      from: query.from ?? '2006-01-01',
-      to: query.to ?? '2025-12-31',
+      aoiId: query.aoiId,
+      from: query.from ?? defaultWindow.from,
+      to: query.to ?? defaultWindow.to,
     });
   });
 
