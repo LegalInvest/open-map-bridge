@@ -13,13 +13,32 @@ if (!Number.isInteger(port) || port < 1 || port > 65_535) throw new Error('OMB_O
 if (!Number.isInteger(mapType) || mapType < 1) throw new Error('OMB_OVI_MAP_TYPE must be a positive integer');
 
 const zoom = 10;
-const longitude = 119.285;
-const latitude = 33.18;
+const longitude = Number(process.env.OMB_PROBE_LONGITUDE ?? '119.285');
+const latitude = Number(process.env.OMB_PROBE_LATITUDE ?? '33.18');
+if (!Number.isFinite(longitude) || longitude < -180 || longitude > 180) {
+  throw new Error('OMB_PROBE_LONGITUDE must be between -180 and 180');
+}
+if (!Number.isFinite(latitude) || latitude < -85.05112878 || latitude > 85.05112878) {
+  throw new Error('OMB_PROBE_LATITUDE must be inside the Web Mercator latitude range');
+}
 const scale = 2 ** zoom;
 const x = Math.floor(((longitude + 180) / 360) * scale);
 const latitudeRadians = latitude * Math.PI / 180;
 const y = Math.floor((1 - Math.log(Math.tan(latitudeRadians) + 1 / Math.cos(latitudeRadians)) / Math.PI) / 2 * scale);
-const requestedDates = ['2006-06-30', '2025-06-30'];
+const requestedDates = (process.env.OMB_PROBE_DATES ?? '2006-06-30,2012-06-30,2019-06-30,2025-06-30')
+  .split(',')
+  .map((date) => date.trim());
+if (
+  requestedDates.length !== 4
+  || new Set(requestedDates).size !== 4
+  || requestedDates.some((date) => {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return true;
+    const parsed = new Date(`${date}T00:00:00Z`);
+    return Number.isNaN(parsed.getTime()) || parsed.toISOString().slice(0, 10) !== date;
+  })
+) {
+  throw new Error('OMB_PROBE_DATES must contain exactly four unique valid ISO dates');
+}
 
 function imageHeader(bytes) {
   if (bytes.length >= 24 && bytes.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]))) {
@@ -81,5 +100,7 @@ for (const requestedDate of requestedDates) {
   });
 }
 
-if (receipts[0]?.sha256 === receipts[1]?.sha256) throw new Error('two requested dates returned identical tile bytes');
+if (new Set(receipts.map((receipt) => receipt.sha256)).size !== receipts.length) {
+  throw new Error('four requested dates did not return four distinct normalized images');
+}
 process.stdout.write(`${JSON.stringify(receipts, null, 2)}\n`);

@@ -49,12 +49,16 @@ function png(seed) {
   ]);
 }
 
-test('requires two genuinely decodable images and compares their normalized hashes', async () => {
-  const earlier = png(11);
-  const later = png(97);
-  assert.ok(earlier.length > 100);
+test('requires four genuinely decodable dates and compares their normalized hashes', async () => {
+  const requestedDates = ['2006-06-30', '2012-06-30', '2019-06-30', '2025-06-30'];
+  const fixtures = new Map(requestedDates.map((date, index) => [date.replaceAll('-', ''), png(11 + index * 29)]));
+  assert.ok([...fixtures.values()].every((image) => image.length > 100));
   const server = createServer((request, response) => {
-    const body = request.url?.includes('20060630') ? earlier : later;
+    const body = [...fixtures].find(([date]) => request.url?.includes(date))?.[1];
+    if (!body) {
+      response.writeHead(404).end();
+      return;
+    }
     response.writeHead(200, { 'content-type': 'image/png', 'content-length': body.length });
     response.end(body);
   });
@@ -65,7 +69,14 @@ test('requires two genuinely decodable images and compares their normalized hash
     if (!address || typeof address === 'string') throw new Error('fixture server did not bind a TCP port');
     const child = spawn(process.execPath, [resolve('scripts/probe-ovi-bridge.mjs')], {
       cwd: process.cwd(),
-      env: { ...process.env, OMB_OVI_PORT: String(address.port), OMB_OVI_MAP_TYPE: '200' },
+      env: {
+        ...process.env,
+        OMB_OVI_PORT: String(address.port),
+        OMB_OVI_MAP_TYPE: '200',
+        OMB_PROBE_LONGITUDE: '119.285',
+        OMB_PROBE_LATITUDE: '33.18',
+        OMB_PROBE_DATES: requestedDates.join(','),
+      },
       stdio: ['ignore', 'pipe', 'pipe'],
     });
     let stdout = '';
@@ -75,12 +86,10 @@ test('requires two genuinely decodable images and compares their normalized hash
     const [code] = await once(child, 'close');
     assert.equal(code, 0, stderr);
     const receipts = JSON.parse(stdout);
-    assert.equal(receipts.length, 2);
-    assert.deepEqual(receipts.map((receipt) => receipt.dimensions), [
-      { width: 16, height: 16, format: 'png' },
-      { width: 16, height: 16, format: 'png' },
-    ]);
-    assert.notEqual(receipts[0].sha256, receipts[1].sha256);
+    assert.equal(receipts.length, 4);
+    assert.deepEqual(receipts.map((receipt) => receipt.requestedDate), requestedDates);
+    assert.ok(receipts.every((receipt) => receipt.dimensions.width === 16 && receipt.dimensions.height === 16));
+    assert.equal(new Set(receipts.map((receipt) => receipt.sha256)).size, 4);
   } finally {
     server.close();
     await once(server, 'close');
