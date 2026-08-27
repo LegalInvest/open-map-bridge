@@ -8,12 +8,14 @@
 - V0：扫描真实奥维图源二维码或导入 `.ovmap`，安全预览后真实出图并保存。
 - 形态：全平台为长期方向；若原生拖慢，Web UI 可接受；重点是能实际拉起运行。
 - 2026-08-27 用户已批准聊天中的 V0 方向，并明确回复“书面规格批准”；当前阶段为 `spec-approved / plan-ready`。
+- 2026-08-27 用户提供并授权试用一张“奥维高清历史影像91”二维码；要求同一个图源选择多个历史年份，并批准“官方奥维本机桥接＋开放 Web 对比核心”。
+- 首批业务验收：宝应湖、高邮湖用户框选区域 2006–2025 的对齐影像、四期对比和时间播放；污染、过度渔猎/养殖或开发原因只作为待验证假设。
 
 ### 本轮回答
 
 - 固化产品旅程、规则、数据、接口、安全和验收。
 - 记录当前 `.ovmap`/二维码证据、开源候选、项目资产和技术推荐。
-- 不安装依赖、不编写产品代码、不抓取大范围地图、不部署、不连接企业服务器。
+- 当前增量先更新规格与计划，再用 TDD 开发；不抓取大范围地图、不部署公网、不连接企业服务器。
 
 ### 搜索与核验边界
 
@@ -45,7 +47,7 @@
 
 | 来源 | 日期/核验 | 支持结论 | 局限 |
 |---|---|---|---|
-| 用户当前线程原话 | 2026-08-27 | 真实二维码、`.ovmap`、开放二次开发、全平台长期目标；Web UI 可先行；能运行优先 | 尚未收到用户合法真实二维码附件及配套 token |
+| 用户当前线程原话与附件 | 2026-08-27 | 已提供真实历史图源二维码和双湖框选参考图；批准方案 A；要求 20 年对比 | 双湖截图无空间参考，边界只能先 approximate；真实源日期目录尚未成功枚举 |
 | [奥维：扫描二维码添加自定义地图](https://www.ovital.com/137268-2/) | 2026-08-27 | 官方确认二维码可分享/导入自定义地图，手机一次扫描一个 | 未公开二维码线协议 |
 | [奥维：导入文件或扫描二维码](https://www.ovital.com/142734-2/) | 2026-08-27 | 官方确认自定义地图可保存为图片或奥维专属 `.ovmap` 并分享 | 视频页面未给出二进制 schema |
 | [奥维文件格式说明](https://www.ovital.com/139064-2/) | 2026-08-27 | `.ovmap` 是自定义地图格式；可导出分享后再导入 | 没有字段和版本文档 |
@@ -53,6 +55,11 @@
 | [奥维在线自定义地图](https://www.ovital.com/131425-2/) | 2026-08-27 | 官方配置字段包括 ID、名称、级别、投影、格式、尺寸、主机、端口、URL 和 token | 示例不等于所有私有记录字段 |
 | [奥维 WMTS 导入](https://www.ovital.com/147808/) | 2026-08-27 | WMTS 可解析生成自定义地图并支持自定义 token 参数 | 当前版本能力可能继续变化 |
 | [奥维多时相地图](https://www.ovital.com/147525/) | 2026-08-27 | URL 支持时间变量，证明统一模型需预留时间维度 | V0 不实现完整遥感时间流水线 |
+| [奥维 Web 瓦片服务](https://www.ovital.com/132277-2/) | 2026-08-27 | 官方接口路径包含日期参数，`yyyyMMdd` 按日期请求，`0` 为最新 | 尚未证明特殊 GEE 历史源能通过该接口按需出图，也未证明只监听回环 |
+| [奥维 Tableau 调用示例](https://www.ovital.com/146671/) | 2026-08-27 | 第三方程序可调用本机瓦片服务，日期表示目标日前的影像 | 不能据此获得真实拍摄日期目录 |
+| [OpenLayers Layer Swipe](https://openlayers.org/en/latest/examples/layer-swipe.html) | 2026-08-27 | 可直接复用卷帘渲染原语 | 示例不包含多时相数据和 Ovi 认证 |
+| [MapStore2](https://github.com/geosolutions-it/MapStore2) | 2026-08-27 | 有时间维度、时间线和 Swipe 的成熟开源行为参考 | 平台较重，仍不解决 Ovi 私有认证；不作为首版底座 |
+| [EO Browser](https://github.com/sentinel-hub/EOBrowser) | 2026-08-27 | 日期搜索、pin、透明度和 split compare 是可复用产品参考 | 外部部署依赖 Sentinel Hub 身份与服务，不适合作为 Ovi 兼容底座 |
 | [星图云奥维二维码教程](https://open.geovisearth.com/service/qa-assistance/159) | 2026-08-27 | 合法二维码模板可要求用户自行替换官方 token | 只代表星图云场景 |
 | [soneverdance/ovital](https://github.com/soneverdance/ovital) | 2026-08-27 | 公开二维码和 `.ovmap` 样本，可用于兼容研究和 golden fixture 候选 | 仓库无明确 LICENSE；图源权利和 token 合规未知，不能复制/再分发全部资源 |
 
@@ -98,9 +105,18 @@
 | 项目目录 | 新建 `/Users/assis/Documents/Codex/2026-08-27/open-map-bridge` | 本轮文件系统创建 | 2026-08-27 |
 | 既有同类本地仓库 | 未发现 | `find /Users/assis/Documents/Codex -maxdepth 2` 仅命中既有 VegFlow mapping 目录，无 Ovi/OpenMapBridge 项目 | 2026-08-27 |
 | Git 仓库 | 已初始化本地 `main`；首个规格 commit `5abe01b`；无 remote | `git log -1 --oneline`、`git status --short` | 2026-08-27 |
-| 根卷空间 | 最近一次复核约 25 GiB 可用；此前同日曾低至约 484 MiB | `df -h /` | 2026-08-27 |
+| 根卷空间 | 最近一次复核约 17 GiB 可用；此前同日曾低至约 484 MiB，临时安装包已清理 | `df -h /` | 2026-08-27 |
 | Node/Docker 工具链 | 本机 Node `v26.7.0`、npm `11.19.0`、Docker `29.4.0`、Compose `5.1.2`；计划冻结 Node `24.20.0` LTS 作为目标运行时 | 版本命令；[Node 官方发布表](https://nodejs.org/en/about/previous-releases) | 2026-08-27 |
-| 奥维桌面客户端 | `/Applications` 未发现 Ovital/奥维应用 | 应用目录名称检索 | 2026-08-27 |
+| 奥维桌面客户端 | 先发现旧 2.6.3；随后从官方分发安装并验签 10.6.0 到独立应用路径，未覆盖旧版 | 应用版本、代码签名、公证和官方安装包校验 | 2026-08-27 |
+
+### 2026-08-27 官方客户端实测增量
+
+- 从奥维官方分发地址取得并校验签名/公证的 macOS 10.6.0，保留安装于 `/Applications/OMapQT-10.6.0.app`；旧 2.6.3 应用未覆盖。
+- 用户二维码通过官方客户端真实导入，名称“奥维高清历史影像91”、legacy ID 200，被识别为“GEE 协议历史影像”；主界面出现日期时间轴。
+- 二维码载荷头为 `ovobj`，包含协议入口、认证和连接参数；认证区为不透明二进制，未发现明文年份。任何 host/key/载荷全文均未进入项目文件。
+- 导入后远端日期目录/瓦片仍停在下载状态；因此目前确认“单码多时相协议和时间轴存在”，尚未确认具体年份列表或真实瓦片。
+- 官方 Web 瓦片服务开关尚未启用；启用前必须证明只能由本机回环访问。若只能监听所有网卡，保持关闭。
+- 根卷在清理本轮临时 DMG/PDF 渲染缓存后约 17 GiB 可用；已安装应用和导入数据保留。
 
 ### GitHub 与远端
 
@@ -174,6 +190,10 @@ python3 -c 'read bytes; inspect header; zlib.decompress(bytes[24:]); list ASCII 
 | DEC-004 | 离线数据 | V0 完整 `.sdb` / V0 识别依赖 | 暂定 V0 识别并准确报 `needs-data`，完整导入后续 | 若用户要求 V0 离线航拍实显，需要扩大切片和样本 |
 | DEC-005 | 内部格式 | 继续以 `.ovmap` 为真值 / 开放 schema 为真值 | 选开放 schema，Ovi 是边界适配器 | 需要设计迁移，但避免再次锁定 |
 | DEC-006 | 品牌 | 使用奥维名称 / 独立品牌 | 工作名 OpenMapBridge，正式独立品牌 | 避免商标和官方关联风险 |
+| DEC-007 | 历史源接入 | 直接复现私有 GEE / 官方客户端桥接 / 只用开放遥感源 | 用户批准官方客户端本机桥接＋开放适配器 | 桥接受官方客户端运行态约束，但最快验证真实二维码且不绕过认证 |
+| DEC-008 | 20 年口径 | 滚动 20 年 / 2006–2025 / 2000–2025 | 首批验收固定 2006–2025 共 20 个完整自然年 | 若用户需要 2000–2025，日期模型可扩展但测试规模增大 |
+| DEC-009 | 双湖边界 | 直接像素转经纬度 / approximate 预设后用户确认 | 选后者；截图无空间参考，不冒充精确边界 | 首次多一步确认，但避免错区验收 |
+| DEC-010 | 环境结论 | 影像自动判定污染 / 影像观察＋外部证据门 | 选证据门 | 结论更慢，但避免把季节、水色、传感器差异写成污染因果 |
 
 ## 11. 推荐系统与代码地图（绿地 planned）
 
@@ -201,6 +221,20 @@ QR/文件 → 纯本地 inspect → version adapter → MapSourceDefinition prev
 
 当前路径均为 planned；没有代码、schema、测试、CI、制品或部署可以声称存在。
 
+历史影像增量目标路径：
+
+```text
+packages/temporal-source     日期事实、适配器、帧回执
+packages/aois                GeoJSON 验证、版本和双湖预设
+apps/gateway/src/temporal    OviBridge、合成 fixture、受控日期瓦片路由
+apps/gateway/src/aois        AOI 版本和比较持久化
+apps/web/src/history         双湖工作台、日期目录、播放与观察
+apps/web/src/map             共享 ViewState、四屏和卷帘
+fixtures/synthetic/temporal  无外网的 20 年彩色/带标签时序瓦片
+```
+
+这些路径在本次文档更新时仍为 `planned`，不得写成已实现。
+
 ## 12. 已核验基线
 
 | 层 | 事实 | 阶段 | 证据 |
@@ -211,6 +245,10 @@ QR/文件 → 纯本地 inspect → version adapter → MapSourceDefinition prev
 | 现有产品 | 无 OpenMapBridge 运行入口 | missing | 本地目录盘点 |
 | `.ovmap` 魔数/压缩 | 一个公开样本完成内存级观察 | discovered | 第 7 节命令与结果 |
 | 二维码协议 | 官方确认流程；私有载荷字段未建 fixture | discovered | 官方文档、同线程观察 |
+| 用户历史二维码 | 官方奥维 10.6.0 已真实导入并识别 GEE 历史协议，时间轴出现 | discovered / official-client-imported | 官方客户端可见行为；具体日期与瓦片尚未返回 |
+| 双湖 AOI | 用户提供含两块红框的参考图 | discovered / approximate | 当前附件；无空间参考，尚未形成确认 GeoJSON |
+| Ovi Web 桥接 | 官方文档证明接口形态；本机尚未启用和请求 | planned / compatibility-gate | 需先验证回环监听和特殊历史源出图 |
+| 时序 Web UI | 新增批准设计，仍无代码 | planned | `docs/superpowers/specs/2026-08-27-temporal-lakes-v0-design.md` |
 | 自动测试 | 无 | missing | 绿地项目 |
 | GitHub main | 无主仓 | missing | 未创建远端 |
 | 部署 | 无 | missing | 未授权/未实施 |
@@ -231,6 +269,10 @@ QR/文件 → 纯本地 inspect → version adapter → MapSourceDefinition prev
 | NFR-001 | SSRF/解压/开放代理防护 | 风险已识别 | security/gateway | 恶意反例套件 | planned | 缺实现与红→绿证据 | 2026-08-27 |
 | NFR-007 | 合法开源依赖 | 候选已发现 | lockfiles、THIRD_PARTY | license audit | discovered | 版本/许可证/安全公告待任务0复核 | 2026-08-27 |
 | AC-001 至 AC-010 | 业务验收 | 均未运行 | E2E + 真实浏览器 | 对应 AC | missing | 无代码入口 | 2026-08-27 |
+| JRN-007 / FR-009 | 历史源日期和真实瓦片 | 官方客户端仅导入成功 | `packages/temporal-source`、`apps/gateway/src/temporal` | AC-011 | discovered | 日期目录仍下载；Web 服务未启用 | 2026-08-27 |
+| JRN-008 / FR-010 | 双湖 AOI 确认 | 仅有无空间参考截图 | `packages/aois`、`apps/web/src/history` | AC-012/013/014 | discovered | 缺确认 GeoJSON 和编辑器 | 2026-08-27 |
+| JRN-009 / FR-011/012 | 四屏、卷帘和播放 | 开源原语已发现，无本地实现 | `apps/web/src/map`、`apps/web/src/history` | AC-014/015 | planned | 缺代码、测试和真实源 | 2026-08-27 |
+| FR-013 / BR-014 | 变化观察证据等级 | 用户目标与风险已定义 | `apps/web/src/history/observations` | AC-016 | planned | 缺模型、UI 和反例测试 | 2026-08-27 |
 
 阶段计数不能跨级汇总：当前只有规格与候选证据，没有 `local-verified`、`main`、`deployed` 或 `accepted`。
 
@@ -245,6 +287,10 @@ QR/文件 → 纯本地 inspect → version adapter → MapSourceDefinition prev
 7. **`.sdb` 边界**：V0 只诊断不显示完整离线航拍；若用户把“所有 `.ovmap` 都能导入”解释为“任何配套离线影像立即可见”，需要正式扩围。
 8. **磁盘动态变化**：同日从极低空间恢复到约 25 GiB。每个安装/构建阶段前都要实时复核，不能依赖旧读数。
 9. **商标/兼容表述**：必须说“兼容导入”而不是冒充奥维官方或复制品牌。
+10. **本机监听暴露**：官方客户端文档只说明端口，没有证明可绑定回环。若实际监听 `0.0.0.0`，不得启用，真实桥接保持 blocked。
+11. **日期语义**：官方 Web 接口的目标日期可能返回“该日前最近一景”，但不返回拍摄日期。UI 必须允许 `captureDate=null`。
+12. **截图配准**：用户红框是产品范围证据，不是地理坐标证据；必须经地图编辑确认。
+13. **环境因果**：水色、云、季节和传感器差异可能看似污染；没有外部数据不得下确定结论。
 
 ## 15. 上下文覆盖账本
 
@@ -271,4 +317,4 @@ QR/文件 → 纯本地 inspect → version adapter → MapSourceDefinition prev
 
 ## 17. Leader 运行复盘与技能改进候选
 
-本次没有需要升级全局 Leader Skill 的候选。项目内记录一个产品细化信号：用户将长期“全平台”愿景进一步裁定为“Web UI 可先行、真实跑起来优先”，已通过 DEC-003、范围和切片顺序修正；这不是通用规则，不进入全局 Skill。
+`EV-CAND-001 | 2026-08-27 | 旧规格把多时相遥感放到后续，且把 QR 主要当单图源；用户纠正同一个历史二维码可选择多个年份 | 官方奥维 10.6.0 实际导入后识别 GEE 历史影像并出现时间轴 | 根因是未在真实官方客户端验证特殊协议就冻结了单图源主线 | 当前项目新增 JRN-007 至 JRN-010、FR-009 至 FR-013、AC-011 至 AC-016，并把日期目录建模为运行时事实 | 待真实日期/瓦片复验 | 单项目一次 | 暂不修改全局 Skill | 该领域特殊，不应泛化为所有二维码 | proposed`
