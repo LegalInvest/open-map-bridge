@@ -1,5 +1,43 @@
 import { expect, test } from '@playwright/test';
 
+test('draws an arbitrary non-preset area and automatically creates a four-frame comparison', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.getByRole('heading', { name: '历史影像四期对比' })).toBeVisible();
+  await expect(page.getByLabel('面板日期')).toHaveCount(4);
+
+  await page.getByRole('button', { name: '新建框选区域' }).click();
+  const creator = page.getByRole('region', { name: '新建框选区域' });
+  await expect(creator).toBeVisible();
+  await creator.getByLabel('区域名称').fill('E2E实验区域');
+
+  const creatorMap = creator.locator('.aoi-creator-map');
+  await creatorMap.scrollIntoViewIfNeeded();
+  const box = await creatorMap.boundingBox();
+  if (!box) throw new Error('AOI creator map has no layout box');
+  await page.mouse.move(box.x + box.width * 0.3, box.y + box.height * 0.35);
+  await page.mouse.down();
+  await page.mouse.move(box.x + box.width * 0.72, box.y + box.height * 0.7, { steps: 8 });
+  await page.mouse.up();
+  await expect(creator.getByText('范围已就绪；保存后自动生成四期对比。')).toBeVisible();
+
+  const createResponse = page.waitForResponse((response) =>
+    response.url().endsWith('/api/aois') && response.request().method() === 'POST' && response.ok(),
+  );
+  await creator.getByRole('button', { name: '使用此范围' }).click();
+  const created = await (await createResponse).json() as { id: string; name: string; status: string };
+  expect(created.id).not.toMatch(/^(baoying|gaoyou)-lake$/);
+  expect(created).toMatchObject({ name: 'E2E实验区域', status: 'confirmed' });
+
+  const area = page.getByLabel('区域');
+  await expect(area.locator('option:checked')).toHaveText('E2E实验区域');
+  await expect(page.getByText('已确认 v1')).toBeVisible();
+  await expect(page.getByLabel('面板日期')).toHaveCount(4);
+  for (let index = 1; index <= 4; index += 1) {
+    await expect(page.getByText(`面板 ${index}：已加载`)).toBeVisible();
+  }
+  await expect(page.getByLabel(/历史影像地图/)).toHaveCount(4);
+});
+
 test('compares both lake presets with aligned views, isolated failures, and an explicit missing year', async ({ page }) => {
   const syntheticDates = new Set<string>();
   page.on('response', (response) => {
@@ -8,7 +46,7 @@ test('compares both lake presets with aligned views, isolated failures, and an e
   });
 
   await page.goto('/');
-  await expect(page.getByRole('heading', { name: '双湖历史影像' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '历史影像四期对比' })).toBeVisible();
   await expect(page.getByText('当前：合成验收源')).toBeVisible();
   await expect(page.getByText('范围待确认')).toBeVisible();
 

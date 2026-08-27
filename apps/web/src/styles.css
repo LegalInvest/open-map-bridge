@@ -6,8 +6,10 @@
 }
 * { box-sizing: border-box; }
 body { margin: 0; min-width: 320px; min-height: 100vh; background: radial-gradient(circle at 15% 0%, #153c49 0, #071722 38%, #050e17 100%); }
-button, select { font: inherit; }
+button, select, input { font: inherit; }
 button { cursor: pointer; }
+button.primary { background: #1aa68d; border: 1px solid #2bd4b5; color: #031915; font-weight: 800; border-radius: 8px; padding: 8px 10px; }
+button:disabled { opacity: .45; cursor: not-allowed; }
 .workspace-shell { min-height: 100vh; display: flex; flex-direction: column; }
 .hero-bar { display: flex; justify-content: space-between; gap: 24px; align-items: flex-end; padding: 24px 28px 18px; border-bottom: 1px solid rgba(138,190,186,.18); background: rgba(4,18,28,.78); backdrop-filter: blur(18px); }
 .hero-bar h1 { margin: 2px 0 4px; font-size: clamp(28px, 4vw, 46px); letter-spacing: -.04em; }
@@ -34,6 +36,15 @@ select { color: #eaf5f4; background: #112e3b; border: 1px solid #284b54; border-
 .aoi-actions { display: flex; gap: 8px; }
 .aoi-actions button { flex: 1; border: 1px solid #345660; color: #c9dcda; background: #102c38; border-radius: 8px; padding: 8px; }
 .aoi-actions button.primary { background: #1aa68d; border-color: #2bd4b5; color: #031915; font-weight: 800; }
+.aoi-creator { margin-top: 20px; padding-top: 16px; border-top: 1px solid rgba(143,185,183,.14); display: grid; gap: 10px; }
+.aoi-create-head, .draw-mode { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.aoi-creator label { display: grid; gap: 5px; color: #9eb6b5; font-size: 12px; }
+.aoi-creator input { width: 100%; color: #eaf5f4; background: #112e3b; border: 1px solid #284b54; border-radius: 8px; padding: 8px; }
+.aoi-creator-map { height: 260px; border: 1px solid #284b54; border-radius: 10px; overflow: hidden; background: #0b2632; }
+.aoi-creator p { color: #8ea8a7; font-size: 12px; line-height: 1.5; margin: 0; }
+.aoi-create-head button, .draw-mode button { border: 1px solid #345660; color: #c9dcda; background: #102c38; border-radius: 8px; padding: 7px 9px; }
+.draw-mode button { flex: 1; }
+.draw-mode button.active { background: #1d665f; border-color: #35b9a6; color: #e8fffb; }
 .observation-panel { margin-top: 20px; padding-top: 16px; border-top: 1px solid rgba(143,185,183,.14); display: grid; gap: 9px; }
 .observation-panel label { display: grid; gap: 5px; color: #9eb6b5; font-size: 12px; }
 .observation-panel input { width: 100%; color: #eaf5f4; background: #112e3b; border: 1px solid #284b54; border-radius: 8px; padding: 8px; }

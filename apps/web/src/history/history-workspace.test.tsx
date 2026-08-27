@@ -1,11 +1,12 @@
 // @vitest-environment jsdom
 import '@testing-library/jest-dom/vitest';
 import { useEffect, type ComponentType } from 'react';
-import { render, screen } from '@testing-library/react';
+import { cleanup, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { lakeAoiPresets } from '@omb/aois';
 import { HistoryWorkspace, type MapPaneProps } from './HistoryWorkspace.js';
+import type { AoiCreatorProps } from './AoiCreator.js';
 import type { HistoryApi } from '../api/client.js';
 
 const dates = Array.from({ length: 20 }, (_, offset) => {
@@ -51,16 +52,18 @@ const TestMapPane: ComponentType<MapPaneProps> = ({ panelIndex, onStatus }) => {
   return <div aria-label={`测试地图 ${panelIndex + 1}`} />;
 };
 
+afterEach(() => cleanup());
+
 describe('HistoryWorkspace', () => {
   it('shows four independent dates and keeps one failed pane isolated', async () => {
     render(<HistoryWorkspace api={api} MapPaneComponent={TestMapPane} />);
-    expect(await screen.findByRole('heading', { name: '双湖历史影像' })).toBeVisible();
+    expect(await screen.findByRole('heading', { name: '历史影像四期对比' })).toBeVisible();
     const selectors = await screen.findAllByLabelText('面板日期');
     expect(selectors).toHaveLength(4);
     expect(selectors.map((selector) => (selector as HTMLSelectElement).value)).toEqual([
       'scene-2006',
       'scene-2011',
-      'scene-2018',
+      'scene-2019',
       'scene-2025',
     ]);
     expect(await screen.findByText('面板 3：加载失败')).toBeVisible();
@@ -74,5 +77,47 @@ describe('HistoryWorkspace', () => {
     await screen.findAllByLabelText('面板日期');
     await user.click(screen.getByRole('button', { name: '确认当前范围' }));
     expect(await screen.findByText('已确认 v2')).toBeVisible();
+  });
+
+  it('creates and selects a non-preset area before automatically showing four dates', async () => {
+    const user = userEvent.setup();
+    const createAoi = vi.fn(api.createAoi);
+    const localApi: HistoryApi = { ...api, createAoi };
+    const TestCreator: ComponentType<AoiCreatorProps> = ({ onCreate }) => (
+      <button
+        type="button"
+        onClick={() => void onCreate({
+          name: '实验区域',
+          geometry: {
+            type: 'Polygon',
+            coordinates: [[[118.5, 31.2], [119.4, 31.2], [119.4, 32.1], [118.5, 32.1], [118.5, 31.2]]],
+          },
+        })}
+      >
+        提交实验区域
+      </button>
+    );
+    render(
+      <HistoryWorkspace api={localApi} MapPaneComponent={TestMapPane} AoiCreatorComponent={TestCreator} />,
+    );
+    await screen.findAllByLabelText('面板日期');
+    await user.click(screen.getByRole('button', { name: '新建框选区域' }));
+    await user.click(screen.getByRole('button', { name: '提交实验区域' }));
+    expect(createAoi).toHaveBeenCalledOnce();
+    expect(await screen.findByRole('combobox', { name: '区域' })).toHaveValue('area-test');
+    expect(await screen.findByText('已确认 v1')).toBeVisible();
+    expect(screen.getAllByLabelText('面板日期')).toHaveLength(4);
+  });
+
+  it('prefers a configured local authorized source over the synthetic fixture', async () => {
+    const localApi: HistoryApi = {
+      ...api,
+      listSources: async () => [
+        ...(await api.listSources()),
+        { id: 'ovi-history-200', name: '本机授权历史影像', kind: 'ovi-bridge', datePrecision: 'request-date-only' },
+      ],
+    };
+    render(<HistoryWorkspace api={localApi} MapPaneComponent={TestMapPane} />);
+    expect(await screen.findByRole('combobox', { name: '图源' })).toHaveValue('ovi-history-200');
   });
 });

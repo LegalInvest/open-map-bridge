@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo, useState, type ComponentType } from 'react';
-import type { AreaOfInterest } from '@omb/aois';
-import type { TemporalDateEntry } from '@omb/temporal-source';
+import type { AoiGeometry, AreaOfInterest } from '@omb/aois';
+import { completeYearWindow, selectFourFrameDates, type TemporalDateEntry } from '@omb/temporal-source';
 import type { HistoryApi, TemporalSourceSummary } from '../api/client.js';
+import { AoiCreator, type AoiCreatorProps } from './AoiCreator.js';
 import { AoiEditor } from './AoiEditor.js';
 import { MapGrid } from './MapGrid.js';
 import { MapPane, type MapPaneProps, type PaneStatus } from './MapPane.js';
@@ -15,6 +16,7 @@ export type { MapPaneProps } from './MapPane.js';
 interface HistoryWorkspaceProps {
   api: HistoryApi;
   MapPaneComponent?: ComponentType<MapPaneProps>;
+  AoiCreatorComponent?: ComponentType<AoiCreatorProps>;
 }
 
 function createInitialStatuses(): PaneStatus[] {
@@ -31,16 +33,7 @@ function latestAois(entries: AreaOfInterest[]): AreaOfInterest[] {
 }
 
 function chooseInitialDates(dates: TemporalDateEntry[]): string[] {
-  const available = dates.filter((date) => date.availability === 'available');
-  const targets = [2006, 2012, 2018, 2025];
-  return targets.map((target) => {
-    const nearest = [...available].sort((left, right) => {
-      const leftDistance = Math.abs(Number(left.requestDate.slice(0, 4)) - target);
-      const rightDistance = Math.abs(Number(right.requestDate.slice(0, 4)) - target);
-      return leftDistance - rightDistance || left.requestDate.localeCompare(right.requestDate);
-    })[0];
-    return nearest?.id ?? dates[0]?.id ?? '';
-  });
+  return selectFourFrameDates(dates).map((date) => date.id);
 }
 
 function statusLabel(index: number, status: PaneStatus): string {
@@ -48,18 +41,21 @@ function statusLabel(index: number, status: PaneStatus): string {
   return `面板 ${index + 1}：${label}`;
 }
 
-export function HistoryWorkspace({ api, MapPaneComponent = MapPane }: HistoryWorkspaceProps) {
+export function HistoryWorkspace({ api, MapPaneComponent = MapPane, AoiCreatorComponent = AoiCreator }: HistoryWorkspaceProps) {
   const [sources, setSources] = useState<TemporalSourceSummary[]>([]);
   const [aois, setAois] = useState<AreaOfInterest[]>([]);
   const [sourceId, setSourceId] = useState('');
-  const [aoiId, setAoiId] = useState('baoying-lake');
+  const [aoiId, setAoiId] = useState('');
   const viewSync = useMemo(() => createViewSync(), [aoiId]);
   const [dates, setDates] = useState<TemporalDateEntry[]>([]);
   const [panelDateIds, setPanelDateIds] = useState<string[]>([]);
   const [paneStatuses, setPaneStatuses] = useState<PaneStatus[]>(createInitialStatuses);
   const [error, setError] = useState<string | null>(null);
   const [confirming, setConfirming] = useState(false);
+  const [creatingAoi, setCreatingAoi] = useState(false);
+  const [showAoiCreator, setShowAoiCreator] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'swipe'>('grid');
+  const yearWindow = useMemo(() => completeYearWindow(new Date().getUTCFullYear()), []);
 
   useEffect(() => {
     let active = true;
@@ -68,7 +64,8 @@ export function HistoryWorkspace({ api, MapPaneComponent = MapPane }: HistoryWor
         if (!active) return;
         setSources(sourceRows);
         setAois(aoiRows);
-        setSourceId(sourceRows[0]?.id ?? '');
+        setSourceId(sourceRows.find((source) => source.kind === 'ovi-bridge')?.id ?? sourceRows[0]?.id ?? '');
+        setAoiId(aoiRows[0]?.id ?? '');
       })
       .catch((cause: unknown) => active && setError((cause as Error).message));
     return () => {
@@ -130,13 +127,28 @@ export function HistoryWorkspace({ api, MapPaneComponent = MapPane }: HistoryWor
     }
   }
 
+  async function createAoi(input: { name: string; geometry: AoiGeometry }) {
+    setCreatingAoi(true);
+    setError(null);
+    try {
+      const created = await api.createAoi(input);
+      setAois((current) => [...current, created]);
+      setAoiId(created.id);
+      setShowAoiCreator(false);
+    } catch (cause) {
+      setError((cause as Error).message);
+    } finally {
+      setCreatingAoi(false);
+    }
+  }
+
   return (
     <main className="workspace-shell">
       <header className="hero-bar">
         <div>
           <p className="eyebrow">OPENMAPBRIDGE · TEMPORAL LAB</p>
-          <h1>双湖历史影像</h1>
-          <p>宝应湖 · 高邮湖｜2006–2025｜同范围、同视角、逐帧留痕</p>
+          <h1>历史影像四期对比</h1>
+          <p>任意框选区域｜{yearWindow.fromYear}–{yearWindow.toYear}｜自动四期、同范围、同视角</p>
         </div>
         <div className="truth-strip">
           <span className={selectedSource?.kind === 'synthetic' ? 'truth-chip warning' : 'truth-chip'}>
@@ -154,6 +166,7 @@ export function HistoryWorkspace({ api, MapPaneComponent = MapPane }: HistoryWor
             {visibleAois.map((aoi) => <option key={aoi.id} value={aoi.id}>{aoi.name}</option>)}
           </select>
         </label>
+        <button type="button" className="primary" onClick={() => setShowAoiCreator(true)}>新建框选区域</button>
         <label>图源
           <select value={sourceId} onChange={(event) => setSourceId(event.target.value)}>
             {sources.map((source) => <option key={source.id} value={source.id}>{source.name}</option>)}
@@ -162,7 +175,9 @@ export function HistoryWorkspace({ api, MapPaneComponent = MapPane }: HistoryWor
         <span className={selectedAoi?.status === 'confirmed' ? 'aoi-state confirmed' : 'aoi-state'}>
           {selectedAoi?.status === 'confirmed' ? `已确认 v${selectedAoi.version}` : '范围待确认'}
         </span>
-        <span className="date-count">可用 {dates.filter((date) => date.availability === 'available').length} / 20 年</span>
+        <span className="date-count">
+          可请求 {dates.filter((date) => date.availability === 'available' || date.availability === 'unknown').length} / 20 年 · 自动 {selectedDates.length} 期
+        </span>
         <div className="view-mode" role="group" aria-label="对比模式">
           <button type="button" className={viewMode === 'grid' ? 'active' : ''} onClick={() => setViewMode('grid')}>四屏对比</button>
           <button type="button" className={viewMode === 'swipe' ? 'active' : ''} onClick={() => setViewMode('swipe')}>双屏卷帘</button>
@@ -190,7 +205,16 @@ export function HistoryWorkspace({ api, MapPaneComponent = MapPane }: HistoryWor
               </label>
             ))}
           </section>
-          {selectedAoi && selectedSource && dates[0] ? (
+          {showAoiCreator && selectedAoi && selectedSource && dates[0] ? (
+            <AoiCreatorComponent
+              sourceId={selectedSource.id}
+              dateId={dates[0].id}
+              seedAoi={selectedAoi}
+              creating={creatingAoi}
+              onCreate={createAoi}
+              onCancel={() => setShowAoiCreator(false)}
+            />
+          ) : selectedAoi && selectedSource && dates[0] ? (
             <AoiEditor
               aoi={selectedAoi}
               sourceId={selectedSource.id}
@@ -224,7 +248,9 @@ export function HistoryWorkspace({ api, MapPaneComponent = MapPane }: HistoryWor
               rightDate={selectedDates[3] as TemporalDateEntry}
             />
           ) : null}
-          {(!selectedAoi || !selectedSource || selectedDates.length !== 4) ? <div className="loading-state">正在建立 20 年日期目录…</div> : null}
+          {(!selectedAoi || !selectedSource || selectedDates.length !== 4) ? (
+            <div className="loading-state">当前找到 {selectedDates.length} 个可请求时期；四屏需要四个不重复日期。</div>
+          ) : null}
           {dates.length > 0 ? (
             <Timeline dates={dates} initialDateId={dates[0]?.id} onFrame={handleTimelineFrame} />
           ) : null}
