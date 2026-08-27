@@ -270,7 +270,7 @@ fixtures/synthetic/temporal  无外网的 20 年彩色/带标签时序瓦片
 | NFR-001 | SSRF/解压/开放代理防护 | 风险已识别 | security/gateway | 恶意反例套件 | planned | 缺实现与红→绿证据 | 2026-08-27 |
 | NFR-007 | 合法开源依赖 | 候选已发现 | lockfiles、THIRD_PARTY | license audit | discovered | 版本/许可证/安全公告待任务0复核 | 2026-08-27 |
 | AC-001 至 AC-010 | 业务验收 | 均未运行 | E2E + 真实浏览器 | 对应 AC | missing | 无代码入口 | 2026-08-27 |
-| JRN-007 / FR-009 | 历史源日期和真实瓦片 | 官方客户端仅导入成功 | `packages/temporal-source`、`apps/gateway/src/temporal` | AC-011 | discovered | 日期目录仍下载；Web 服务未启用 | 2026-08-27 |
+| JRN-007 / FR-009 | 历史源日期和真实瓦片 | 日期事实/20 年请求目录/ViewState 合约已本地验证；官方客户端仅导入成功 | `packages/temporal-source/src/{schema,annual-catalog,view-state}.ts`；adapter planned | 4 unit tests；AC-011 未运行 | contract local-verified / adapter missing | 日期目录仍下载；Web 服务未启用 | 2026-08-27 |
 | JRN-008 / FR-010 | 双湖 AOI 确认 | 仅有无空间参考截图 | `packages/aois`、`apps/web/src/history` | AC-012/013/014 | discovered | 缺确认 GeoJSON 和编辑器 | 2026-08-27 |
 | JRN-009 / FR-011/012 | 四屏、卷帘和播放 | 开源原语已发现，无本地实现 | `apps/web/src/map`、`apps/web/src/history` | AC-014/015 | planned | 缺代码、测试和真实源 | 2026-08-27 |
 | FR-013 / BR-014 | 变化观察证据等级 | 用户目标与风险已定义 | `apps/web/src/history/observations` | AC-016 | planned | 缺模型、UI 和反例测试 | 2026-08-27 |
