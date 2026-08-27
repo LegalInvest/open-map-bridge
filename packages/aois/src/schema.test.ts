@@ -1,5 +1,5 @@
 import { expect, it } from 'vitest';
-import { createNextAoiVersion, parseAreaOfInterest } from './index.js';
+import { createConfirmedAoi, createNextAoiVersion, parseAreaOfInterest } from './index.js';
 import { lakeAoiPresets } from './presets.js';
 
 it('rejects an unclosed polygon before it can become an AOI', () => {
@@ -77,4 +77,24 @@ it('rejects a self-intersecting bow-tie polygon', () => {
       },
     }),
   ).toThrow(/self-intersect/i);
+});
+
+it('creates a server-owned confirmed version one for a newly drawn area', () => {
+  const geometry = lakeAoiPresets[0]?.geometry;
+  if (!geometry) throw new Error('missing geometry fixture');
+  expect(
+    createConfirmedAoi({
+      id: 'area-test',
+      name: '实验区域',
+      geometry,
+      provenance: 'user-drawn-web',
+      confirmedAt: '2026-08-27T12:00:00.000Z',
+    }),
+  ).toMatchObject({
+    id: 'area-test',
+    name: '实验区域',
+    version: 1,
+    status: 'confirmed',
+    confirmedAt: '2026-08-27T12:00:00.000Z',
+  });
 });

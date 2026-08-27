@@ -141,3 +141,22 @@ export function createNextAoiVersion(
     confirmedAt,
   });
 }
+
+export function createConfirmedAoi(input: {
+  id: string;
+  name: string;
+  geometry: AoiGeometry;
+  provenance: string;
+  confirmedAt: string;
+}): AreaOfInterest {
+  return parseAreaOfInterest({
+    id: input.id,
+    version: 1,
+    name: input.name,
+    geometry: structuredClone(input.geometry),
+    crs: 'EPSG:4326',
+    status: 'confirmed',
+    provenance: input.provenance,
+    confirmedAt: input.confirmedAt,
+  });
+}
