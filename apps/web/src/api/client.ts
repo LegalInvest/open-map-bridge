@@ -1,5 +1,5 @@
-import type { AreaOfInterest } from '@omb/aois';
-import type { TemporalDateEntry } from '@omb/temporal-source';
+import type { AoiGeometry, AreaOfInterest } from '@omb/aois';
+import { completeYearWindow, type TemporalDateEntry } from '@omb/temporal-source';
 
 export interface TemporalSourceSummary {
   id: string;
@@ -12,6 +12,7 @@ export interface HistoryApi {
   listSources(): Promise<TemporalSourceSummary[]>;
   listAois(): Promise<AreaOfInterest[]>;
   listDates(sourceId: string, aoiId: string): Promise<TemporalDateEntry[]>;
+  createAoi(input: { name: string; geometry: AoiGeometry }): Promise<AreaOfInterest>;
   confirmAoi(aoi: AreaOfInterest): Promise<AreaOfInterest>;
 }
 
@@ -20,7 +21,8 @@ async function readJson<T>(response: Response): Promise<T> {
   return (await response.json()) as T;
 }
 
-export function createApiClient(baseUrl = ''): HistoryApi {
+export function createApiClient(baseUrl = '', currentYear = new Date().getUTCFullYear()): HistoryApi {
+  const yearWindow = completeYearWindow(currentYear);
   return {
     async listSources() {
       return readJson<TemporalSourceSummary[]>(await fetch(`${baseUrl}/api/temporal/sources`));
@@ -29,9 +31,18 @@ export function createApiClient(baseUrl = ''): HistoryApi {
       return readJson<AreaOfInterest[]>(await fetch(`${baseUrl}/api/aois`));
     },
     async listDates(sourceId, aoiId) {
-      const query = new URLSearchParams({ aoiId, from: '2006-01-01', to: '2025-12-31' });
+      const query = new URLSearchParams({ aoiId, from: yearWindow.from, to: yearWindow.to });
       return readJson<TemporalDateEntry[]>(
         await fetch(`${baseUrl}/api/temporal/sources/${encodeURIComponent(sourceId)}/dates?${query}`),
+      );
+    },
+    async createAoi(input) {
+      return readJson<AreaOfInterest>(
+        await fetch(`${baseUrl}/api/aois`, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(input),
+        }),
       );
     },
     async confirmAoi(aoi) {

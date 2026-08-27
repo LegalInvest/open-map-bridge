@@ -6,11 +6,11 @@ import Polygon from 'ol/geom/Polygon.js';
 import Modify from 'ol/interaction/Modify.js';
 import TileLayer from 'ol/layer/Tile.js';
 import VectorLayer from 'ol/layer/Vector.js';
-import { fromLonLat } from 'ol/proj.js';
 import VectorSource from 'ol/source/Vector.js';
 import XYZ from 'ol/source/XYZ.js';
 import { Circle, Fill, Stroke, Style } from 'ol/style.js';
 import type { AreaOfInterest, Position } from '@omb/aois';
+import { aoiExtent3857 } from './aoi-view.js';
 
 interface AoiEditorProps {
   aoi: AreaOfInterest;
@@ -36,9 +36,7 @@ export function AoiEditor({ aoi, sourceId, dateId, confirming, onConfirm }: AoiE
     const feature = new Feature({ geometry: polygon });
     const vectors = new VectorSource({ features: [feature] });
     const modify = new Modify({ source: vectors });
-    const positions = ring(draft);
-    const longitude = positions.reduce((sum, value) => sum + value[0], 0) / positions.length;
-    const latitude = positions.reduce((sum, value) => sum + value[1], 0) / positions.length;
+    const view = new View();
     const map = new Map({
       target,
       layers: [
@@ -54,8 +52,10 @@ export function AoiEditor({ aoi, sourceId, dateId, confirming, onConfirm }: AoiE
       ],
       interactions: [modify],
       controls: [],
-      view: new View({ center: fromLonLat([longitude, latitude]), zoom: aoi.id === 'baoying-lake' ? 10 : 9 }),
+      view,
     });
+    map.updateSize();
+    view.fit(aoiExtent3857(aoi), { padding: [16, 16, 16, 16], maxZoom: 14, size: map.getSize() });
     modify.on('modifyend', () => {
       const edited = feature.getGeometry()?.clone().transform('EPSG:3857', 'EPSG:4326') as Polygon | undefined;
       if (!edited) return;

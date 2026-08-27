@@ -5,13 +5,13 @@ import View from 'ol/View.js';
 import Polygon from 'ol/geom/Polygon.js';
 import TileLayer from 'ol/layer/Tile.js';
 import VectorLayer from 'ol/layer/Vector.js';
-import { fromLonLat } from 'ol/proj.js';
 import VectorSource from 'ol/source/Vector.js';
 import XYZ from 'ol/source/XYZ.js';
 import { Fill, Stroke, Style } from 'ol/style.js';
 import type { AreaOfInterest, Position } from '@omb/aois';
 import type { TemporalDateEntry, ViewState } from '@omb/temporal-source';
 import type { ViewSync } from './view-sync.js';
+import { aoiExtent3857 } from './aoi-view.js';
 
 export interface PaneStatus {
   state: 'waiting' | 'loading' | 'loaded' | 'failed';
@@ -31,13 +31,6 @@ export interface MapPaneProps {
 function outerRing(aoi: AreaOfInterest): Position[] {
   if (aoi.geometry.type === 'Polygon') return aoi.geometry.coordinates[0] ?? [];
   return aoi.geometry.coordinates[0]?.[0] ?? [];
-}
-
-function aoiCenter(aoi: AreaOfInterest): [number, number] {
-  const ring = outerRing(aoi);
-  const longitudes = ring.map((position) => position[0]);
-  const latitudes = ring.map((position) => position[1]);
-  return [(Math.min(...longitudes) + Math.max(...longitudes)) / 2, (Math.min(...latitudes) + Math.max(...latitudes)) / 2];
 }
 
 export function MapPane({ panelIndex, sourceId, date, aoi, viewSync, onStatus }: MapPaneProps) {
@@ -71,13 +64,15 @@ export function MapPane({ panelIndex, sourceId, date, aoi, viewSync, onStatus }:
         fill: new Fill({ color: 'rgba(255, 93, 74, 0.08)' }),
       }),
     });
-    const view = new View({ center: fromLonLat(aoiCenter(aoi)), zoom: aoi.id === 'baoying-lake' ? 10 : 9 });
+    const view = new View();
     const map = new Map({
       target,
       layers: [new TileLayer({ source }), outline],
       view,
       controls: [],
     });
+    map.updateSize();
+    view.fit(aoiExtent3857(aoi), { padding: [24, 24, 24, 24], maxZoom: 14, size: map.getSize() });
     const exposeViewState = (state: ViewState) => {
       target.dataset.viewState = JSON.stringify(state);
     };

@@ -31,6 +31,16 @@ const api: HistoryApi = {
   ],
   listAois: async () => structuredClone(lakeAoiPresets),
   listDates: async () => dates,
+  createAoi: async ({ name, geometry }) => ({
+    id: 'area-test',
+    version: 1,
+    name,
+    geometry,
+    crs: 'EPSG:4326',
+    status: 'confirmed',
+    provenance: 'user-drawn-web',
+    confirmedAt: '2026-08-27T12:00:00.000Z',
+  }),
   confirmAoi: async (aoi) => ({ ...aoi, version: aoi.version + 1, status: 'confirmed', confirmedAt: '2026-08-27T12:00:00.000Z' }),
 };
 

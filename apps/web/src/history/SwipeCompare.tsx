@@ -2,11 +2,11 @@ import { useEffect, useRef, useState } from 'react';
 import Map from 'ol/Map.js';
 import View from 'ol/View.js';
 import TileLayer from 'ol/layer/Tile.js';
-import { fromLonLat } from 'ol/proj.js';
 import XYZ from 'ol/source/XYZ.js';
 import type RenderEvent from 'ol/render/Event.js';
-import type { AreaOfInterest, Position } from '@omb/aois';
+import type { AreaOfInterest } from '@omb/aois';
 import type { TemporalDateEntry } from '@omb/temporal-source';
+import { aoiExtent3857 } from './aoi-view.js';
 
 interface SwipeCompareProps {
   sourceId: string;
@@ -17,13 +17,6 @@ interface SwipeCompareProps {
 
 export function clampSwipePercentage(value: number): number {
   return Math.min(100, Math.max(0, value));
-}
-
-function center(aoi: AreaOfInterest): [number, number] {
-  const ring: Position[] = aoi.geometry.type === 'Polygon' ? (aoi.geometry.coordinates[0] ?? []) : (aoi.geometry.coordinates[0]?.[0] ?? []);
-  const xs = ring.map((point) => point[0]);
-  const ys = ring.map((point) => point[1]);
-  return [(Math.min(...xs) + Math.max(...xs)) / 2, (Math.min(...ys) + Math.max(...ys)) / 2];
 }
 
 export function SwipeCompare({ sourceId, aoi, leftDate, rightDate }: SwipeCompareProps) {
@@ -52,12 +45,15 @@ export function SwipeCompare({ sourceId, aoi, leftDate, rightDate }: SwipeCompar
       const context = event.context as CanvasRenderingContext2D | undefined;
       context?.restore();
     });
+    const view = new View();
     const map = new Map({
       target,
       layers: [left, right],
       controls: [],
-      view: new View({ center: fromLonLat(center(aoi)), zoom: aoi.id === 'baoying-lake' ? 10 : 9 }),
+      view,
     });
+    map.updateSize();
+    view.fit(aoiExtent3857(aoi), { padding: [24, 24, 24, 24], maxZoom: 14, size: map.getSize() });
     return () => map.setTarget(undefined);
   }, [aoi, leftDate.id, percentage, rightDate.id, sourceId]);
 
