@@ -9,3 +9,4 @@
 - 当前阶段：temporal spec-approved / implementation-prep；`local-verified/main/deployed/accepted` 均为 0。
 - 当前最大风险：官方 Web 服务能否仅监听回环、特殊 GEE 源能否按日期出图、真实拍摄日期可能不可得。
 - 当前下一步：完成时序实施计划与隔离工作区，先用合成时序源 TDD，再运行单瓦片 OviBridge 闸门。
+- Task 0：隔离 worktree、Node/npm 精确依赖锁和环境门已通过；197 packages、0 vulnerabilities，根卷约 13 GiB，应用功能仍未实现。

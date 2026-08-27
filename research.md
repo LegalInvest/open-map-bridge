@@ -249,6 +249,7 @@ fixtures/synthetic/temporal  无外网的 20 年彩色/带标签时序瓦片
 | 双湖 AOI | 用户提供含两块红框的参考图 | discovered / approximate | 当前附件；无空间参考，尚未形成确认 GeoJSON |
 | Ovi Web 桥接 | 官方文档证明接口形态；本机尚未启用和请求 | planned / compatibility-gate | 需先验证回环监听和特殊历史源出图 |
 | 时序 Web UI | 新增批准设计，仍无代码 | planned | `docs/superpowers/specs/2026-08-27-temporal-lakes-v0-design.md` |
+| 时序工作区基线 | 隔离分支已建立；环境门、精确依赖锁和四个空 workspace typecheck 通过 | local-candidate / scaffold-only | `npm run env:check && npm test && npm run typecheck`；Node 26.7.0、npm 11.19.0、197 packages、0 vulnerabilities；2026-08-27 |
 | 自动测试 | 无 | missing | 绿地项目 |
 | GitHub main | 无主仓 | missing | 未创建远端 |
 | 部署 | 无 | missing | 未授权/未实施 |
