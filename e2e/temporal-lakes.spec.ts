@@ -2,6 +2,7 @@ import { expect, test } from '@playwright/test';
 
 test('draws an arbitrary non-preset area and automatically creates a four-frame comparison', async ({ page }) => {
   await page.goto('/');
+  await expect(page).toHaveTitle('OpenMapBridge · 通用四期历史影像');
   await expect(page.getByRole('heading', { name: '历史影像四期对比' })).toBeVisible();
   await expect(page.getByLabel('面板日期')).toHaveCount(4);
 
