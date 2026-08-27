@@ -49,11 +49,11 @@ function statusLabel(index: number, status: PaneStatus): string {
 }
 
 export function HistoryWorkspace({ api, MapPaneComponent = MapPane }: HistoryWorkspaceProps) {
-  const viewSync = useMemo(() => createViewSync(), []);
   const [sources, setSources] = useState<TemporalSourceSummary[]>([]);
   const [aois, setAois] = useState<AreaOfInterest[]>([]);
   const [sourceId, setSourceId] = useState('');
   const [aoiId, setAoiId] = useState('baoying-lake');
+  const viewSync = useMemo(() => createViewSync(), [aoiId]);
   const [dates, setDates] = useState<TemporalDateEntry[]>([]);
   const [panelDateIds, setPanelDateIds] = useState<string[]>([]);
   const [paneStatuses, setPaneStatuses] = useState<PaneStatus[]>(createInitialStatuses);

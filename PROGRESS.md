@@ -9,4 +9,4 @@
 - 当前阶段：开放工作台 `local-candidate`，合成链路 `local-verified`；真实奥维、用户 AOI 确认、`main/deployed/accepted` 仍为 0。
 - 当前最大风险：官方 Web 服务能否仅监听回环、特殊 GEE 源能否按日期出图、真实拍摄日期可能不可得。
 - 当前下一步：在操作时确认后启用官方“第三方接口”，只在回环监听通过时运行两日期真实瓦片探测。
-- Task 0–6（合成门）：四屏 Web、共享 ViewState、AOI 拖点/确认、卷帘、2006–2025 时间轴、缺年跳过、分级观察记录、一键启动和 Chrome E2E 已构建；32 tests/typecheck/build/E2E 通过。
+- Task 0–6（合成门）：四屏 Web、共享 ViewState、AOI 拖点/确认、卷帘、2006–2025 时间轴、缺年跳过、观察证据门、一键启动和 Chrome E2E 已构建；32 Vitest + 2 Node tests/typecheck/build/E2E 通过。

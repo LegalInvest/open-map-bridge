@@ -44,7 +44,7 @@ E2E 使用本机 Chrome，分别经过宝应湖和高邮湖，检查四屏加载
 OMB_OVI_PORT=<local-port> OMB_OVI_MAP_TYPE=<authorized-map-type> node scripts/probe-ovi-bridge.mjs
 ```
 
-4. 两个请求必须都是可解码、非空、尺寸合理且 SHA-256 不同的图片。HTTP 200、官方客户端时间轴或导入成功都不能替代该证据。
+4. 两个请求必须都能由系统图像解码器归一化、非空、尺寸合理，且归一化图片的 SHA-256 不同。临时图片在探测结束时删除。HTTP 200、官方客户端时间轴或导入成功都不能替代该证据。
 5. 真实模式启动时由操作者在本机进程环境配置端口和地图类型；浏览器不能提交 host、URL、token 或地图类型。
 
 ## 数据真实性

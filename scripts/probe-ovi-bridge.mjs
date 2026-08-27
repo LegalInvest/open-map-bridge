@@ -1,4 +1,11 @@
 import { createHash } from 'node:crypto';
+import { execFile } from 'node:child_process';
+import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { promisify } from 'node:util';
+
+const execFileAsync = promisify(execFile);
 
 const port = Number(process.env.OMB_OVI_PORT);
 const mapType = Number(process.env.OMB_OVI_MAP_TYPE);
@@ -14,7 +21,7 @@ const latitudeRadians = latitude * Math.PI / 180;
 const y = Math.floor((1 - Math.log(Math.tan(latitudeRadians) + 1 / Math.cos(latitudeRadians)) / Math.PI) / 2 * scale);
 const requestedDates = ['2006-06-30', '2025-06-30'];
 
-function imageDimensions(bytes) {
+function imageHeader(bytes) {
   if (bytes.length >= 24 && bytes.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]))) {
     return { width: bytes.readUInt32BE(16), height: bytes.readUInt32BE(20), format: 'png' };
   }
@@ -35,6 +42,25 @@ function imageDimensions(bytes) {
   throw new Error('response is not a decodable PNG or JPEG header');
 }
 
+async function decodeAndNormalize(bytes, format) {
+  const directory = await mkdtemp(join(tmpdir(), 'omb-ovi-probe-'));
+  const inputPath = join(directory, `tile.${format === 'jpeg' ? 'jpg' : 'png'}`);
+  const outputPath = join(directory, 'normalized.png');
+  try {
+    await writeFile(inputPath, bytes, { mode: 0o600 });
+    await execFileAsync('/usr/bin/sips', ['-s', 'format', 'png', inputPath, '--out', outputPath], { timeout: 10_000 });
+    const { stdout } = await execFileAsync('/usr/bin/sips', ['-g', 'pixelWidth', '-g', 'pixelHeight', outputPath], { timeout: 10_000 });
+    const width = Number(/pixelWidth:\s*(\d+)/.exec(stdout)?.[1]);
+    const height = Number(/pixelHeight:\s*(\d+)/.exec(stdout)?.[1]);
+    if (!Number.isInteger(width) || width <= 0 || !Number.isInteger(height) || height <= 0) {
+      throw new Error('system image decoder returned invalid dimensions');
+    }
+    return { width, height, normalized: await readFile(outputPath) };
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+}
+
 const receipts = [];
 for (const requestedDate of requestedDates) {
   const compactDate = requestedDate.replaceAll('-', '');
@@ -43,12 +69,14 @@ for (const requestedDate of requestedDates) {
   const body = Buffer.from(await response.arrayBuffer());
   if (!response.ok) throw new Error(`official bridge returned HTTP ${response.status}`);
   if (body.length < 100 || body.length > 5 * 1024 * 1024) throw new Error('official bridge returned an invalid tile size');
-  const dimensions = imageDimensions(body);
+  const header = imageHeader(body);
+  const decoded = await decodeAndNormalize(body, header.format);
+  if (decoded.width !== header.width || decoded.height !== header.height) throw new Error('decoded dimensions do not match image header');
   receipts.push({
     requestedDate,
     statusCategory: 'image-ok',
-    dimensions,
-    sha256: createHash('sha256').update(body).digest('hex'),
+    dimensions: { width: decoded.width, height: decoded.height, format: header.format },
+    sha256: createHash('sha256').update(decoded.normalized).digest('hex'),
     observedAt: new Date().toISOString(),
   });
 }

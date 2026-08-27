@@ -21,6 +21,9 @@ test('compares both lake presets with aligned views, isolated failures, and an e
     await expect(page.getByText(`面板 ${index}：已加载`)).toBeVisible();
   }
   await expect.poll(() => syntheticDates.size).toBeGreaterThanOrEqual(4);
+  const maps = page.getByLabel(/历史影像地图/);
+  await expect(maps).toHaveCount(4);
+  const baoyingInitialView = JSON.parse((await maps.first().getAttribute('data-view-state')) ?? 'null') as { center: number[] };
 
   await Promise.all([
     page.waitForResponse((response) => response.url().includes('aoiId=gaoyou-lake') && response.ok()),
@@ -30,6 +33,8 @@ test('compares both lake presets with aligned views, isolated failures, and an e
   for (let index = 1; index <= 4; index += 1) {
     await expect(page.getByText(`面板 ${index}：已加载`)).toBeVisible();
   }
+  const gaoyouInitialView = JSON.parse((await maps.first().getAttribute('data-view-state')) ?? 'null') as { center: number[] };
+  expect(gaoyouInitialView.center).not.toEqual(baoyingInitialView.center);
   await Promise.all([
     page.waitForResponse((response) => response.url().includes('aoiId=baoying-lake') && response.ok()),
     area.selectOption('baoying-lake'),
@@ -38,9 +43,9 @@ test('compares both lake presets with aligned views, isolated failures, and an e
   for (let index = 1; index <= 4; index += 1) {
     await expect(page.getByText(`面板 ${index}：已加载`)).toBeVisible();
   }
+  const baoyingReturnView = JSON.parse((await maps.first().getAttribute('data-view-state')) ?? 'null') as { center: number[] };
+  expect(baoyingReturnView.center).toEqual(baoyingInitialView.center);
 
-  const maps = page.getByLabel(/历史影像地图/);
-  await expect(maps).toHaveCount(4);
   const firstMap = maps.first();
   const box = await firstMap.boundingBox();
   if (!box) throw new Error('first map has no layout box');
