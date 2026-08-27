@@ -60,6 +60,8 @@
 | [OpenLayers Layer Swipe](https://openlayers.org/en/latest/examples/layer-swipe.html) | 2026-08-27 | 可直接复用卷帘渲染原语 | 示例不包含多时相数据和 Ovi 认证 |
 | [MapStore2](https://github.com/geosolutions-it/MapStore2) | 2026-08-27 | 有时间维度、时间线和 Swipe 的成熟开源行为参考 | 平台较重，仍不解决 Ovi 私有认证；不作为首版底座 |
 | [EO Browser](https://github.com/sentinel-hub/EOBrowser) | 2026-08-27 | 日期搜索、pin、透明度和 split compare 是可复用产品参考 | 外部部署依赖 Sentinel Hub 身份与服务，不适合作为 Ovi 兼容底座 |
+| [江苏省农业农村厅高宝邵伯湖养殖水域滩涂资料](https://nynct.jiangsu.gov.cn/module/download/downfile.jsp?classid=0&filename=4e59a3178dec41fda94e6a596ebc228f.pdf) | 2026-08-27 | 官方资料给出宝应湖限制养殖区和高邮湖保护区坐标，可作为后续外部证据线索 | 不等于用户红框精确边界，也不证明影像中的变化原因 |
+| [金湖县高邮湖宝应湖退圩还湖规划批复说明](https://www.jinhu.gov.cn/col/1401_768714/art/20190412091534_JCcoAOKV.html) | 2026-08-27 | 官方说明 2018 年启动退圩还湖规划，目标含恢复调蓄和改善水质 | 只能作为历史治理背景，不能替代影像和水质数据的逐项对齐 |
 | [星图云奥维二维码教程](https://open.geovisearth.com/service/qa-assistance/159) | 2026-08-27 | 合法二维码模板可要求用户自行替换官方 token | 只代表星图云场景 |
 | [soneverdance/ovital](https://github.com/soneverdance/ovital) | 2026-08-27 | 公开二维码和 `.ovmap` 样本，可用于兼容研究和 golden fixture 候选 | 仓库无明确 LICENSE；图源权利和 token 合规未知，不能复制/再分发全部资源 |
 
@@ -271,7 +273,7 @@ fixtures/synthetic/temporal  无外网的 20 年彩色/带标签时序瓦片
 | NFR-007 | 合法开源依赖 | 候选已发现 | lockfiles、THIRD_PARTY | license audit | discovered | 版本/许可证/安全公告待任务0复核 | 2026-08-27 |
 | AC-001 至 AC-010 | 业务验收 | 均未运行 | E2E + 真实浏览器 | 对应 AC | missing | 无代码入口 | 2026-08-27 |
 | JRN-007 / FR-009 | 历史源日期和真实瓦片 | 日期事实/20 年请求目录/ViewState 合约已本地验证；官方客户端仅导入成功 | `packages/temporal-source/src/{schema,annual-catalog,view-state}.ts`；adapter planned | 4 unit tests；AC-011 未运行 | contract local-verified / adapter missing | 日期目录仍下载；Web 服务未启用 | 2026-08-27 |
-| JRN-008 / FR-010 | 双湖 AOI 确认 | 仅有无空间参考截图 | `packages/aois`、`apps/web/src/history` | AC-012/013/014 | discovered | 缺确认 GeoJSON 和编辑器 | 2026-08-27 |
+| JRN-008 / FR-010 | 双湖 AOI 确认 | GeoJSON 校验、两个独立 approximate 预设和不可变版本追加已本地验证 | `packages/aois/src/{schema,presets}.ts`；editor planned | 5 unit tests；AC-012/013/014 未运行 | contract local-verified / UI missing | 预设不是精确边界；缺地图编辑确认 | 2026-08-27 |
 | JRN-009 / FR-011/012 | 四屏、卷帘和播放 | 开源原语已发现，无本地实现 | `apps/web/src/map`、`apps/web/src/history` | AC-014/015 | planned | 缺代码、测试和真实源 | 2026-08-27 |
 | FR-013 / BR-014 | 变化观察证据等级 | 用户目标与风险已定义 | `apps/web/src/history/observations` | AC-016 | planned | 缺模型、UI 和反例测试 | 2026-08-27 |
 
