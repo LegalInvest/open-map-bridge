@@ -97,7 +97,7 @@
 |---|---|---|---|
 | 项目目录 | 新建 `/Users/assis/Documents/Codex/2026-08-27/open-map-bridge` | 本轮文件系统创建 | 2026-08-27 |
 | 既有同类本地仓库 | 未发现 | `find /Users/assis/Documents/Codex -maxdepth 2` 仅命中既有 VegFlow mapping 目录，无 Ovi/OpenMapBridge 项目 | 2026-08-27 |
-| Git 仓库 | 本轮规格落盘前不存在；初始化和文档 commit 计划在本轮完成 | 当前目录初始盘点 | 2026-08-27 |
+| Git 仓库 | 已初始化本地 `main`；首个规格 commit `5abe01b`；无 remote | `git log -1 --oneline`、`git status --short` | 2026-08-27 |
 | 根卷空间 | 最近一次复核约 25 GiB 可用；此前同日曾低至约 484 MiB | `df -h /` | 2026-08-27 |
 | Node/Docker/浏览器工具链 | unknown，实施任务 0 核验 | 尚未执行版本命令 | 2026-08-27 |
 
@@ -201,7 +201,7 @@ QR/文件 → 纯本地 inspect → version adapter → MapSourceDefinition prev
 | 层 | 事实 | 阶段 | 证据 |
 |---|---|---|---|
 | 产品裁决 | V0 方向获用户聊天批准 | discovered/spec-chat-approved | 当前线程 |
-| 书面规格 | `goal.md`、`research.md`、设计文档本轮创建 | local-candidate，待用户复核 | 本地文件 |
+| 书面规格 | `goal.md`、`research.md`、设计文档已落盘并提交于本地 `main`（根 commit `5abe01b`） | local-candidate，待用户复核 | 本地文件与 Git commit |
 | 现有产品 | 无 OpenMapBridge 运行入口 | missing | 本地目录盘点 |
 | `.ovmap` 魔数/压缩 | 一个公开样本完成内存级观察 | discovered | 第 7 节命令与结果 |
 | 二维码协议 | 官方确认流程；私有载荷字段未建 fixture | discovered | 官方文档、同线程观察 |
