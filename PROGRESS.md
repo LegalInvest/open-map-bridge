@@ -8,5 +8,5 @@
 - 2026-08-27：新增历史影像设计 `docs/superpowers/specs/2026-08-27-temporal-lakes-v0-design.md`，旧导入安全契约保留。
 - 当前阶段：temporal spec-approved / implementation-prep；`local-verified/main/deployed/accepted` 均为 0。
 - 当前最大风险：官方 Web 服务能否仅监听回环、特殊 GEE 源能否按日期出图、真实拍摄日期可能不可得。
-- 当前下一步：TDD 实现卷帘、时间轴播放/缺年恢复和变化观察证据等级。
-- Task 0–4：四屏 Web、逐屏日期/加载状态、共享 ViewState 和 AOI 拖点/确认已构建；27 tests/typecheck/build 通过；尚未浏览器 E2E。
+- 当前下一步：增加一键本地启动和浏览器 E2E，再执行官方奥维本机 Web 服务的回环安全门。
+- Task 0–5：四屏 Web、共享 ViewState、AOI 拖点/确认、卷帘、2006–2025 时间轴、缺年跳过和分级观察记录已构建；31 tests/typecheck/build 通过；尚未浏览器 E2E。

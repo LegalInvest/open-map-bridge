@@ -19,6 +19,9 @@ button { cursor: pointer; }
 .aoi-state.confirmed { color: #9cebc9; border-color: rgba(55,204,143,.42); background: rgba(20,93,62,.3); }
 .control-bar { display: flex; align-items: center; gap: 12px; padding: 12px 22px; background: #0a1e2b; border-bottom: 1px solid rgba(143,185,183,.14); flex-wrap: wrap; }
 .control-bar label, .date-field { display: flex; gap: 8px; align-items: center; color: #9eb6b5; font-size: 13px; }
+.view-mode { display: flex; gap: 4px; margin-left: auto; }
+.view-mode button, .timeline button { border: 1px solid #345660; background: #102c38; color: #bdd1cf; border-radius: 8px; padding: 7px 10px; }
+.view-mode button.active, .timeline button.primary { background: #1aa68d; color: #041b17; border-color: #31d9bb; font-weight: 800; }
 select { color: #eaf5f4; background: #112e3b; border: 1px solid #284b54; border-radius: 8px; padding: 7px 9px; }
 .workspace-layout { flex: 1; min-height: 0; display: grid; grid-template-columns: 300px minmax(0,1fr); }
 .side-panel { padding: 16px; overflow: auto; background: rgba(7,24,34,.9); border-right: 1px solid rgba(143,185,183,.14); }
@@ -31,6 +34,12 @@ select { color: #eaf5f4; background: #112e3b; border: 1px solid #284b54; border-
 .aoi-actions { display: flex; gap: 8px; }
 .aoi-actions button { flex: 1; border: 1px solid #345660; color: #c9dcda; background: #102c38; border-radius: 8px; padding: 8px; }
 .aoi-actions button.primary { background: #1aa68d; border-color: #2bd4b5; color: #031915; font-weight: 800; }
+.observation-panel { margin-top: 20px; padding-top: 16px; border-top: 1px solid rgba(143,185,183,.14); display: grid; gap: 9px; }
+.observation-panel label { display: grid; gap: 5px; color: #9eb6b5; font-size: 12px; }
+.observation-panel input { width: 100%; color: #eaf5f4; background: #112e3b; border: 1px solid #284b54; border-radius: 8px; padding: 8px; }
+.observation-panel button { border: 1px solid #345660; border-radius: 8px; padding: 8px; background: #153d45; color: #c9dcda; }
+.observation-panel button:disabled { opacity: .45; cursor: not-allowed; }
+.hypothesis { color: #ffc98c; font-size: 12px; margin: 0; padding: 8px; background: rgba(110,59,18,.3); border-radius: 7px; }
 .map-stage { min-width: 0; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
 .pane-status-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; color: #99b4b2; font-size: 11px; }
 .pane-status-grid span { padding: 6px 8px; background: rgba(12,40,51,.7); border-radius: 6px; text-align: center; }
@@ -40,6 +49,20 @@ select { color: #eaf5f4; background: #112e3b; border: 1px solid #284b54; border-
 .map-card-title strong { color: #62dac6; font-size: 17px; }
 .map-card-title span { color: #8daaa8; font-size: 11px; }
 .map-pane-canvas { flex: 1; min-height: 230px; background: #123242; }
+.timeline { display: grid; gap: 8px; padding: 10px; background: rgba(8,29,39,.92); border: 1px solid rgba(107,158,158,.25); border-radius: 10px; }
+.timeline-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.timeline-actions label { display: flex; gap: 6px; align-items: center; color: #8fa9a7; font-size: 12px; }
+.timeline-actions strong { margin-left: auto; color: #65dac7; font-size: 12px; }
+.timeline-track { display: grid; grid-template-columns: repeat(20,minmax(18px,1fr)); gap: 3px; }
+.timeline-track button { padding: 5px 1px; font-size: 10px; border-radius: 4px; }
+.timeline-track button.active { outline: 2px solid #61dac6; outline-offset: 1px; }
+.timeline-track button.missing { color: #ffb27c; background: #502c20; border-color: #8b513c; }
+.timeline-gaps { display: flex; gap: 8px; color: #ffb27c; font-size: 11px; }
+.swipe-compare { flex: 1; min-height: 580px; position: relative; display: flex; flex-direction: column; gap: 8px; }
+.swipe-map { flex: 1; min-height: 500px; border: 1px solid rgba(107,158,158,.32); border-radius: 12px; overflow: hidden; }
+.swipe-labels { display: flex; justify-content: space-between; color: #62dac6; font-weight: 800; }
+.swipe-compare label { display: flex; gap: 8px; align-items: center; color: #9eb6b5; font-size: 12px; }
+.swipe-compare input { flex: 1; }
 .loading-state { display: grid; place-items: center; flex: 1; color: #8eaaa8; }
 .error-banner { margin: 10px 22px 0; padding: 10px 12px; border-radius: 8px; background: #5a2424; color: #ffd5d5; }
 footer { padding: 9px 18px; color: #789492; text-align: right; font-size: 11px; background: #06131e; border-top: 1px solid rgba(143,185,183,.14); }

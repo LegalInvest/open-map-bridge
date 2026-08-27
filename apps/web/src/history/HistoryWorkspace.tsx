@@ -5,6 +5,9 @@ import type { HistoryApi, TemporalSourceSummary } from '../api/client.js';
 import { AoiEditor } from './AoiEditor.js';
 import { MapGrid } from './MapGrid.js';
 import { MapPane, type MapPaneProps, type PaneStatus } from './MapPane.js';
+import { ObservationPanel } from './ObservationPanel.js';
+import { SwipeCompare } from './SwipeCompare.js';
+import { Timeline } from './Timeline.js';
 import { createViewSync } from './view-sync.js';
 
 export type { MapPaneProps } from './MapPane.js';
@@ -46,6 +49,7 @@ export function HistoryWorkspace({ api, MapPaneComponent = MapPane }: HistoryWor
   const [paneStatuses, setPaneStatuses] = useState<PaneStatus[]>(initialStatuses);
   const [error, setError] = useState<string | null>(null);
   const [confirming, setConfirming] = useState(false);
+  const [viewMode, setViewMode] = useState<'grid' | 'swipe'>('grid');
 
   useEffect(() => {
     let active = true;
@@ -97,6 +101,10 @@ export function HistoryWorkspace({ api, MapPaneComponent = MapPane }: HistoryWor
     });
   }, []);
 
+  const handleTimelineFrame = useCallback((dateId: string) => {
+    setPanelDateIds((current) => current.map((value, index) => (index === 3 ? dateId : value)));
+  }, []);
+
   async function confirmAoi(aoi: AreaOfInterest) {
     setConfirming(true);
     setError(null);
@@ -143,6 +151,10 @@ export function HistoryWorkspace({ api, MapPaneComponent = MapPane }: HistoryWor
           {selectedAoi?.status === 'confirmed' ? `已确认 v${selectedAoi.version}` : '范围待确认'}
         </span>
         <span className="date-count">可用 {dates.filter((date) => date.availability === 'available').length} / 20 年</span>
+        <div className="view-mode" role="group" aria-label="对比模式">
+          <button type="button" className={viewMode === 'grid' ? 'active' : ''} onClick={() => setViewMode('grid')}>四屏对比</button>
+          <button type="button" className={viewMode === 'swipe' ? 'active' : ''} onClick={() => setViewMode('swipe')}>双屏卷帘</button>
+        </div>
       </section>
 
       <div className="workspace-layout">
@@ -175,13 +187,14 @@ export function HistoryWorkspace({ api, MapPaneComponent = MapPane }: HistoryWor
               onConfirm={confirmAoi}
             />
           ) : <p>正在载入范围…</p>}
+          <ObservationPanel />
         </aside>
 
         <section className="map-stage">
           <div className="pane-status-grid">
             {paneStatuses.map((status, index) => <span key={index}>{statusLabel(index, status)}</span>)}
           </div>
-          {selectedAoi && selectedSource && selectedDates.length === 4 ? (
+          {selectedAoi && selectedSource && selectedDates.length === 4 && viewMode === 'grid' ? (
             <MapGrid
               sourceId={selectedSource.id}
               aoi={selectedAoi}
@@ -190,7 +203,19 @@ export function HistoryWorkspace({ api, MapPaneComponent = MapPane }: HistoryWor
               MapPaneComponent={MapPaneComponent}
               onPaneStatus={handlePaneStatus}
             />
-          ) : <div className="loading-state">正在建立 20 年日期目录…</div>}
+          ) : null}
+          {selectedAoi && selectedSource && selectedDates.length === 4 && viewMode === 'swipe' ? (
+            <SwipeCompare
+              sourceId={selectedSource.id}
+              aoi={selectedAoi}
+              leftDate={selectedDates[0] as TemporalDateEntry}
+              rightDate={selectedDates[3] as TemporalDateEntry}
+            />
+          ) : null}
+          {(!selectedAoi || !selectedSource || selectedDates.length !== 4) ? <div className="loading-state">正在建立 20 年日期目录…</div> : null}
+          {dates.length > 0 ? (
+            <Timeline dates={dates} initialDateId={dates[0]?.id} onFrame={handleTimelineFrame} />
+          ) : null}
         </section>
       </div>
       <footer>影像显示可见变化，不单独证明污染、过度养殖或开发原因。</footer>
