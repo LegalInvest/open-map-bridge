@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@omb/aois": "0.0.0",
+    "@omb/developer-sdk": "0.1.0",
     "@omb/ovmap-codec": "0.0.0",
     "@omb/qr-import": "0.0.0",
     "@omb/source-schema": "0.0.0",

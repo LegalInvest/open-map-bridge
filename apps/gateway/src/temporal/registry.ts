@@ -4,6 +4,7 @@ export interface TemporalSourceRecord {
   id: string;
   name: string;
   kind: 'synthetic' | 'ovi-bridge';
+  availability: 'configured' | 'ready';
   datePrecision: 'capture-date' | 'request-date-only';
   adapter: TemporalSourceAdapter;
 }

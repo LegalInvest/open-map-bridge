@@ -24,3 +24,7 @@
 - 2026-08-28：完成 `SLICE-V0-IMPORT-001` 本地实现。新增二维码图片/摄像头、`.ovmap` 点击/拖入、安全预览、授权门、统一 `MapSourceDefinition`、确认配置/回执原子保存和刷新恢复；状态停在 `confirmed`，未冒充已探测/已出图。
 - 用户真实二维码经 Chrome 实扫通过；证据显示实际变体含结构键 `at/ad/al`，`ul` 为 72 字符不透明协议值。实现只记录需要凭证/奥维桥接，不回显或持久化这些值。
 - 公开真实 455-byte `.ovmap` 经 codec 与浏览器双门列出 5 图层；检查阶段未请求其嵌入 host。全量门：84 Vitest + 2 Node、7 workspace 类型检查、生产构建、1 compatibility test、4 默认 Chrome E2E、2 授权本地 E2E 全过。
+- 2026-08-28：用户明确最终结果必须支持“基于奥维地图图源进行二次开发”；当前切片切为 `SLICE-V0-SDK-001`，但不降低 QR/`.ovmap` 导入和真实渲染验收。
+- 已新增 `@omb/developer-sdk`、严格 V1 应用清单和 `/api/v1/developer` 源/日期/瓦片接口。开发者描述采用字段白名单；confirmed 导入源只有 `metadata`，合成 ready 适配器才有 `temporal-catalog/tiles`，配置但未探测的 OviBridge 不授予运行能力。
+- 本地验收：92 Vitest + 2 Node、8 workspace 类型检查、生产构建、4 默认 Chrome E2E 和 2 条用户授权本地兼容 E2E 全过；实际 HTTP 验证目录、2006–2025 共 20 个日期和 SVG 瓦片均成功。服务已恢复在 `127.0.0.1:5173/4174`。
+- 当前阶段：`SLICE-V0-SDK-001 local-verified`；真实奥维源仍是 `metadata-only/render blocked`，`main/deployed/accepted` 均未达到。唯一下一步是让同一 imported source ID 通过 vault/SSRF/最小探测并绑定 OviBridge，再由 V1 SDK 读取真实日期与瓦片。

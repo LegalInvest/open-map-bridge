@@ -8,6 +8,7 @@ import { SyntheticTemporalAdapter } from './temporal/synthetic-adapter.js';
 import { OviBridgeAdapter } from './temporal/ovi-bridge.js';
 import { createImportInspector } from './import/inspector.js';
 import { registerImportRoutes } from './routes/import.js';
+import { registerDeveloperRoutes } from './routes/developer.js';
 
 interface BuildAppOptions {
   dataPath: string | null;
@@ -22,6 +23,7 @@ export async function buildApp(options: BuildAppOptions): Promise<FastifyInstanc
     id: 'synthetic-lakes',
     name: '合成时序验收源',
     kind: 'synthetic',
+    availability: 'ready',
     datePrecision: 'capture-date',
     adapter: new SyntheticTemporalAdapter({ missingYears: [2012] }),
   });
@@ -30,6 +32,7 @@ export async function buildApp(options: BuildAppOptions): Promise<FastifyInstanc
       id: 'ovi-history-200',
       name: '本机授权历史影像',
       kind: 'ovi-bridge',
+      availability: 'configured',
       datePrecision: 'request-date-only',
       adapter: new OviBridgeAdapter(options.ovi),
     });
@@ -40,5 +43,6 @@ export async function buildApp(options: BuildAppOptions): Promise<FastifyInstanc
   registerAoiRoutes(app, repository);
   registerTemporalRoutes(app, registry);
   registerImportRoutes(app, createImportInspector(), repository);
+  registerDeveloperRoutes(app, registry, repository);
   return app;
 }
