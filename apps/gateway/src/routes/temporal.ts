@@ -1,6 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 import { completeYearWindow } from '@omb/temporal-source';
 import type { TemporalSourceRegistry } from '../temporal/registry.js';
+import { parseDateWindowQuery, parseTilePath } from './temporal-input.js';
 
 export function registerTemporalRoutes(app: FastifyInstance, registry: TemporalSourceRegistry): void {
   app.get('/api/temporal/sources', async () =>
@@ -15,14 +16,10 @@ export function registerTemporalRoutes(app: FastifyInstance, registry: TemporalS
     const record = registry.get(id);
     if (!record) return reply.code(404).send({ error: 'source-not-found' });
     if (record.availability !== 'ready') return reply.code(409).send({ error: 'source-not-ready' });
-    const query = request.query as Record<string, string | undefined>;
-    if (!query.aoiId) return reply.code(400).send({ error: 'aoi-id-required' });
     const defaultWindow = completeYearWindow(new Date().getUTCFullYear());
-    return record.adapter.listDates({
-      aoiId: query.aoiId,
-      from: query.from ?? defaultWindow.from,
-      to: query.to ?? defaultWindow.to,
-    });
+    const parsed = parseDateWindowQuery(request.query as Record<string, unknown>, defaultWindow);
+    if (!parsed.ok) return reply.code(400).send({ error: parsed.error });
+    return record.adapter.listDates(parsed.value);
   });
 
   app.get('/api/temporal/tiles/:sourceId/:dateId/:z/:x/:y', async (request, reply) => {
@@ -31,11 +28,9 @@ export function registerTemporalRoutes(app: FastifyInstance, registry: TemporalS
     const record = registry.get(params.sourceId);
     if (!record) return reply.code(404).send({ error: 'source-not-found' });
     if (record.availability !== 'ready') return reply.code(409).send({ error: 'source-not-ready' });
-    const coordinates = { z: Number(params.z), x: Number(params.x), y: Number(params.y) };
-    if (Object.values(coordinates).some((value) => !Number.isInteger(value) || value < 0)) {
-      return reply.code(400).send({ error: 'invalid-coordinate' });
-    }
-    const tile = await record.adapter.tile({ dateId: params.dateId, ...coordinates });
+    const parsed = parseTilePath(params);
+    if (!parsed.ok) return reply.code(400).send({ error: parsed.error });
+    const tile = await record.adapter.tile(parsed.value);
     return reply.code(tile.status).type(tile.contentType).send(Buffer.from(tile.body));
   });
 }

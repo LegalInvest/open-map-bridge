@@ -204,6 +204,21 @@ it('rejects invalid or duplicate verified date catalog entries', () => {
   ).toThrow(/unique/i);
 });
 
+it('rejects invalid temporal inputs before an upstream fetch', async () => {
+  const fetchImpl = vi.fn<typeof fetch>();
+  const adapter = new OviBridgeAdapter({
+    baseUrl: 'http://127.0.0.1:19991',
+    mapType: 200,
+    verifiedDates: [verifiedDate],
+    fetchImpl,
+  });
+  await expect(
+    adapter.listDates({ aoiId: 'area-1', from: '2025-02-29', to: '2025-12-31' }),
+  ).rejects.toThrow(/calendar date/i);
+  await expect(adapter.tile({ dateId: verifiedDate.id, z: 8, x: 256, y: 0 })).rejects.toThrow(/zoom extent/i);
+  expect(fetchImpl).not.toHaveBeenCalled();
+});
+
 it('returns only injected verified dates and caps oversized responses', async () => {
   const fetchImpl = vi.fn(async () =>
     new Response(new Uint8Array(5 * 1024 * 1024 + 1), {

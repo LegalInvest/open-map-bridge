@@ -74,3 +74,7 @@
 - 批次结果：`OMB-AUD-004` 的“不伪造年度目录、无目录明确失败、未登记/missing/failed ID 零请求、已验证目录 schema/唯一性/窗口过滤”达到 main。该批没有请求真实奥维、没有真实目录提供者、没有 probe/ready、部署或用户业务验收。
 - 当前证据分支：`codex/audit-p0-ovi-date-truth-evidence`，只回写 main/CI 证据。18:32 根卷约 5.3 GiB，仍低于 8 GiB 门。
 - 唯一最安全下一步：为 `FIX-BATCH-005` 冻结 `OMB-AUD-022` 的共享严格输入 schema（真实 ISO 日期、窗口顺序、dateId/AOI 长度、z/x/y 边界），再写代码；不得在输入真值门前开始真实上游请求。
+- 2026-08-28 18:40：`FIX-BATCH-005` 已形成 `local-candidate`（分支 `codex/audit-p1-temporal-input-truth`）。新增 `@omb/temporal-source` 共享输入 schema：实际 UTC 日历日期与顺序窗口；1–160 字符且无首尾空白/控制符的 AOI/date ID；规范十进制安全非负整数；z≤30 且 x/y<2^z。
+- 接入范围：旧 `/api/temporal`、V1 `/api/v1/developer`、TypeScript SDK、OviBridge 和合成适配器均复用同一规则；新增伪日期、反向窗口、空白/超长 ID、前导零、科学计数、小数和越界 x/y 反例。所有候选均零真实外联。
+- 当前阶段：`local-candidate`，不是 `local-verified/main/deployed/accepted`。18:40 根卷约 5.3 GiB，低于 8 GiB 门；未运行本机测试、构建或浏览器。
+- 唯一最安全下一步：完成 FIX-BATCH-005 文档/交底静态门后提交 PR，由 GitHub CI 验证共享 schema、8 workspace 类型、构建和公开 Chrome 旅程；全绿最多推进 OMB-AUD-022 到 main。

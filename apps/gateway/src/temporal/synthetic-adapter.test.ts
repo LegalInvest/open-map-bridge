@@ -26,3 +26,11 @@ it('builds the synthetic catalog from the requested twenty-year window instead o
   expect(dates.at(-1)?.id).toBe('scene-2029');
   expect((await adapter.tile({ dateId: 'scene-2029', z: 8, x: 212, y: 102 })).status).toBe(200);
 });
+
+it('enforces the shared temporal input contract when called directly', async () => {
+  const adapter = new SyntheticTemporalAdapter();
+  await expect(
+    adapter.listDates({ aoiId: 'area-1', from: '2025-02-29', to: '2025-12-31' }),
+  ).rejects.toThrow(/calendar date/i);
+  await expect(adapter.tile({ dateId: 'scene-2025', z: 8, x: 256, y: 0 })).rejects.toThrow(/zoom extent/i);
+});

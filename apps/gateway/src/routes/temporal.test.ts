@@ -64,3 +64,38 @@ it('does not silently substitute a lake when arbitrary-area date discovery omits
   expect(response.statusCode).toBe(400);
   expect(response.json()).toEqual({ error: 'aoi-id-required' });
 });
+
+it.each([
+  { query: 'aoiId=area-1&extra=true', error: 'query-not-allowed' },
+  { query: 'aoiId=%20area-1', error: 'invalid-aoi-id' },
+  { query: `aoiId=${'x'.repeat(161)}`, error: 'invalid-aoi-id' },
+  { query: 'aoiId=area-1&from=2025-02-29&to=2025-12-31', error: 'invalid-date-window' },
+  { query: 'aoiId=area-1&from=2025-12-31&to=2006-01-01', error: 'invalid-date-window' },
+])('applies the strict shared date-window contract to the legacy route: $query', async ({ query, error }) => {
+  const app = await buildApp({ dataPath: null });
+  apps.push(app);
+  const response = await app.inject({
+    method: 'GET',
+    url: `/api/temporal/sources/synthetic-lakes/dates?${query}`,
+  });
+  expect(response.statusCode).toBe(400);
+  expect(response.json()).toEqual({ error });
+});
+
+it.each([
+  { path: `${'x'.repeat(161)}/8/212/102`, error: 'invalid-date-id' },
+  { path: 'scene-2006/01/0/0', error: 'invalid-coordinate' },
+  { path: 'scene-2006/1e1/0/0', error: 'invalid-coordinate' },
+  { path: 'scene-2006/31/0/0', error: 'invalid-coordinate' },
+  { path: 'scene-2006/8/256/0', error: 'invalid-coordinate' },
+  { path: 'scene-2006/8/0/256', error: 'invalid-coordinate' },
+])('applies the strict shared tile contract to the legacy route: $path', async ({ path, error }) => {
+  const app = await buildApp({ dataPath: null });
+  apps.push(app);
+  const response = await app.inject({
+    method: 'GET',
+    url: `/api/temporal/tiles/synthetic-lakes/${path}`,
+  });
+  expect(response.statusCode).toBe(400);
+  expect(response.json()).toEqual({ error });
+});
