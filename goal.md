@@ -7,9 +7,9 @@
 - 状态：Approved / Implementing；用户于 2026-08-28 明确最终结果必须能基于已导入奥维图源进行二次开发
 - 产品裁决者：用户
 - 当前整合者：本 Codex 主线程
-- 更新时间：2026-08-28 17:32（Asia/Shanghai）
+- 更新时间：2026-08-28 17:43（Asia/Shanghai）
 - 适用目录：`/Users/assis/Documents/Codex/2026-08-27/open-map-bridge`
-- 当前切片：`FIX-BATCH-002 local-candidate`（分支 `codex/audit-p1-ovi-response`）；在不连接真实上游的前提下，为 Ovi runtime 增加流式大小门、错误正文隔离和 PNG/JPEG 真实解码/尺寸门。FIX-BATCH-001 已在 main `240b91b` 完整收口；真实 probe 编排、ready 晋级、真实日期、部署与用户验收仍未达到
+- 当前切片：`FIX-BATCH-002 main`（PR #3，`de36012`，CI `33160315934`）；Ovi runtime 流式大小门、状态/错误正文隔离和 PNG/JPEG 解码/尺寸门已进入 main。下一批尚未写入代码；真实 probe 编排、ready 晋级、真实日期、部署与用户验收仍未达到
 - 上版：V0.4 奥维兼容双入口导入实施版
 
 <!-- GOAL_CAPSULE_START -->
@@ -21,18 +21,18 @@
 
 硬约束：clean-room 独立实现；不得复制奥维专有代码、商标或绕过会员/设备绑定；不得内置、记录或传播第三方 token；解析前不联网，确认前不请求图源；未知版本、解压异常、内网目标或不安全 URL 必须 fail closed；“文件已解析”“探测成功”“成功出图”是不同事实；任何成功都要有导入回执和可复现实证。
 
-当前只允许修改本项目目录；禁止清理用户文件、接触生产服务器、部署公网、批量抓取图源或离线下载 20 年整域瓦片。不得把真实秘密写入 fixture、日志、回执、普通 JSON 或前端。可用空间低于 8 GiB 立即停止本机构建、测试、截图和新增缓存；2026-08-28 17:32 最新约 5.7 GiB，低于门禁，本轮只能做小型源码/文档并由 GitHub PR CI 验证。发现越界需求写入 `BLOCKED.md`。
+当前只允许修改本项目目录；禁止清理用户文件、接触生产服务器、部署公网、批量抓取图源或离线下载 20 年整域瓦片。不得把真实秘密写入 fixture、日志、回执、普通 JSON 或前端。可用空间低于 8 GiB 立即停止本机构建、测试、截图和新增缓存；2026-08-28 17:43 最新约 6.1 GiB，低于门禁，本轮只能做小型源码/文档并由 GitHub PR CI 验证。发现越界需求写入 `BLOCKED.md`。
 
-`FIX-BATCH-001` 已由 PR #1/#2 进入 main `240b91b`。当前 `FIX-BATCH-002` 只收紧 Ovi 响应：无 `content-length` 也在读取过程中限制 5 MiB；非 2xx 只保留状态而不转发正文；成功响应只接受 MIME 与字节一致、可完整解码且尺寸受限的 PNG/JPEG。它不执行真实 probe，也不授予 ready。
+`FIX-BATCH-001/002` 已进入 main `de36012`。第二批只收紧 Ovi 响应：无 `content-length` 也在读取过程中限制 5 MiB；只接受状态 200，其他状态不转发正文；成功响应只接受 MIME 与字节一致、可完整解码且尺寸受限的 PNG/JPEG。它不执行真实 probe，也不授予 ready。
 
-当前批次完成条件：无长度头的大响应在流式读取中止损；声明超限/非法长度在读正文前失败；非 2xx 正文不进入下游；SVG/HTML、MIME 不符、损坏图片和超尺寸像素均失败；合法 PNG/JPEG 完整解码后才返回。PR CI 通过最多使该安全原语进入 main，不代表真实 probe 或 ready。项目最终完成条件仍是同一 source ID 获得有证据的 `tiles/temporal-catalog`，且至少两个真实日期返回可解码、非空并内容不同的瓦片。
+第二批完成条件已经由 CI `33160315934` 的 122 Vitest＋2 Node、8 workspace 类型检查、生产构建和 4 条 Chrome E2E 验证并进入 main：无长度头的大响应流式止损；声明超限/非法长度在读正文前失败；非 200 正文不进入下游；SVG/HTML、MIME 不符、损坏图片和超尺寸像素均失败；合法 PNG/JPEG 完整解码后才返回。这不代表真实 probe 或 ready。项目最终完成条件仍是同一 source ID 获得有证据的 `tiles/temporal-catalog`，且至少两个真实日期返回可解码、非空并内容不同的瓦片。
 <!-- GOAL_CAPSULE_END -->
 
 ## 当前技术修复契约
 
 用户于 2026-08-28 批准逐一修复全量审计问题。修复采用小批次、可回滚、逐项取证的方式；完整清单、优先级、状态、验收和追加记录见 `docs/问题账本.md`。
 
-`FIX-BATCH-002` 关联 `OMB-AUD-021` 和 `OMB-AUD-002` 的解码前置，保护 JRN-001/JRN-007/JRN-011、BR-001/006/015/017、FR-005/009/017、NFR-001/004/006 和 AC-005/011/017/019。该批不新增外联入口、不调用真实奥维、不改变 configured 状态。
+`FIX-BATCH-002` 已进入 main，关联 `OMB-AUD-021` 和 `OMB-AUD-002` 的解码前置，保护 JRN-001/JRN-007/JRN-011、BR-001/006/015/017、FR-005/009/017、NFR-001/004/006 和 AC-005/011/017/019。该批未新增外联入口、未调用真实奥维、未改变 configured 状态。下一批在写代码前仍须先在问题账本冻结范围与验收。
 
 ## 一页产品定义
 
@@ -829,3 +829,4 @@ V1 公共类型和错误语义通过契约测试冻结；新增可选能力不�
 - 2026-08-28：用户批准逐一修复全量审计问题并同步问题账本/进度 Markdown。建立 `docs/问题账本.md`（38 组问题），启动 `FIX-BATCH-001`：同 imported UUID 绑定、configured 不可消费、空 probe 不假绿和 source UUID/mapType/port 三元配置。当前只为 `local-candidate`；本机 5.8 GiB 容量门下未测试/构建，待 PR CI。
 - 2026-08-28：`FIX-BATCH-001` 经 PR #1 合并为 `5a7e9ad`；CI `33159198541` 对源提交 `bc63661` 通过 113 Vitest＋2 Node、8 workspace typecheck、build 和 4 Chrome E2E。001/003/005/023 达到 main，002 仅假绿子项达到 main；真实探测/ready 仍开放。
 - 2026-08-28：启动 `FIX-BATCH-002`，为 Ovi runtime 增加流式 5 MiB 上限、非 2xx 正文隔离、PNG/JPEG MIME/magic/完整解码/尺寸门和负例。当前仅 `local-candidate`，本机约 5.7 GiB 未运行测试/构建，待 PR CI。
+- 2026-08-28：`FIX-BATCH-002` 经 PR #3 合并为 main `de36012`；首次 CI `33160137300`、第二次 `33160229102` 的失败已保留，第三次 `33160315934` 通过 122 Vitest＋2 Node、8 workspace typecheck、build 和 4 Chrome E2E。021 达到 main，002 仅解码前置达到 main；真实探测/ready 仍开放。
