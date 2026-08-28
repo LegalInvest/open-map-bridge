@@ -61,14 +61,7 @@ function evaluated(
 }
 
 function runtimeFor(source: MapSourceDefinition, registry: TemporalSourceRegistry): TemporalSourceRecord | null {
-  const exact = registry.get(source.id);
-  if (exact) return exact;
-  if (source.compatibilityExtension.needsOviBridge === true) {
-    return registry
-      .list()
-      .find((record) => record.kind === 'ovi-bridge' && record.legacyMapType === source.legacyId) ?? null;
-  }
-  return null;
+  return registry.get(source.id);
 }
 
 export function buildSourceReadinessRun(

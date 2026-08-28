@@ -90,6 +90,15 @@ node scripts/probe-ovi-bridge.mjs
 4. 四个请求必须都能由系统图像解码器归一化、非空、尺寸合理，且四个归一化 SHA-256 全部不同。经纬度必须合法，日期必须是四个不重复的 ISO 日期。临时图片在探测结束时删除。HTTP 200、官方客户端时间轴或导入成功都不能替代该证据。
 5. 真实模式启动时由操作者在本机进程环境配置端口和地图类型；浏览器不能提交 host、URL、token 或地图类型。
 
+```bash
+OMB_OVI_PORT=<local-port> \
+OMB_OVI_MAP_TYPE=<authorized-map-type> \
+OMB_OVI_SOURCE_ID=<persisted-imported-source-uuid> \
+npm run dev
+```
+
+三项必须一起配置且 map type 必须与目标导入源的 `legacyId` 匹配。网关只以显式 source UUID 建立 `configured` runtime；即使另一个源具有相同 legacy ID 也不会绑定。configured 源不会因配置存在而进入历史影像源列表。当前尚无自动真实探测/ready 晋级，不能用该启动命令证明影像可用。
+
 ## 数据真实性
 
 - `requestDate` 是请求日期；奥维桥接不返回拍摄日期时，`captureDate` 保持空。

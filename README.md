@@ -70,6 +70,7 @@ Execution accepts only `{ "sourceId": "..." }`; it never accepts an upstream URL
 - [`research.md`](research.md): evidence, implementation map, and stage ledger.
 - [`PROGRESS.md`](PROGRESS.md): current checkpoint and safest next action.
 - [`BLOCKED.md`](BLOCKED.md): unresolved real-source and safety gates.
+- [`docs/问题账本.md`](docs/问题账本.md): prioritized audit findings, per-issue acceptance, repair batches, and evidence stages.
 - [`docs/技术交底书.md`](docs/技术交底书.md): timestamped technical disclosure, architecture, technical features, embodiments, and evidence boundary.
 - [`docs/可视化与自动化路线图.md`](docs/可视化与自动化路线图.md): observable workflow, one-click four-frame automation, human gates, and staged acceptance plan.
 - [`docs/automation-api.md`](docs/automation-api.md): the implemented zero-network readiness job contract and its explicit non-goals.

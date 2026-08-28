@@ -1,3 +1,6 @@
+import { mkdtemp } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { afterEach, expect, it, vi } from 'vitest';
 import { buildApp } from '../app.js';
 
@@ -104,9 +107,16 @@ it('surfaces the missing credential vault while keeping redacted query data out 
 it('recognizes an opaque Ovi source as needing the configured local bridge without calling it', async () => {
   const fetchSpy = vi.fn<typeof fetch>();
   vi.stubGlobal('fetch', fetchSpy);
-  const app = await buildApp({ dataPath: null, ovi: { baseUrl: 'http://127.0.0.1:54321', mapType: 402 } });
+  const directory = await mkdtemp(join(tmpdir(), 'omb-ovi-readiness-'));
+  const dataPath = join(directory, 'state.json');
+  const importing = await buildApp({ dataPath });
+  const source = await importSource(importing, 'tiles.example.invalid', 'opaque-private-template');
+  await importing.close();
+  const app = await buildApp({
+    dataPath,
+    ovi: { baseUrl: 'http://127.0.0.1:54321', mapType: 402, sourceId: source.id },
+  });
   apps.push(app);
-  const source = await importSource(app, 'tiles.example.invalid', 'opaque-private-template');
   const response = await app.inject({
     method: 'POST',
     url: '/api/v1/processes/source-readiness/execution',

@@ -64,7 +64,7 @@ export function HistoryWorkspace({ api, MapPaneComponent = MapPane, AoiCreatorCo
         if (!active) return;
         setSources(sourceRows);
         setAois(aoiRows);
-        setSourceId(sourceRows.find((source) => source.kind === 'ovi-bridge')?.id ?? sourceRows[0]?.id ?? '');
+        setSourceId(sourceRows[0]?.id ?? '');
         setAoiId(aoiRows[0]?.id ?? '');
       })
       .catch((cause: unknown) => active && setError((cause as Error).message));
@@ -151,10 +151,16 @@ export function HistoryWorkspace({ api, MapPaneComponent = MapPane, AoiCreatorCo
           <p>任意框选区域｜{yearWindow.fromYear}–{yearWindow.toYear}｜自动四期、同范围、同视角</p>
         </div>
         <div className="truth-strip">
-          <span className={selectedSource?.kind === 'synthetic' ? 'truth-chip warning' : 'truth-chip'}>
-            {selectedSource?.kind === 'synthetic' ? '当前：合成验收源' : '当前：本机授权源'}
+          <span className={!selectedSource || selectedSource.kind === 'synthetic' ? 'truth-chip warning' : 'truth-chip'}>
+            {!selectedSource
+              ? '当前：无已就绪图源'
+              : selectedSource.kind === 'synthetic'
+                ? '当前：合成验收源'
+                : '当前：已就绪本机授权源'}
           </span>
-          <span className="truth-chip">拍摄日期：{selectedSource?.datePrecision === 'capture-date' ? '可用' : '未知/按请求日'}</span>
+          <span className="truth-chip">
+            拍摄日期：{selectedSource?.datePrecision === 'capture-date' ? '可用' : '未知/按请求日'}
+          </span>
         </div>
       </header>
 

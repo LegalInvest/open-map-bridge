@@ -10,7 +10,7 @@
 - `temporal-catalog`：可按 AOI 和日期窗口列出时序条目。
 - `tiles`：可通过本地网关读取已知 source/date/z/x/y 的瓦片。
 
-确认导入但尚未完成 SSRF 策略、凭证保险库、最小探测和运行时绑定的奥维兼容源只会得到 `metadata`，状态为 `metadata-only`。这表示“配置已确认”，不表示服务器可达或影像可用。当前 `synthetic-lakes` 是离线契约验收源；它不能替代真实奥维图源验收。
+确认导入但尚未完成 SSRF 策略、凭证保险库、最小探测和 ready 晋级的奥维兼容源只会得到 `metadata`，状态为 `metadata-only`。本机桥配置可与该 imported source 的同一 UUID 建立 `configured` runtime，但这仍只表示“配置已关联”，不表示服务器可达或影像可用。当前 `synthetic-lakes` 是离线契约验收源；它不能替代真实奥维图源验收。
 
 ## API
 
@@ -60,8 +60,9 @@ if (source) {
 
 1. 从二维码或 `.ovmap` 安全解析并确认，得到稳定 source ID。
 2. 通过 URL/IP SSRF 策略和本地凭证保险库。
-3. 以同一个 source ID 完成最小探测和运行时适配器绑定。
-4. 只有真实日期目录和瓦片检查通过后，能力从 `metadata` 晋级为 `temporal-catalog`/`tiles`。
-5. 行业应用继续使用相同 V1 SDK，不读取奥维私有格式。
+3. 运行时只能以同一个 source ID 绑定；legacy map type 只用于匹配配置，不能成为下游身份。
+4. 以该 source ID 完成最小探测、图片解码和运行时 ready 晋级。
+5. 只有真实日期目录和瓦片检查通过后，能力从 `metadata` 晋级为 `temporal-catalog`/`tiles`。
+6. 行业应用继续使用相同 V1 SDK，不读取奥维私有格式。
 
 V1 暂不提供插件市场、任意第三方代码执行、写图源、批量抓取或公网代理。

@@ -11,14 +11,36 @@ import { registerImportRoutes } from './routes/import.js';
 import { registerDeveloperRoutes } from './routes/developer.js';
 import { SourceReadinessService } from './automation/source-readiness.js';
 import { registerAutomationRoutes } from './routes/automation.js';
+import type { MapSourceDefinition } from '@omb/source-schema';
 
 interface BuildAppOptions {
   dataPath: string | null;
-  ovi?: { baseUrl: string; mapType: number };
+  ovi?: { baseUrl: string; mapType: number; sourceId: string };
+}
+
+function bindImportedOviSource(
+  registry: TemporalSourceRegistry,
+  source: MapSourceDefinition,
+  ovi: NonNullable<BuildAppOptions['ovi']>,
+): void {
+  if (source.id !== ovi.sourceId) throw new Error('configured Ovi source ID does not match the imported source');
+  if (source.compatibilityExtension.needsOviBridge !== true) {
+    throw new Error('configured Ovi source does not require the local bridge');
+  }
+  if (source.legacyId !== ovi.mapType) throw new Error('configured Ovi map type does not match the imported source');
+  if (registry.get(source.id)) throw new Error(`duplicate temporal source ${source.id}`);
+  registry.register({
+    id: source.id,
+    name: source.name,
+    kind: 'ovi-bridge',
+    legacyMapType: ovi.mapType,
+    availability: 'configured',
+    datePrecision: 'request-date-only',
+    adapter: new OviBridgeAdapter(ovi),
+  });
 }
 
 export async function buildApp(options: BuildAppOptions): Promise<FastifyInstance> {
-  const app = Fastify({ logger: false });
   const repository = await TemporalStateRepository.open(options.dataPath, lakeAoiPresets);
   const registry = new TemporalSourceRegistry();
   registry.register({
@@ -30,17 +52,13 @@ export async function buildApp(options: BuildAppOptions): Promise<FastifyInstanc
     adapter: new SyntheticTemporalAdapter({ missingYears: [2012] }),
   });
   if (options.ovi) {
-    registry.register({
-      id: 'ovi-history-200',
-      name: '本机授权历史影像',
-      kind: 'ovi-bridge',
-      legacyMapType: options.ovi.mapType,
-      availability: 'configured',
-      datePrecision: 'request-date-only',
-      adapter: new OviBridgeAdapter(options.ovi),
-    });
+    const ovi = options.ovi;
+    const source = repository.listImportSources().find((candidate) => candidate.id === ovi.sourceId);
+    if (!source) throw new Error('configured Ovi source ID was not found in persisted imports');
+    bindImportedOviSource(registry, source, ovi);
   }
 
+  const app = Fastify({ logger: false });
   app.get('/api/health', async () => ({ ok: true, persistence: options.dataPath === null ? 'memory' : 'atomic-json' }));
   app.get('/api/comparisons', async () => repository.listComparisons());
   registerAoiRoutes(app, repository);

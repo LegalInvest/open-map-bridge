@@ -24,7 +24,7 @@ GET  /api/v1/jobs/{jobId}
 1. `source-confirmed`：确认图源已经由用户授权保存；不表示可用。
 2. `network-policy`：只检查保存后的 path/host/port/IP。云元数据和危险路径永久阻断；私网、裸 IP、企业域名和非标准端口进入人工门。它不解析 DNS。
 3. `credential-readiness`：只读 `credentialRequired`/`credentialRef` 的脱敏事实。不透明奥维配置交给受控本机桥，任务账本不保存私有载荷。
-4. `runtime-binding`：只读当前 registry。奥维桥还要求 legacy map type 匹配；`configured` 不等于 `ready`。
+4. `runtime-binding`：只读当前 registry，并且只接受与 saved source 完全相同的 UUID。配置桥接时可用 legacy map type 选择应绑定的导入源，但不能用 legacy ID 代替 source UUID 或跨源推进；`configured` 不等于 `ready`。
 
 每个 step 明确记录 `status`、`attempt`、起止时间、`externalRequest`、稳定错误码、消息和下一动作。当前流程的 `externalRequest` 必须全部为 `false`。
 
