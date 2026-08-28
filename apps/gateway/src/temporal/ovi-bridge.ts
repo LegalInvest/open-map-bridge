@@ -4,6 +4,7 @@ import {
   type TemporalSourceAdapter,
   type TemporalTileResponse,
 } from '@omb/temporal-source';
+import { validateDecodedTile } from './image-validation.js';
 
 interface OviBridgeOptions {
   baseUrl: string;
@@ -19,6 +20,35 @@ interface OviPathInput {
 }
 
 const MAX_TILE_BYTES = 5 * 1024 * 1024;
+const SAFE_UPSTREAM_ERROR_STATUSES = new Set([400, 401, 403, 404, 408, 409, 410, 422, 429, 500, 502, 503, 504]);
+
+async function readCappedBody(response: Response): Promise<Uint8Array> {
+  if (!response.body) throw new Error('Ovi bridge returned an empty image response');
+  const reader = response.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let total = 0;
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      total += value.byteLength;
+      if (total > MAX_TILE_BYTES) {
+        await reader.cancel('Ovi bridge tile exceeds 5 MiB');
+        throw new Error('Ovi bridge tile exceeds 5 MiB');
+      }
+      chunks.push(value);
+    }
+  } finally {
+    reader.releaseLock();
+  }
+  const body = new Uint8Array(total);
+  let offset = 0;
+  for (const chunk of chunks) {
+    body.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  return body;
+}
 
 function requireTileInteger(value: number, name: string): void {
   if (!Number.isInteger(value) || value < 0) throw new Error(`${name} must be a non-negative integer`);
@@ -73,11 +103,30 @@ export class OviBridgeAdapter implements TemporalSourceAdapter {
     try {
       const response = await this.fetchImpl(url, { redirect: 'error', signal: controller.signal });
       const contentType = response.headers.get('content-type')?.split(';')[0]?.trim() ?? 'application/octet-stream';
-      if (response.ok && !contentType.startsWith('image/')) throw new Error('Ovi bridge returned non-image content');
-      const declaredLength = Number(response.headers.get('content-length') ?? '0');
-      if (declaredLength > MAX_TILE_BYTES) throw new Error('Ovi bridge tile exceeds 5 MiB');
-      const body = new Uint8Array(await response.arrayBuffer());
-      if (body.byteLength > MAX_TILE_BYTES) throw new Error('Ovi bridge tile exceeds 5 MiB');
+      if (response.status !== 200) {
+        await response.body?.cancel().catch(() => undefined);
+        return {
+          status: SAFE_UPSTREAM_ERROR_STATUSES.has(response.status) ? response.status : 502,
+          contentType: 'application/json',
+          body: new Uint8Array(),
+        };
+      }
+      if (!['image/png', 'image/jpeg'].includes(contentType)) {
+        await response.body?.cancel().catch(() => undefined);
+        throw new Error('Ovi bridge returned unsupported content');
+      }
+      const declaredHeader = response.headers.get('content-length');
+      const declaredLength = declaredHeader === null ? null : Number(declaredHeader);
+      if (declaredLength !== null && (!Number.isSafeInteger(declaredLength) || declaredLength < 0)) {
+        await response.body?.cancel().catch(() => undefined);
+        throw new Error('Ovi bridge returned an invalid content length');
+      }
+      if (declaredLength !== null && declaredLength > MAX_TILE_BYTES) {
+        await response.body?.cancel().catch(() => undefined);
+        throw new Error('Ovi bridge tile exceeds 5 MiB');
+      }
+      const body = await readCappedBody(response);
+      validateDecodedTile(body, contentType);
       return { status: response.status, contentType, body };
     } finally {
       clearTimeout(timeout);
