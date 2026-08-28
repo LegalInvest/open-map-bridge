@@ -23,6 +23,7 @@ it('inspects QR and confirms a source only after authorization', async () => {
   expect(inspect.statusCode).toBe(200);
   const preview = inspect.json();
   expect(preview.layers[0].source.name).toBe('Fixture Map');
+  expect(preview.layers[0].source.compatibilityExtension.credentialRequired).toBe(false);
   expect(fetchSpy).not.toHaveBeenCalled();
 
   const rejected = await app.inject({

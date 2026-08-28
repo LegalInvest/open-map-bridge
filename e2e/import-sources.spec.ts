@@ -18,7 +18,20 @@ test('imports a QR image only after a secret-safe preview and authorization', as
   await confirmed;
   await expect(page.getByRole('heading', { name: '已保存配置（尚未探测）' })).toBeVisible();
   await expect(page.locator('.source-registry').getByText('E2E QR Source')).toBeVisible();
+  await page.locator('.result-step').getByRole('button', { name: '检查图源准备度' }).click();
+  await expect(page.getByRole('heading', { name: '图源任务驾驶舱' })).toBeVisible();
+  const executed = page.waitForResponse((response) =>
+    response.url().endsWith('/api/v1/processes/source-readiness/execution') && response.status() === 201,
+  );
+  await page.getByRole('button', { name: '检查图源准备度' }).click();
+  await executed;
+  await expect(page.getByText('已阻塞')).toBeVisible();
+  await expect(page.getByText('运行时绑定 · 阻塞')).toBeVisible();
+  await expect(page.getByText('未发出上游请求')).toHaveCount(4);
   await page.reload();
+  await page.getByRole('button', { name: '任务驾驶舱' }).click();
+  await expect(page.getByText('运行时绑定 · 阻塞')).toBeVisible();
+  await page.getByRole('button', { name: '图源导入' }).click();
   await expect(page.locator('.source-registry').getByText('E2E QR Source')).toBeVisible();
 });
 

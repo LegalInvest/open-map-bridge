@@ -1,6 +1,6 @@
 import type { AoiGeometry, AreaOfInterest } from '@omb/aois';
 import { completeYearWindow, type TemporalDateEntry } from '@omb/temporal-source';
-import type { ImportPreview, ImportReceipt, MapSourceDefinition } from '@omb/source-schema';
+import type { AutomationRun, ImportPreview, ImportReceipt, MapSourceDefinition } from '@omb/source-schema';
 
 export interface TemporalSourceSummary {
   id: string;
@@ -27,12 +27,18 @@ export interface ImportApi {
   listImportSources(): Promise<MapSourceDefinition[]>;
 }
 
-export type OpenMapBridgeApi = HistoryApi & ImportApi;
+export interface AutomationApi {
+  listAutomationRuns(): Promise<AutomationRun[]>;
+  startSourceReadiness(sourceId: string): Promise<{ run: AutomationRun; created: boolean }>;
+}
+
+export type OpenMapBridgeApi = HistoryApi & ImportApi & AutomationApi;
 
 async function readJson<T>(response: Response): Promise<T> {
   if (!response.ok) {
-    const body = (await response.json().catch(() => null)) as { error?: { message?: string } } | null;
-    throw new Error(body?.error?.message ?? `request failed with ${response.status}`);
+    const body = (await response.json().catch(() => null)) as { error?: string | { message?: string }; message?: string } | null;
+    const message = typeof body?.error === 'string' ? body.error : body?.error?.message;
+    throw new Error(message ?? body?.message ?? `request failed with ${response.status}`);
   }
   return (await response.json()) as T;
 }
@@ -109,6 +115,18 @@ export function createApiClient(baseUrl = '', currentYear = new Date().getUTCFul
     },
     async listImportSources() {
       return readJson<MapSourceDefinition[]>(await fetch(`${baseUrl}/api/import/sources`));
+    },
+    async listAutomationRuns() {
+      return readJson<AutomationRun[]>(await fetch(`${baseUrl}/api/v1/jobs`));
+    },
+    async startSourceReadiness(sourceId) {
+      return readJson<{ run: AutomationRun; created: boolean }>(
+        await fetch(`${baseUrl}/api/v1/processes/source-readiness/execution`, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ sourceId }),
+        }),
+      );
     },
   };
 }

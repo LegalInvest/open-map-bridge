@@ -2,7 +2,13 @@ import { mkdir, open, readFile, rename } from 'node:fs/promises';
 import { dirname } from 'node:path';
 import { normalizeViewState, type ViewState } from '@omb/temporal-source';
 import { parseAreaOfInterest, type AreaOfInterest } from '@omb/aois';
-import { parseMapSourceDefinition, type ImportReceipt, type MapSourceDefinition } from '@omb/source-schema';
+import {
+  parseAutomationRun,
+  parseMapSourceDefinition,
+  type AutomationRun,
+  type ImportReceipt,
+  type MapSourceDefinition,
+} from '@omb/source-schema';
 
 export interface FrameReceipt {
   dateId: string;
@@ -26,6 +32,7 @@ interface TemporalState {
   comparisons: ComparisonReceipt[];
   importSources: MapSourceDefinition[];
   importReceipts: ImportReceipt[];
+  automationRuns: AutomationRun[];
 }
 
 function parseImportReceipt(value: unknown): ImportReceipt {
@@ -66,6 +73,7 @@ function parseComparison(value: unknown): ComparisonReceipt {
 export class TemporalStateRepository {
   private readonly path: string | null;
   private state: TemporalState;
+  private writeTail: Promise<void> = Promise.resolve();
 
   private constructor(path: string | null, state: TemporalState) {
     this.path = path;
@@ -79,6 +87,7 @@ export class TemporalStateRepository {
         comparisons: [],
         importSources: [],
         importReceipts: [],
+        automationRuns: [],
       });
     }
     try {
@@ -87,6 +96,7 @@ export class TemporalStateRepository {
         comparisons?: unknown;
         importSources?: unknown;
         importReceipts?: unknown;
+        automationRuns?: unknown;
       };
       if (!Array.isArray(parsed.aois) || !Array.isArray(parsed.comparisons)) throw new Error('invalid temporal state');
       return new TemporalStateRepository(path, {
@@ -94,6 +104,7 @@ export class TemporalStateRepository {
         comparisons: parsed.comparisons.map(parseComparison),
         importSources: Array.isArray(parsed.importSources) ? parsed.importSources.map(parseMapSourceDefinition) : [],
         importReceipts: Array.isArray(parsed.importReceipts) ? parsed.importReceipts.map(parseImportReceipt) : [],
+        automationRuns: Array.isArray(parsed.automationRuns) ? parsed.automationRuns.map(parseAutomationRun) : [],
       });
     } catch (error) {
       if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
@@ -102,6 +113,7 @@ export class TemporalStateRepository {
         comparisons: [],
         importSources: [],
         importReceipts: [],
+        automationRuns: [],
       });
       await repository.persist();
       return repository;
@@ -124,36 +136,80 @@ export class TemporalStateRepository {
     return structuredClone(this.state.importReceipts);
   }
 
+  listAutomationRuns(): AutomationRun[] {
+    return structuredClone(this.state.automationRuns).sort((left, right) => right.createdAt.localeCompare(left.createdAt));
+  }
+
+  getAutomationRun(id: string): AutomationRun | null {
+    const run = this.state.automationRuns.find((entry) => entry.id === id);
+    return run ? structuredClone(run) : null;
+  }
+
+  findAutomationRunByFingerprint(inputFingerprint: string): AutomationRun | null {
+    const run = this.state.automationRuns.find((entry) => entry.inputFingerprint === inputFingerprint);
+    return run ? structuredClone(run) : null;
+  }
+
   async appendAoi(aoi: AreaOfInterest): Promise<void> {
     const parsed = parseAreaOfInterest(aoi);
-    const latest = this.state.aois.filter((entry) => entry.id === parsed.id).sort((a, b) => b.version - a.version)[0];
-    if (latest && parsed.version !== latest.version + 1) throw new Error('AOI version must append exactly one version');
-    this.state.aois.push(parsed);
-    await this.persist();
+    await this.mutate((state) => {
+      const latest = state.aois.filter((entry) => entry.id === parsed.id).sort((a, b) => b.version - a.version)[0];
+      if (latest && parsed.version !== latest.version + 1) throw new Error('AOI version must append exactly one version');
+      return { ...state, aois: [...state.aois, parsed] };
+    });
   }
 
   async appendComparison(comparison: ComparisonReceipt): Promise<void> {
-    if (this.state.comparisons.some((entry) => entry.id === comparison.id)) throw new Error('duplicate comparison');
-    this.state.comparisons.push(parseComparison(comparison));
-    await this.persist();
+    const parsed = parseComparison(comparison);
+    await this.mutate((state) => {
+      if (state.comparisons.some((entry) => entry.id === parsed.id)) throw new Error('duplicate comparison');
+      return { ...state, comparisons: [...state.comparisons, parsed] };
+    });
   }
 
   async appendConfirmedImport(input: { sources: MapSourceDefinition[]; receipt: ImportReceipt }): Promise<void> {
     const sources = input.sources.map(parseMapSourceDefinition);
     if (sources.some((source) => source.status !== 'confirmed')) throw new Error('import source must be confirmed');
-    if (sources.some((source) => this.state.importSources.some((existing) => existing.id === source.id))) {
-      throw new Error('duplicate import source');
-    }
-    if (this.state.importReceipts.some((receipt) => receipt.receiptId === input.receipt.receiptId)) {
-      throw new Error('duplicate import receipt');
-    }
-    const next: TemporalState = {
-      ...this.state,
-      importSources: [...this.state.importSources, ...sources],
-      importReceipts: [...this.state.importReceipts, parseImportReceipt(input.receipt)],
-    };
-    await this.persist(next);
-    this.state = next;
+    const receipt = parseImportReceipt(input.receipt);
+    await this.mutate((state) => {
+      if (sources.some((source) => state.importSources.some((existing) => existing.id === source.id))) {
+        throw new Error('duplicate import source');
+      }
+      if (state.importReceipts.some((existing) => existing.receiptId === receipt.receiptId)) {
+        throw new Error('duplicate import receipt');
+      }
+      return {
+        ...state,
+        importSources: [...state.importSources, ...sources],
+        importReceipts: [...state.importReceipts, receipt],
+      };
+    });
+  }
+
+  async ensureAutomationRun(input: AutomationRun): Promise<{ run: AutomationRun; created: boolean }> {
+    const parsed = parseAutomationRun(input);
+    let result: { run: AutomationRun; created: boolean } = { run: structuredClone(parsed), created: true };
+    await this.mutate((state) => {
+      const existing = state.automationRuns.find((entry) => entry.inputFingerprint === parsed.inputFingerprint);
+      if (existing) {
+        result = { run: structuredClone(existing), created: false };
+        return state;
+      }
+      result = { run: structuredClone(parsed), created: true };
+      return { ...state, automationRuns: [...state.automationRuns, parsed] };
+    });
+    return result;
+  }
+
+  private async mutate(update: (state: TemporalState) => TemporalState): Promise<void> {
+    const operation = this.writeTail.then(async () => {
+      const next = update(this.state);
+      if (next === this.state) return;
+      await this.persist(next);
+      this.state = next;
+    });
+    this.writeTail = operation.catch(() => undefined);
+    await operation;
   }
 
   private async persist(state: TemporalState = this.state): Promise<void> {

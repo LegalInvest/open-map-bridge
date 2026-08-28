@@ -29,3 +29,16 @@ describe('history API client', () => {
     expect(JSON.parse(String(request?.[1]?.body))).toEqual({ name: '实验区域', geometry });
   });
 });
+
+it('starts source readiness with only the selected source id', async () => {
+  const body = { run: {}, created: true };
+  const fetchSpy = vi.fn<typeof fetch>().mockResolvedValue(
+    new Response(JSON.stringify(body), { status: 201, headers: { 'content-type': 'application/json' } }),
+  );
+  vi.stubGlobal('fetch', fetchSpy);
+  await createApiClient('', 2026).startSourceReadiness('source-1');
+  expect(fetchSpy).toHaveBeenCalledWith('/api/v1/processes/source-readiness/execution', expect.objectContaining({
+    method: 'POST',
+    body: JSON.stringify({ sourceId: 'source-1' }),
+  }));
+});

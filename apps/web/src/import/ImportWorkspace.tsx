@@ -6,6 +6,7 @@ import { browserQrReader, type QrReader } from './qr-reader.js';
 interface ImportWorkspaceProps {
   api: ImportApi;
   qrReader?: QrReader;
+  onOpenAutomation?: () => void;
 }
 
 type ImportState = 'input' | 'inspecting' | 'preview' | 'confirming' | 'result' | 'error';
@@ -15,7 +16,7 @@ function shortHash(hash: string): string {
   return `${hash.slice(0, 10)}…${hash.slice(-6)}`;
 }
 
-export function ImportWorkspace({ api, qrReader = browserQrReader }: ImportWorkspaceProps) {
+export function ImportWorkspace({ api, qrReader = browserQrReader, onOpenAutomation }: ImportWorkspaceProps) {
   const [state, setState] = useState<ImportState>('input');
   const [tab, setTab] = useState<InputTab>('qr-image');
   const [preview, setPreview] = useState<ImportPreview | null>(null);
@@ -239,7 +240,10 @@ export function ImportWorkspace({ api, qrReader = browserQrReader }: ImportWorks
               <span className="result-mark">✓</span>
               <h2>已保存配置（尚未探测）</h2>
               <p>配置与脱敏回执已写入本地；投影、凭证、服务器可用性和真实瓦片仍需分别验证。</p>
-              <button type="button" className="primary" onClick={reset}>继续导入</button>
+              <div className="preview-actions">
+                <button type="button" onClick={reset}>继续导入</button>
+                {onOpenAutomation ? <button type="button" className="primary" onClick={onOpenAutomation}>检查图源准备度</button> : null}
+              </div>
             </div>
           ) : null}
         </section>

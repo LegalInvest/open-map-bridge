@@ -133,6 +133,7 @@ export function normalizeOviLayer(
     queryParameters: safe.queryParameters,
     maxZoom: Math.min(layer.maxZoom, 30),
     createdAt,
+    compatibilityExtension: { credentialRequired: safe.redactedCredential },
   });
   return candidateFromSource(source, safe.redactedCredential);
 }
@@ -153,7 +154,10 @@ export function normalizeQrCandidate(
     queryParameters: candidate.queryParameters,
     maxZoom: 0,
     createdAt,
-    compatibilityExtension: candidate.opaqueTemplate ? { opaqueTemplate: true, needsOviBridge: true } : {},
+    compatibilityExtension: {
+      credentialRequired: candidate.containsSensitiveQuery,
+      ...(candidate.opaqueTemplate ? { opaqueTemplate: true, needsOviBridge: true } : {}),
+    },
   });
   return candidateFromSource(source, candidate.containsSensitiveQuery, candidate.opaqueTemplate);
 }

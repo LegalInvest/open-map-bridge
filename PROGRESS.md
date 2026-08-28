@@ -33,4 +33,6 @@
 - 阶段更新：记录到 `4b90939` 的产品代码已达到 `main`；仍无公网部署，真实奥维瓦片与用户业务签收未达到 `deployed/accepted`。唯一产品下一步保持不变：同一 imported source ID 的 vault/SSRF/probe/runtime binding。
 - 2026-08-28：建立 `docs/技术交底书.md` V0.1，记录创建/更新时间、基线提交、源码 SHA-256、追加式变更日志、技术问题、完整方案、候选特征、实施例和真实完成边界。新增 `disclosure:update/check`，CI 将拒绝技术源码变化但交底书未同步的提交。
 - 2026-08-28 15:56：用户提出“数字化之后，就是可视化和自动化”。已走查当前页面与关键代码，建立 `docs/可视化与自动化路线图.md`：以真实 `AutomationRun/Step` 驾驶舱、一键四期、人工门、幂等续跑、帧质量和来源链为主线；新增规格暂为 proposed，未实现、未新增依赖。
-- 唯一最安全下一步不变但增强：在 `SLICE-V0-IMPORT-002` 为同一 confirmed source ID 实现 vault/SSRF/最小探测/runtime binding，同时让每一步产生可持久、可恢复、可视化的最小任务事件；禁止先做合成自动化大屏。
+- 2026-08-28 16:25：用户批准继续优化架构/代码并同步全部文档。`SLICE-AUTOMATION-RUN-001A` 已形成 local-candidate：四步零外联准备度 schema/evaluator、主机/路径静态策略、凭证/桥接人工门、输入与运行时指纹去重、并发安全原子账本、process/job API、任务驾驶舱和导入后入口；新增单元/路由/组件/浏览器候选验收。
+- 容量门：`/System/Volumes/Data` 约 6.7 GiB 可用，低于 8 GiB；本轮没有运行本地构建、测试、浏览器、下载或影像生成。当前代码尚未通过本轮远端 CI，不能晋级 local-verified/main。
+- 唯一最安全下一步：推送当前小型源码/文档变更，以 GitHub CI 完成测试、类型检查、构建和 Chrome E2E；通过后再进入 vault＋请求时 DNS/IP 门＋最小真实探测。

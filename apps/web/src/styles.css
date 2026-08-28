@@ -129,6 +129,32 @@ footer { padding: 9px 18px; color: #789492; text-align: right; font-size: 11px; 
 .source-registry article small { color: #607e7b; }
 .source-status { color: #ffd28f; font-size: 10px; text-transform: uppercase; }
 .empty-copy { color: #829d9a; line-height: 1.6; }
+.automation-shell { min-height: calc(100vh - 44px); background: radial-gradient(circle at 100% 0, #163d48 0, #071722 34%, #050e17 100%); }
+.automation-hero { display: flex; justify-content: space-between; align-items: flex-end; gap: 24px; padding: 42px clamp(20px,5vw,70px) 28px; border-bottom: 1px solid rgba(138,190,186,.15); }
+.automation-hero h1 { margin: 4px 0 8px; font-size: clamp(32px,5vw,58px); letter-spacing: -.045em; }
+.automation-hero p { margin: 0; color: #9db9b7; }
+.automation-controls { max-width: 1160px; margin: 0 auto; padding: 24px clamp(16px,4vw,40px) 0; display: flex; align-items: flex-end; gap: 12px; }
+.automation-controls label { flex: 1; display: grid; gap: 6px; color: #9eb6b5; font-size: 12px; }
+.automation-controls select { width: 100%; }
+.automation-empty { width: 100%; min-height: 130px; display: grid; place-items: center; align-content: center; gap: 8px; border: 1px dashed #46757a; border-radius: 12px; background: rgba(14,53,62,.35); color: #d9eeee; text-align: center; }
+.automation-empty span { color: #829d9a; font-size: 12px; }
+.automation-runs { max-width: 1160px; margin: 0 auto; padding: 18px clamp(16px,4vw,40px) 60px; display: grid; gap: 16px; }
+.automation-notice { max-width: 1080px; margin: 14px auto 0; padding: 10px 12px; border: 1px solid rgba(75,205,173,.3); border-radius: 8px; background: rgba(21,91,74,.3); color: #bcefe2; }
+.automation-run { border: 1px solid rgba(110,171,168,.24); background: rgba(5,22,31,.86); border-radius: 15px; padding: 18px; box-shadow: 0 16px 48px rgba(0,0,0,.2); }
+.automation-run > header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 14px; }
+.automation-run h2 { margin: 2px 0; }
+.run-status { display: grid; justify-items: end; gap: 4px; color: #ffc17a; }
+.run-status.completed { color: #7be1c5; }
+.run-status time { color: #718d8a; font-size: 11px; }
+.automation-steps { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 8px; }
+.automation-step { min-width: 0; min-height: 132px; display: grid; grid-template-columns: auto 1fr; align-content: start; gap: 9px; padding: 12px; border: 1px solid #2c4b54; border-radius: 10px; background: #0b2935; }
+.automation-step.succeeded, .automation-step.skipped { border-color: rgba(69,195,162,.45); }
+.automation-step.blocked, .automation-step.retryable-failed { border-color: rgba(232,151,75,.52); background: rgba(78,41,25,.45); }
+.step-number { width: 24px; height: 24px; display: grid; place-items: center; border-radius: 50%; background: #18464d; color: #9ce5da; font-size: 11px; font-weight: 800; }
+.automation-step p { margin: 5px 0 0; color: #8fa8a6; font-size: 11px; line-height: 1.45; }
+.automation-step small { grid-column: 2; color: #5f807d; }
+.run-next { margin-top: 12px; padding: 11px 12px; display: flex; gap: 10px; text-align: left; border: 0; border-radius: 9px; background: rgba(37,74,74,.38); color: #bcd8d4; }
+.run-next strong { color: #63d6c4; white-space: nowrap; }
 @media (max-width: 900px) {
   .workspace-layout { grid-template-columns: 1fr; }
   .side-panel { border-right: 0; border-bottom: 1px solid rgba(143,185,183,.14); }
@@ -137,6 +163,8 @@ footer { padding: 9px 18px; color: #789492; text-align: right; font-size: 11px; 
   .import-hero { align-items: flex-start; flex-direction: column; }
   .import-layout { grid-template-columns: 1fr; }
   .source-registry { position: static; }
+  .automation-hero { align-items: flex-start; flex-direction: column; }
+  .automation-steps { grid-template-columns: repeat(2,minmax(0,1fr)); }
 }
 @media (max-width: 620px) {
   .map-grid { grid-template-columns: 1fr; grid-template-rows: none; }
@@ -145,4 +173,6 @@ footer { padding: 9px 18px; color: #789492; text-align: right; font-size: 11px; 
   .import-tabs { grid-template-columns: 1fr; }
   .preview-heading { align-items: flex-start; flex-direction: column; }
   .preview-meta { justify-items: start; }
+  .automation-controls { align-items: stretch; flex-direction: column; }
+  .automation-steps { grid-template-columns: 1fr; }
 }

@@ -29,7 +29,8 @@ export function decodeOmsQr(payload: string): RawQrCandidate[] {
       pathTemplate: source.pathTemplate,
       projection: source.projection,
       rawCodes: {},
-      containsSensitiveQuery: false,
+      containsSensitiveQuery:
+        source.compatibilityExtension.credentialRequired === true || source.credentialRef !== null,
       queryParameters: source.queryParameters,
       opaqueTemplate: false,
     },
