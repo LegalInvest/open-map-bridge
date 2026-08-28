@@ -7,9 +7,9 @@
 - 状态：Approved / Implementing；用户于 2026-08-28 明确最终结果必须能基于已导入奥维图源进行二次开发
 - 产品裁决者：用户
 - 当前整合者：本 Codex 主线程
-- 更新时间：2026-08-28 17:22（Asia/Shanghai）
+- 更新时间：2026-08-28 17:26（Asia/Shanghai）
 - 适用目录：`/Users/assis/Documents/Codex/2026-08-27/open-map-bridge`
-- 当前切片：`FIX-BATCH-001 local-candidate`（分支 `codex/audit-p0-source-binding`）；逐项修复审计账本中的 P0/P1 问题。当前候选只处理同一 imported source UUID 的 Ovi runtime 绑定、configured 不可消费、probe 不假绿和 mapType 配置，尚未本机验证、进入 main、真实探测、部署或用户验收
+- 当前切片：`FIX-BATCH-001 main`（PR #1，`5a7e9ad`，CI `33159198541`）；同一 imported source UUID 的 Ovi configured runtime、configured 不可消费、空 probe 不假绿和三元配置已进入 main。真实探测、真实日期、部署与用户验收仍未达到；下一修复批尚未写入代码
 - 上版：V0.4 奥维兼容双入口导入实施版
 
 <!-- GOAL_CAPSULE_START -->
@@ -23,16 +23,16 @@
 
 当前只允许修改本项目目录；禁止清理用户文件、接触生产服务器、部署公网、批量抓取图源或离线下载 20 年整域瓦片。不得把真实秘密写入 fixture、日志、回执、普通 JSON 或前端。可用空间低于 8 GiB 立即停止本机构建、测试、截图和新增缓存；2026-08-28 17:12 观测约 5.8 GiB、17:22 最新约 7.2 GiB，仍低于门禁，本轮只能做小型源码/文档并由 GitHub PR CI 验证。发现越界需求写入 `BLOCKED.md`。
 
-既有任务 0 已完成：远端 CI 通过 108 Vitest＋2 Node、8 workspace 类型检查、生产构建和 4 条 Chrome E2E。当前先执行 `FIX-BATCH-001`：消除导入 UUID 与 runtime 的断链，确保 configured 不进入历史消费链，移除 probe 假绿，并把 source UUID/mapType/port 作为不可缺项的桥接配置。CI 通过后，下一产品批次仍是凭证保险库、请求时 DNS/IP/重绑定门、真实最小探测与 ready 晋级、至少两个不同日期的真实可解码瓦片。每一步必须同步账本，不重复已确认写入。
+`FIX-BATCH-001` 已由 PR #1 进入 main：CI `33159198541` 对 `bc63661` 通过 113 Vitest＋2 Node、8 workspace 类型检查、生产构建和 4 条 Chrome E2E。下一产品批次仍是凭证保险库、请求时 DNS/IP/重绑定门、流式/解码安全、真实最小探测与 ready 晋级、至少两个不同日期的真实可解码瓦片。每一步必须同步账本，不重复已确认写入。
 
-当前批次完成条件：opaque Ovi 导入后只以显式 persisted UUID 出现在 runtime、准备度和开发者目录；legacyId 相同不得串绑；source UUID/mapType/port 缺一或非法必须启动前失败；configured 源不出现在历史源目录且 dates/tiles fail closed；未请求并解码真实瓦片的 probe 不得返回成功。PR CI 通过最多使本批进入 `main`，不关闭真实探测/日期/影像问题。项目最终完成条件仍是同一 source ID 获得有证据的 `tiles/temporal-catalog`，且至少两个真实日期返回可解码、非空并内容不同的瓦片。local-verified 不等于 main、deployed 或 accepted。
+本批完成事实：opaque Ovi 只以显式 persisted UUID 出现在 configured runtime、准备度和开发者目录；相同 legacyId 不串绑；source UUID/mapType/port 缺一或非法启动前失败；configured 源不出现在历史源目录且 dates/tiles fail closed；空 probe 不返回成功。该事实已进 main，但不关闭真实探测/日期/影像问题。项目最终完成条件仍是同一 source ID 获得有证据的 `tiles/temporal-catalog`，且至少两个真实日期返回可解码、非空并内容不同的瓦片。main 不等于 deployed 或 accepted。
 <!-- GOAL_CAPSULE_END -->
 
 ## 当前技术修复契约
 
 用户于 2026-08-28 批准逐一修复全量审计问题。修复采用小批次、可回滚、逐项取证的方式；完整清单、优先级、状态、验收和追加记录见 `docs/问题账本.md`。
 
-`FIX-BATCH-001` 关联 `OMB-AUD-001/002/003/005/023`，保护 JRN-001/JRN-007/JRN-011、BR-001/007/017/020、FR-009/014/017 和 AC-005/017/019/021。该批不新增真实外联权力，也不把 synthetic、configured、HTTP 200 或未知日期升级成真实影像能力。
+`FIX-BATCH-001` 关联 `OMB-AUD-001/002/003/005/023`，保护 JRN-001/JRN-007/JRN-011、BR-001/007/017/020、FR-009/014/017 和 AC-005/017/019/021。该批已进 main，但不新增真实外联权力，也不把 synthetic、configured、HTTP 200 或未知日期升级成真实影像能力。下一批次必须先在 `docs/问题账本.md` 建立范围与验收再写代码。
 
 ## 一页产品定义
 
@@ -827,3 +827,4 @@ V1 公共类型和错误语义通过契约测试冻结；新增可选能力不�
 - 2026-08-28：用户回复“好的，根据讨论，继续优化架构和代码，记得更新全部文档”，批准上述方向继续实施。`source-readiness` 静态准备度任务和驾驶舱进入 local-candidate；一键四期、真实探测和完整续跑仍未完成。
 - 2026-08-28：准备度切片提交 `16f445c` 进入 GitHub main；CI run `33155671827` 通过 108 Vitest＋2 Node、8 workspace typecheck、build 和 4 Chrome E2E，阶段晋级 main。一键四期、真实探测和完整续跑仍未完成。
 - 2026-08-28：用户批准逐一修复全量审计问题并同步问题账本/进度 Markdown。建立 `docs/问题账本.md`（38 组问题），启动 `FIX-BATCH-001`：同 imported UUID 绑定、configured 不可消费、空 probe 不假绿和 source UUID/mapType/port 三元配置。当前只为 `local-candidate`；本机 5.8 GiB 容量门下未测试/构建，待 PR CI。
+- 2026-08-28：`FIX-BATCH-001` 经 PR #1 合并为 `5a7e9ad`；CI `33159198541` 对源提交 `bc63661` 通过 113 Vitest＋2 Node、8 workspace typecheck、build 和 4 Chrome E2E。001/003/005/023 达到 main，002 仅假绿子项达到 main；真实探测/ready 仍开放。
