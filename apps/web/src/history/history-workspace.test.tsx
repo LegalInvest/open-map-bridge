@@ -27,6 +27,7 @@ const api: HistoryApi = {
       id: 'synthetic-lakes',
       name: '合成时序验收源',
       kind: 'synthetic',
+      availability: 'ready',
       datePrecision: 'capture-date',
     },
   ],
@@ -109,15 +110,29 @@ describe('HistoryWorkspace', () => {
     expect(screen.getAllByLabelText('面板日期')).toHaveLength(4);
   });
 
-  it('prefers a configured local authorized source over the synthetic fixture', async () => {
+  it('uses the first ready source returned by the API instead of inferring readiness from provider kind', async () => {
     const localApi: HistoryApi = {
       ...api,
       listSources: async () => [
         ...(await api.listSources()),
-        { id: 'ovi-history-200', name: '本机授权历史影像', kind: 'ovi-bridge', datePrecision: 'request-date-only' },
+        {
+          id: 'ready-ovi-source',
+          name: '已就绪本机授权历史影像',
+          kind: 'ovi-bridge',
+          availability: 'ready',
+          datePrecision: 'request-date-only',
+        },
       ],
     };
     render(<HistoryWorkspace api={localApi} MapPaneComponent={TestMapPane} />);
-    expect(await screen.findByRole('combobox', { name: '图源' })).toHaveValue('ovi-history-200');
+    expect(await screen.findByRole('combobox', { name: '图源' })).toHaveValue('synthetic-lakes');
+  });
+
+  it('shows an explicit empty state when the API has no ready source', async () => {
+    const listDates = vi.fn(api.listDates);
+    const localApi: HistoryApi = { ...api, listSources: async () => [], listDates };
+    render(<HistoryWorkspace api={localApi} MapPaneComponent={TestMapPane} />);
+    expect(await screen.findByText('当前：无已就绪图源')).toBeVisible();
+    expect(listDates).not.toHaveBeenCalled();
   });
 });

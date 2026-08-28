@@ -44,7 +44,7 @@ export class OviBridgeAdapter implements TemporalSourceAdapter {
   }
 
   async probe(): Promise<{ ok: boolean; detail: string }> {
-    return { ok: true, detail: 'loopback configuration accepted; tile not yet verified' };
+    return { ok: false, detail: 'loopback configuration accepted; no tile has been verified' };
   }
 
   async listDates(input: { aoiId: string; from: string; to: string }): Promise<TemporalDateEntry[]> {

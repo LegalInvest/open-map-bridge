@@ -40,3 +40,8 @@
 - 2026-08-28 16:32：提交 `16f445c` 已进入 GitHub main；CI run `33155671827` 通过交底书新鲜度、35 个 Vitest 文件/108 tests＋2 Node tests、8 workspace typecheck、生产构建和 4 Chrome E2E。新增浏览器旅程实际覆盖 QR 导入→授权保存→准备度任务→四步阻塞→刷新恢复。
 - 阶段：`SLICE-AUTOMATION-RUN-001A main`；本机/用户独立浏览器签收、真实探测、deployed、accepted 均未达到。
 - 唯一最安全下一步：实现本地凭证保险库引用＋请求时 DNS 解析后 IP/重绑定安全门，让当前任务在人工门处理后可安全进入最小真实探测；继续禁止外联前假绿。
+- 2026-08-28 17:12：用户要求逐一修复全量审计问题并同步问题账本/解决进度。已建立 `docs/问题账本.md`：共 38 组（P0 6、P1 21、P2 11），每项都有状态、证据和关闭验收；公开产品 backlog 另列，不以“缺陷关闭”冒充实现。
+- 当前批次：`FIX-BATCH-001`，分支 `codex/audit-p0-source-binding`，关联 `OMB-AUD-001/002/003/005/023`。已形成候选：opaque Ovi runtime 只使用显式 persisted imported UUID；同 legacyId 的其他源不绑定；readiness 取消 legacyId 回退；configured 源不进入时序目录且 dates/tiles 返回 409；无真实瓦片的 probe 返回失败；`OMB_OVI_SOURCE_ID/OMB_OVI_MAP_TYPE/OMB_OVI_PORT` 三项成组必填。新增 gateway/config/adapter/web 回归测试但尚未执行。
+- 当前阶段：`local-candidate`，不是 `local-verified/main/deployed/accepted`。`/System/Volumes/Data` 17:12 约 5.8 GiB、17:22 最新约 7.2 GiB，仍低于 8 GiB 门；本机测试、构建、浏览器、下载和影像生成继续暂停。
+- 文档同步：`goal.md`、`research.md`、`PROGRESS.md`、`BLOCKED.md`、README、技术交底书和问题账本随本批更新；Leader 规格翻译用于绑定 issue→旅程/规则/验收→证据阶段。
+- 唯一最安全下一步：完成静态 diff/交底新鲜度检查后提交功能分支，推送 PR 并以 GitHub CI 验证 `FIX-BATCH-001`；CI 通过最多把该批晋级 main，不关闭真实探测和真实影像阻塞。

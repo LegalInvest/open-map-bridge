@@ -6,6 +6,7 @@ export interface TemporalSourceSummary {
   id: string;
   name: string;
   kind: 'synthetic' | 'ovi-bridge';
+  availability: 'ready';
   datePrecision: 'capture-date' | 'request-date-only';
 }
 

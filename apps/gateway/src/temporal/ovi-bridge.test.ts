@@ -15,6 +15,14 @@ it('builds the documented dated tile path without exposing auth', () => {
   );
 });
 
+it('does not report readiness before a real tile has been verified', async () => {
+  const adapter = new OviBridgeAdapter({ baseUrl: 'http://127.0.0.1:19991', mapType: 200 });
+  await expect(adapter.probe()).resolves.toEqual({
+    ok: false,
+    detail: 'loopback configuration accepted; no tile has been verified',
+  });
+});
+
 it('uses a request-date-only catalog and caps oversized responses', async () => {
   const fetchImpl = vi.fn(async () =>
     new Response(new Uint8Array(5 * 1024 * 1024 + 1), {
