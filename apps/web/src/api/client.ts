@@ -1,6 +1,12 @@
 import type { AoiGeometry, AreaOfInterest } from '@omb/aois';
 import { completeYearWindow, type TemporalDateEntry } from '@omb/temporal-source';
-import type { AutomationRun, ImportPreview, ImportReceipt, MapSourceDefinition } from '@omb/source-schema';
+import {
+  OVMAP_FILE_MAX_BYTES,
+  type AutomationRun,
+  type ImportPreview,
+  type ImportReceipt,
+  type MapSourceDefinition,
+} from '@omb/source-schema';
 
 export interface TemporalSourceSummary {
   id: string;
@@ -96,12 +102,14 @@ export function createApiClient(baseUrl = '', currentYear = new Date().getUTCFul
       );
     },
     async inspectOvmap(file) {
-      if (file.size > 1_048_576) throw new Error('.ovmap 文件不能超过 1 MiB');
+      if (file.size > OVMAP_FILE_MAX_BYTES) throw new Error('.ovmap 文件不能超过 1 MiB');
+      const bytes = await file.arrayBuffer();
+      if (bytes.byteLength > OVMAP_FILE_MAX_BYTES) throw new Error('.ovmap 文件不能超过 1 MiB');
       return readJson<ImportPreview>(
         await fetch(`${baseUrl}/api/import/inspect/ovmap`, {
           method: 'POST',
           headers: { 'content-type': 'application/json' },
-          body: JSON.stringify({ fileName: file.name, bytesBase64: arrayBufferToBase64(await file.arrayBuffer()) }),
+          body: JSON.stringify({ bytesBase64: arrayBufferToBase64(bytes) }),
         }),
       );
     },

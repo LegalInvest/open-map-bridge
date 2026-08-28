@@ -1,6 +1,14 @@
 import { randomUUID } from 'node:crypto';
 import type { FastifyInstance, FastifyReply } from 'fastify';
-import { appError, parseMapSourceDefinition, transitionSource, type ImportReceipt } from '@omb/source-schema';
+import {
+  OVMAP_BASE64_MAX_CHARS,
+  OVMAP_FILE_MAX_BYTES,
+  OVMAP_INSPECT_BODY_MAX_BYTES,
+  appError,
+  parseMapSourceDefinition,
+  transitionSource,
+  type ImportReceipt,
+} from '@omb/source-schema';
 import type { ImportInspector } from '../import/inspector.js';
 import { ImportPreviewStore } from '../import/preview-store.js';
 import type { TemporalStateRepository } from '../storage/temporal-state.js';
@@ -11,6 +19,16 @@ function fail(reply: FastifyReply, status: number, code: Parameters<typeof appEr
 
 function safeImportFailure(reply: FastifyReply, cause: unknown) {
   const message = cause instanceof Error ? cause.message : '';
+  if (message === 'INPUT_OVMAP_REQUIRED') {
+    return fail(reply, 400, 'INPUT_OVMAP_REQUIRED', '请选择非空的 .ovmap 文件');
+  }
+  if (message === 'INPUT_OVMAP_LIMIT') {
+    return reply.status(413).send({
+      error: appError('INPUT_OVMAP_LIMIT', '.ovmap 文件不能超过 1 MiB', {
+        detail: { maxBytes: OVMAP_FILE_MAX_BYTES },
+      }),
+    });
+  }
   const parseCode = /^[A-Z]+_[A-Z0-9_]+$/.test(message) ? message : 'FORMAT_UNKNOWN';
   return reply.status(400).send({
     error: appError('FORMAT_IMPORT', '无法识别该导入内容；文件可能损坏、版本不受支持或字段不完整', {
@@ -20,10 +38,13 @@ function safeImportFailure(reply: FastifyReply, cause: unknown) {
 }
 
 function decodeBase64(value: unknown): Uint8Array {
-  if (typeof value !== 'string' || value.length === 0 || value.length > 1_500_000) throw new Error('INPUT_OVMAP_LIMIT');
+  if (typeof value !== 'string' || value.length === 0) throw new Error('INPUT_OVMAP_REQUIRED');
+  if (value.length > OVMAP_BASE64_MAX_CHARS) throw new Error('INPUT_OVMAP_LIMIT');
   if (!/^[A-Za-z0-9+/]*={0,2}$/.test(value) || value.length % 4 !== 0) throw new Error('FORMAT_BASE64');
   const bytes = Buffer.from(value, 'base64');
-  if (bytes.length === 0 || bytes.length > 1_048_576) throw new Error('INPUT_OVMAP_LIMIT');
+  if (bytes.length === 0) throw new Error('INPUT_OVMAP_REQUIRED');
+  if (bytes.length > OVMAP_FILE_MAX_BYTES) throw new Error('INPUT_OVMAP_LIMIT');
+  if (Buffer.from(bytes).toString('base64') !== value) throw new Error('FORMAT_BASE64');
   return bytes;
 }
 
@@ -45,16 +66,32 @@ export function registerImportRoutes(
     }
   });
 
-  app.post('/api/import/inspect/ovmap', async (request, reply) => {
-    try {
-      const body = request.body as { bytesBase64?: unknown };
-      const preview = await inspector.inspectOvmap(decodeBase64(body?.bytesBase64));
-      previews.put(preview);
-      return preview;
-    } catch (cause) {
-      return safeImportFailure(reply, cause);
-    }
-  });
+  app.post(
+    '/api/import/inspect/ovmap',
+    {
+      bodyLimit: OVMAP_INSPECT_BODY_MAX_BYTES,
+      errorHandler(error, _request, reply) {
+        if (error.code === 'FST_ERR_CTP_BODY_TOO_LARGE') {
+          return reply.status(413).send({
+            error: appError('INPUT_BODY_LIMIT', '上传请求超过 .ovmap 检查接口允许的编码上限', {
+              detail: { maxBytes: OVMAP_INSPECT_BODY_MAX_BYTES },
+            }),
+          });
+        }
+        throw error;
+      },
+    },
+    async (request, reply) => {
+      try {
+        const body = request.body as { bytesBase64?: unknown };
+        const preview = await inspector.inspectOvmap(decodeBase64(body?.bytesBase64));
+        previews.put(preview);
+        return preview;
+      } catch (cause) {
+        return safeImportFailure(reply, cause);
+      }
+    },
+  );
 
   app.post('/api/import/confirm', async (request, reply) => {
     try {

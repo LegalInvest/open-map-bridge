@@ -85,3 +85,7 @@
 - 批次结果：`OMB-AUD-022` 达到 main；日期/窗口/ID/瓦片坐标在旧 API、V1、SDK 和适配器之间已有共享真值，超长 HTTP 路径保留更早 414。该批没有真实奥维请求、真实日期目录、部署或用户业务验收。
 - 当前证据分支：`codex/audit-p1-temporal-input-truth-evidence`，只回写 main/CI 证据。本机仍低于 8 GiB 门。
 - 唯一最安全下一步：合并 FIX-BATCH-005 证据回写后，为 `FIX-BATCH-006` 冻结 `OMB-AUD-010` 的上传字节、base64 膨胀和 Fastify body 上限一致性，再写边界测试；不得用提高无界上限掩盖 413。
+- 2026-08-28 18:56：FIX-BATCH-005 证据 PR #10 经 CI `33165036211` 全绿并合并，GitHub main 更新为 `f8733da`。随后建立 `codex/audit-p1-upload-envelope`，启动 FIX-BATCH-006 / OMB-AUD-010。
+- FIX-BATCH-006 候选：`@omb/source-schema` 共享 1 MiB 原文件、精确 base64 上界和 4 KiB JSON 信封预算；只有 `/api/import/inspect/ovmap` 使用计算后的路由级 bodyLimit，其他 API 不放宽。前端在读取前拒绝大文件且不再发送无用文件名；后端规范化 base64，并把解码后文件超限与 HTTP 信封超限分别映射为稳定 413。
+- 边界验收已写：恰好 1 MiB 必须越过 HTTP 门到达格式解析；1 MiB＋1 字节由业务层 `INPUT_OVMAP_LIMIT` 拒绝；超编码信封由 HTTP 层 `INPUT_BODY_LIMIT` 拒绝；前端超限不得读取文件或 fetch。当前仅 `local-candidate`，18:56 本机约 5.2 GiB，未运行测试/构建/浏览器。
+- 唯一最安全下一步：完成 FIX-BATCH-006 的交底指纹和静态 diff 门，提交 PR 由 GitHub CI 验证；全绿最多把 OMB-AUD-010 晋级 main，不代表其他导入资源上限或真实图源验收完成。
