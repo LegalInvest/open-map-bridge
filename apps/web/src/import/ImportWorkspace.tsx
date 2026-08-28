@@ -1,5 +1,11 @@
 import { useEffect, useRef, useState, type DragEvent } from 'react';
-import { OVMAP_FILE_MAX_BYTES, type ImportPreview, type MapSourceDefinition } from '@omb/source-schema';
+import {
+  OVMAP_FILE_MAX_BYTES,
+  QR_IMAGE_MAX_BYTES,
+  QR_IMAGE_MAX_PIXELS,
+  type ImportPreview,
+  type MapSourceDefinition,
+} from '@omb/source-schema';
 import type { ImportApi } from '../api/client.js';
 import { browserQrReader, type QrReader } from './qr-reader.js';
 
@@ -155,7 +161,7 @@ export function ImportWorkspace({ api, qrReader = browserQrReader, onOpenAutomat
               {tab === 'qr-image' ? (
                 <label className="drop-zone">
                   <strong>选择二维码截图或照片</strong>
-                  <span>图像只在浏览器本地送入 ZXing 解码；原图不上传到网关。</span>
+                  <span>图像只在浏览器本地解码，不上传原图；上限 {QR_IMAGE_MAX_BYTES / (1024 * 1024)} MiB / {QR_IMAGE_MAX_PIXELS} 像素。</span>
                   <input
                     aria-label="选择二维码图片"
                     type="file"

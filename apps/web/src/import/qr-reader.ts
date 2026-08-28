@@ -1,4 +1,11 @@
 import { BrowserQRCodeReader } from '@zxing/browser';
+import {
+  QR_IMAGE_MAX_BYTES,
+  QR_IMAGE_MAX_PIXELS,
+  QR_IMAGE_PREPROCESS_MAX_PIXELS,
+  QR_IMAGE_PREPROCESS_SCALES,
+} from '@omb/source-schema';
+import { readRasterDimensions, type RasterDimensions } from './image-dimensions.js';
 
 interface QrTextResult {
   getText(): string;
@@ -11,7 +18,7 @@ interface ScannerControls {
 type DecodeCallback = (result: QrTextResult | undefined, error: unknown, controls: ScannerControls) => void;
 
 export interface QrDecoderBackend {
-  decodeFromImageUrl(url: string): Promise<QrTextResult>;
+  decodeFromImageUrl(url: string, dimensions: RasterDimensions): Promise<QrTextResult>;
   decodeFromVideoDevice(
     deviceId: string | undefined,
     video: HTMLVideoElement,
@@ -33,7 +40,7 @@ interface QrReaderDependencies {
 function defaultBackend(): QrDecoderBackend {
   const reader = new BrowserQRCodeReader();
   return {
-    async decodeFromImageUrl(url) {
+    async decodeFromImageUrl(url, expectedDimensions) {
       const image = new Image();
       image.src = url;
       if (typeof image.decode === 'function') await image.decode();
@@ -43,13 +50,16 @@ function defaultBackend(): QrDecoderBackend {
           image.onerror = () => reject(new Error('二维码图片无法读取'));
         });
       }
+      const width = image.naturalWidth || image.width;
+      const height = image.naturalHeight || image.height;
+      if (width !== expectedDimensions.width || height !== expectedDimensions.height) {
+        throw new Error('二维码图片尺寸与文件头不一致');
+      }
       try {
         return await reader.decodeFromImageElement(image);
       } catch (firstError) {
-        const width = image.naturalWidth || image.width;
-        const height = image.naturalHeight || image.height;
         if (width <= 0 || height <= 0) throw firstError;
-        for (const scale of [2, 3]) {
+        for (const scale of allowedQrPreprocessScales(width, height)) {
           const canvas = document.createElement('canvas');
           canvas.width = width * scale;
           canvas.height = height * scale;
@@ -73,6 +83,13 @@ function defaultBackend(): QrDecoderBackend {
   };
 }
 
+export function allowedQrPreprocessScales(width: number, height: number): number[] {
+  const sourcePixels = width * height;
+  return QR_IMAGE_PREPROCESS_SCALES.filter(
+    (scale) => Number.isSafeInteger(sourcePixels * scale * scale) && sourcePixels * scale * scale <= QR_IMAGE_PREPROCESS_MAX_PIXELS,
+  );
+}
+
 function stopTracks(video: HTMLVideoElement): void {
   const stream = video.srcObject;
   if (stream && 'getTracks' in stream) {
@@ -87,9 +104,19 @@ export function createQrReader(dependencies: QrReaderDependencies = {}): QrReade
   const revokeObjectUrl = dependencies.revokeObjectUrl ?? ((url: string) => URL.revokeObjectURL(url));
   return {
     async decodeFile(file) {
+      if (file.size <= 0) throw new Error('二维码图片不能为空');
+      if (file.size > QR_IMAGE_MAX_BYTES) throw new Error('二维码图片不能超过 8 MiB');
+      const bytes = new Uint8Array(await file.arrayBuffer());
+      if (bytes.byteLength <= 0) throw new Error('二维码图片不能为空');
+      if (bytes.byteLength > QR_IMAGE_MAX_BYTES) throw new Error('二维码图片不能超过 8 MiB');
+      const dimensions = readRasterDimensions(bytes);
+      const pixels = dimensions.width * dimensions.height;
+      if (!Number.isSafeInteger(pixels) || pixels > QR_IMAGE_MAX_PIXELS) {
+        throw new Error('二维码图片像素不能超过 16777216');
+      }
       const url = createObjectUrl(file);
       try {
-        return (await createBackend().decodeFromImageUrl(url)).getText();
+        return (await createBackend().decodeFromImageUrl(url, dimensions)).getText();
       } finally {
         revokeObjectUrl(url);
       }

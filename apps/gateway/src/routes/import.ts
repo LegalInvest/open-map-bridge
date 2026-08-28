@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import type { FastifyInstance, FastifyReply } from 'fastify';
 import {
+  IMPORT_PREVIEW_MAX_BYTES,
   OVMAP_BASE64_MAX_CHARS,
   OVMAP_FILE_MAX_BYTES,
   OVMAP_INSPECT_BODY_MAX_BYTES,
@@ -26,6 +27,13 @@ function safeImportFailure(reply: FastifyReply, cause: unknown) {
     return reply.status(413).send({
       error: appError('INPUT_OVMAP_LIMIT', '.ovmap 文件不能超过 1 MiB', {
         detail: { maxBytes: OVMAP_FILE_MAX_BYTES },
+      }),
+    });
+  }
+  if (message === 'INPUT_PREVIEW_TOO_LARGE') {
+    return reply.status(413).send({
+      error: appError('INPUT_PREVIEW_LIMIT', '导入预览超过安全内存上限', {
+        detail: { maxBytes: IMPORT_PREVIEW_MAX_BYTES },
       }),
     });
   }
