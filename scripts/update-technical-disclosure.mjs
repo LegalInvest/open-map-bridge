@@ -18,6 +18,7 @@ const sourcePaths = [
   'research.md',
   'docs/open-map-source-schema.md',
   'docs/developer-sdk.md',
+  'docs/可视化与自动化路线图.md',
   'docs/compatibility',
   'docs/superpowers/specs',
 ];

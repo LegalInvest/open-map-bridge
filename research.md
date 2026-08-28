@@ -13,6 +13,7 @@
 - 2026-08-27 用户纠偏：产品不是双湖专用时间轴，而是任意图源上框选任意区域后一次自动得到四张、展现约 20 年变化；双湖只做实验。用户随后明确批准“方案 A”，即保留开放内核、先贯通官方奥维本机桥接真实源，再扩展协议矩阵和规模。
 - 2026-08-28 用户再次纠偏：项目最核心应先打通奥维图源导入；二维码图片/摄像头扫描和 `.ovmap` 文件都必须真实实现。当前切片由消费端四期对比切回 `SLICE-V0-IMPORT-001`，既有时序能力保留为下游回归。
 - 2026-08-28 用户明确最终结果必须“基于奥维地图图源进行二次开发”。这不是把插件市场整体提前，而是把脱敏、版本化、可协商能力的开发者 API/SDK 提升为核心产品契约；导入是图源获取上游，历史四期是代表性消费端。
+- 2026-08-28 用户提出“数字化之后，就是可视化和自动化”，要求提高两者程度。当前整合结论是把可视化从地图展示升级为真实任务状态、质量、来源和下一动作，把自动化从纯函数选四期升级为可恢复工作流；该方向必须直接推进真实 source ID，不得再用合成消费端掩盖导入/绑定缺口。
 
 ### 本轮回答
 
@@ -20,6 +21,7 @@
 - 记录当前 `.ovmap`/二维码证据、开源候选、项目资产和技术推荐。
 - 当前增量以 `SLICE-V0-SDK-001` 用 TDD 冻结二次开发契约：能力描述、V1 本地 API、TypeScript SDK、严格应用清单和最小消费示例；不抓取大范围地图、不部署公网、不连接企业服务器，也不执行任意第三方插件代码。
 - 2026-08-27 20:14 当前实现已完成合成源上的任意 AOI、四屏、卷帘、播放、缺年状态和观察证据等级；48 个 Vitest 加 2 个 Node 测试、类型检查、生产构建和 2 条 Chrome E2E 通过。该结论仍是 `local-verified` 合成消费链路，不代表 QR/`.ovmap` 已导入或真实奥维瓦片已经可用。
+- 本轮以探索型产品增强记录 `docs/可视化与自动化路线图.md`，新增 proposed 规格 JRN-012、UI-008、BR-019/020、FR-017/018、DATA-009/010、IF-008、NFR-013 和 AC-019 至 AC-022；未新增依赖、未构建影像、未把 proposed 写成 implemented。
 
 ### 搜索与核验边界
 
@@ -33,6 +35,7 @@
 
 - 整合者：本 Codex 主线程；未使用新 subagent。
 - 研究方式：当前线程内官方文档检索、GitHub 仓库/代码检索、公开样本最小字节检查、本地工作区只读盘点。
+- 2026-08-28 本轮增量方式：完整读取 Leader 相关规则；读取当前双文件、进度、阻塞和关键前后端代码；通过本机已有 `127.0.0.1:5173` 页面只读 DOM 走查；核对 STAC、OGC API - Processes、OpenLayers、OpenTelemetry 和 STAC Browser 官方资料。未使用 subagent。
 - 规格深度：新产品完整 PRD，当前实现切片为 V0 导入闭环。
 - Leader Skill：`/Users/assis/.codex/skills/leader/SKILL.md`
 - Skill SHA-256：`477ed37e9381a866cc04622fee62a5ab167208d2db77ae03e04eaf13c26f6e8c`
@@ -63,6 +66,10 @@
 | [奥维 Web 瓦片服务](https://www.ovital.com/132277-2/) | 2026-08-27 | 官方接口路径包含日期参数，`yyyyMMdd` 按日期请求，`0` 为最新 | 尚未证明特殊 GEE 历史源能通过该接口按需出图，也未证明只监听回环 |
 | [奥维 Tableau 调用示例](https://www.ovital.com/146671/) | 2026-08-27 | 第三方程序可调用本机瓦片服务，日期表示目标日前的影像 | 不能据此获得真实拍摄日期目录 |
 | [OpenLayers Layer Swipe](https://openlayers.org/en/latest/examples/layer-swipe.html) | 2026-08-27 | 可直接复用卷帘渲染原语 | 示例不包含多时相数据和 Ovi 认证 |
+| [STAC Specification](https://stacspec.org/en/about/stac-spec/) | 2026-08-28 | Item/Collection 提供空间、时间、资产、许可、提供方和链接的开放描述，可作为已验证帧的兼容出口 | 不处理 Ovi 私有认证，也不替代内部加载回执和权限 |
+| [OGC API - Processes](https://ogcapi.ogc.org/processes/overview.html) | 2026-08-28 | 官方模型定义 process execution、异步 job、status、results 和 cancel，适合任务 API 资源形态 | 只借鉴兼容接口；V0 不宣称标准认证 |
+| [OpenTelemetry JavaScript](https://opentelemetry.io/docs/languages/js/) | 2026-08-28 | Node/浏览器可生成 traces、metrics、logs；官方当前标记 traces/metrics stable、logs development | 先用结构化业务事件；不因接 telemetry 就获得业务状态真值 |
+| [STAC Browser](https://github.com/radiantearth/stac-browser) | 2026-08-28 | ISC 开源 UI 展示时空目录、地图、搜索和资产，当前实现使用 OpenLayers 并具 Playwright E2E | Vue 全应用过重，不直接替换现有 React 工作台；借鉴产品模式和兼容出口 |
 | [MapStore2](https://github.com/geosolutions-it/MapStore2) | 2026-08-27 | 有时间维度、时间线和 Swipe 的成熟开源行为参考 | 平台较重，仍不解决 Ovi 私有认证；不作为首版底座 |
 | [EO Browser](https://github.com/sentinel-hub/EOBrowser) | 2026-08-27 | 日期搜索、pin、透明度和 split compare 是可复用产品参考 | 外部部署依赖 Sentinel Hub 身份与服务，不适合作为 Ovi 兼容底座 |
 | [江苏省农业农村厅高宝邵伯湖养殖水域滩涂资料](https://nynct.jiangsu.gov.cn/module/download/downfile.jsp?classid=0&filename=4e59a3178dec41fda94e6a596ebc228f.pdf) | 2026-08-27 | 官方资料给出宝应湖限制养殖区和高邮湖保护区坐标，可作为后续外部证据线索 | 不等于用户红框精确边界，也不证明影像中的变化原因 |
@@ -91,6 +98,7 @@
 - 把解析、授权、探测、渲染、保存分成可观察状态。
 - 把封闭配置转为开放模型和可迁移回执。
 - 先把二维码图片/摄像头与 `.ovmap` 两种入口汇入同一开放模型；用户保存后，再进入任意矩形/多边形框选和四期历史影像消费链路。
+- 把“导入页”和“历史页”之间不可见的网络/能力步骤变成持久任务；用户只处理授权、秘密、内网风险、AOI 冲突和低置信裁决，其他步骤自动推进并可恢复。
 
 ## 5. 业务对象与口径
 
@@ -104,6 +112,9 @@
 | ProbeResult | 最小网络探测结果 | HTTP 成功不等于渲染成功 | 本地网关 |
 | SDB companion | 奥维离线地图数据 | V0 只识别依赖，完整导入 planned | 用户文件 |
 | FourFramePolicy | 动态 20 年窗口与四期选择 | local-verified；不得复制日期补齐 | 平台纯函数 |
+| AutomationRun/Step | 可恢复的真实工作流与步骤事件 | proposed；尚无 schema/API/持久化实现 | 路线图与 goal.md |
+| FrameQuality | 帧覆盖、内容指纹、空白/重复和日期质量 | proposed；现有只有 loaded/failed 瓦片计数 | 真实瓦片加载事实 |
+| InterventionRequest | 授权、凭证、内网、冲突和低置信人工门 | proposed；不得保存明文秘密 | 网关策略/用户裁决 |
 
 ## 6. 资产与环境地图
 
@@ -219,6 +230,7 @@ apps/gateway             本地 API、凭证、策略、瓦片代理、持久化
 packages/source-schema   MapSourceDefinition、状态机、错误码
 packages/developer-sdk   脱敏源描述、能力/权限、应用清单、V1 客户端
 docs/技术交底书.md        技术问题、方案、特征候选、实施例、边界和追加式时间戳
+docs/可视化与自动化路线图.md 任务驾驶舱、一键四期、人工门、续跑和分期验收
 packages/qr-import       QR载荷适配
 packages/ovmap-codec     嗅探、有界解压、版本记录解析
 packages/protocols       XYZ/TMS/WMTS/WMS/ArcGIS 等归一化
@@ -259,7 +271,9 @@ apps/web/src/map             共享 ViewState、四屏和卷帘
 fixtures/synthetic/temporal  无外网的 20 年彩色/带标签时序瓦片
 ```
 
-这些路径已经形成通用时序 `local-candidate`；真实源、QR/`.ovmap` 导入与用户独立签收必须分开晋级，不得因合成 E2E 写成业务已接受。
+这些路径已经形成通用时序 `local-candidate`；真实源、QR/`.ovmap` 导入与用户独立签收必须分开晋级，不得因合成 E2E 写成业务已接受。公共 GitHub main 与 CI 已在后续增量建立，当前记录以基线表中的确切提交和 run 为准。
+
+2026-08-28 页面走查观察：顶部只有“图源导入/历史影像四期”两入口；导入页清楚区分零上游检查、确认保存和“尚未探测”；历史页已有四屏、卷帘、20 年时间轴、缺年、逐屏加载、AOI 编辑和原因证据门。真实网络步骤没有统一 run ID、持久步骤状态、恢复/取消/重试入口或跨页下一动作，这是本轮可视化与自动化的直接产品缺口。
 
 ## 12. 已核验基线
 
@@ -277,7 +291,8 @@ fixtures/synthetic/temporal  无外网的 20 年彩色/带标签时序瓦片
 | 时序 Web UI | 四屏、卷帘、播放、AOI 编辑和观察面板已实现 | local-candidate | Chrome E2E 通过；真实源未过门 |
 | 导入 Web UI | 默认首页提供二维码图片、摄像头和 `.ovmap` 点击/拖入，预览后授权保存 | local-verified slice | 4 默认 E2E + 2 授权本地 E2E |
 | 二次开发 V1 | 脱敏源目录、能力协商、严格应用清单、TypeScript SDK 和本地日期/瓦片消费已实现；configured OviBridge 不授予运行能力 | local-verified slice | `packages/developer-sdk`、`apps/gateway/src/{developer,routes/developer}.ts`、8 项聚焦测试和实际 HTTP |
-| 技术交底持续同步 | 中文技术交底书覆盖架构、流程、数据、安全、特征候选、实施例和当前证据边界；122 个核心文件生成 SHA-256，CI 检查陈旧 | local-verified mechanism | `docs/技术交底书.md`、`scripts/update-technical-disclosure.mjs`、`npm run disclosure:check`；2026-08-28 |
+| 技术交底持续同步 | 中文技术交底书覆盖架构、流程、数据、安全、特征候选、实施例和当前证据边界；123 个核心文件生成 SHA-256，CI 检查陈旧 | local-verified mechanism | `docs/技术交底书.md`、`scripts/update-technical-disclosure.mjs`、`npm run disclosure:check`；2026-08-28 |
+| 可视化/自动化方向 | 当前 UI/代码已走查；形成真实任务驾驶舱、一键四期、人工门、幂等续跑和结果事实层提案 | discovered / proposed | `docs/可视化与自动化路线图.md`、goal proposed IDs；2026-08-28 |
 | 工作区基线 | 隔离分支；Node 26.7.0、npm 11.19.0、244 packages、0 vulnerabilities；8 GiB 磁盘门 | local-verified | `npm run env:check` 与 lockfile；2026-08-28 |
 | 自动测试 | 92 Vitest + 2 Node、8 workspace 类型检查、生产构建、4 默认 Chrome E2E 和 2 授权本地 E2E 均通过 | local-verified | 完整命令链；2026-08-28 |
 | GitHub main | 公共唯一主仓 `LegalInvest/open-map-bridge`；产品代码提交 `4b90939` 已进入 main，GitHub CI run `33146192919` 全绿 | main for recorded commit | GitHub repo、Actions run；2026-08-28 |
@@ -305,6 +320,8 @@ fixtures/synthetic/temporal  无外网的 20 年彩色/带标签时序瓦片
 | FR-013 / BR-014 | 变化观察证据等级 | 可见对象、原因假设和独立证据门已实现 | `apps/web/src/history/ObservationPanel.tsx` | component tests passed；AC-016 synthetic-only | UI local-verified | 尚无真实观察、外部逐年证据或用户接受 | 2026-08-27 |
 | JRN-007/008 / FR-010/014 | 任意框选后自动四期 | POST 创建、服务端 `area-*` 身份、矩形拖拽/多边形绘制、动态 20 年窗口、唯一四期、几何 fit 和真实浏览器非湖区旅程均已实现 | `packages/aois`、`packages/temporal-source`、`apps/gateway/src/routes/aois.ts`、`apps/web/src/history` | 单元/组件/路由测试 + 非湖区 Chrome E2E | synthetic local-verified / generic UI local-candidate | 真实奥维四日期闸门与用户独立签收未完成 | 2026-08-27 20:09 |
 | JRN-011 / FR-015/016 / IF-007 | 基于导入图源二次开发 | 白名单描述合并 imported sources 与 runtime registry；SDK 校验清单/权限/能力并只构造 V1 本地路径 | `packages/developer-sdk`、`apps/gateway/src/developer`、`apps/gateway/src/routes/developer.ts` | 8 个契约/路由反例、全量测试/类型/构建、实际 HTTP | local-verified slice | 真实 imported source 仍 metadata-only；缺同 ID vault/probe/runtime binding | 2026-08-28 |
+| JRN-012 / UI-008 / FR-017 | 可观察一键任务 | 当前状态散落在导入/历史页；无持久 run/step/人工门/续跑 | proposed `apps/gateway/src/automation`、`apps/web/src/automation`、IF-008 | AC-019/021 planned | discovered / proposed | 必须与 IMPORT-002 真实 source ID 同步实现，不能先做合成驾驶舱 | 2026-08-28 |
+| FR-018 / DATA-010 / AC-020/022 | 可解释四期和质量事实 | 等距唯一选择、逐屏 loaded/failed、内容哈希真实探针已分散存在 | `packages/temporal-source`、`apps/gateway/src/temporal`、`apps/web/src/history` | existing tests + new real-source AC planned | partially discovered / proposed | 缺覆盖/质量统一模型、选择解释、真实结果页和用户签收 | 2026-08-28 |
 
 阶段计数不能跨级汇总：`SLICE-V0-IMPORT-001`、`SLICE-V0-SDK-001` 和合成时序链路分别达到 `local-verified`；真实二维码渲染、完整 AC-001/011、`main`、`deployed` 和用户 `accepted` 均未达到。
 
@@ -324,6 +341,8 @@ fixtures/synthetic/temporal  无外网的 20 年彩色/带标签时序瓦片
 12. **截图配准**：用户红框是产品范围证据，不是地理坐标证据；必须经地图编辑确认。
 13. **环境因果**：水色、云、季节和传感器差异可能看似污染；没有外部数据不得下确定结论。
 14. **“奥维全部能力”表述**：奥维本体为专有产品，公开候选许可证与功能覆盖不完整。当前只能建立 clean-room 兼容矩阵，逐协议、逐合法样本晋级，不能把“找到仓库”写成全兼容。
+15. **自动化假绿**：任务条全绿、run completed 或 telemetry 正常都不能证明真实瓦片可用。完成必须引用同一 source/AOI/date 的帧回执和内容检查。
+16. **过早基础设施化**：当前是单机薄切片，直接引入大型工作流/可观测集群会增加运维和磁盘成本。先用现有原子状态仓库证明任务语义，再按并发和恢复证据升级。
 
 ## 15. 上下文覆盖账本
 
@@ -336,6 +355,8 @@ fixtures/synthetic/temporal  无外网的 20 年彩色/带标签时序瓦片
 | 二进制样本 | `.ovmap` 基本容器 | 一个公开 455-byte 样本 | 魔数、zlib、字符串 | 中 | 字段边界、历史版本、加密未知 |
 | 运行链 | Web UI 到真实出图 | 双入口解析/确认保存与合成时序消费链均验证 | 全量测试和 6 条 Chrome E2E | 高 | 中间的 vault/SSRF/probe/真实 tile proxy 尚缺 |
 | 发布链 | GitHub/CI/部署 | 公共 GitHub main 与 push/PR CI 已建立；公网应用部署仍未建立 | main verified / deployment missing | 高 | `4b90939`、CI run `33146192919`；无部署制品或环境 |
+| 产品入口 | 可视化和自动化现实 | 只读 DOM 与关键 React/Fastify/state 代码 | 当前 UI 和本地源码 | 高 | 尚未人工操作 proposed 驾驶舱，因为尚未实现 |
+| 外部标准 | 时空元数据、任务与 telemetry | STAC、OGC Processes、OpenLayers、OpenTelemetry、STAC Browser 官方页 | 第 3 节链接；2026-08-28 | 高 | 尚未做依赖选型或标准合规测试 |
 
 继续检索的停止条件已满足到“可以写 V0 规格”，但不满足“可以声称完整兼容”。实施任务 0 要补依赖版本、合法 fixture 和运行命令。
 
@@ -358,3 +379,5 @@ fixtures/synthetic/temporal  无外网的 20 年彩色/带标签时序瓦片
 `EV-CAND-003 | 2026-08-28 | 消费端四期对比已经形成完整合成链路，但产品入口仍不能读取用户最关键的二维码和 .ovmap；用户第三次纠偏把导入提升为核心 | 当前仓库只有 aois/temporal-source，packages/source-schema、qr-import、ovmap-codec 和导入 UI 均不存在 | 根因是优先交付了可见的历史影像界面，却跨过了上游图源获取与事实晋级门 | goal.md 切换为 V0.4，当前实施顺序改为 schema→双 codec→零外联预览→授权保存→后续真实渲染 | 待本轮代码和浏览器复验 | 同项目第三次用户纠偏 | 暂不修改全局 Skill；把纠偏作为项目执行审计项 | 若再次先做消费端，应触发停止并回到入口闭环 | proposed`
 
 `EV-CAND-004 | 2026-08-28 | 规格虽多次写“开放、可扩展”，但仍把插件 SDK 放在后续；用户明确最终必须基于奥维图源二次开发 | goal.md 旧角色表和后续范围与用户最终产品定义冲突，内部 import API 还会暴露 hosts/path/credentialRef | 根因是把架构可扩展性误当成开发者可完成旅程 | goal.md 升级 V0.5，新增 JRN-011/能力和秘密契约，并实现白名单 V1 API/SDK；真实源能力仍独立受探测门控制 | AC-017/018 本地复验通过 | 同项目第四次产品纠偏 | 暂不修改全局 Skill；现有 Skill 已要求 API 平台 onboarding/权限/版本旅程 | 泛化原则已存在，先修项目 | verified`
+
+本轮没有新增全局 Skill 演进候选；用户提出的是新的产品成熟度方向。项目内修正是把 proposed 自动化直接绑定真实导入主线，并明确禁止先做合成驾驶舱。

@@ -60,6 +60,7 @@ The public V1 contract intentionally does not expose upstream hosts, URL templat
 - [`PROGRESS.md`](PROGRESS.md): current checkpoint and safest next action.
 - [`BLOCKED.md`](BLOCKED.md): unresolved real-source and safety gates.
 - [`docs/技术交底书.md`](docs/技术交底书.md): timestamped technical disclosure, architecture, technical features, embodiments, and evidence boundary.
+- [`docs/可视化与自动化路线图.md`](docs/可视化与自动化路线图.md): observable workflow, one-click four-frame automation, human gates, and staged acceptance plan.
 - [`docs/runbook.md`](docs/runbook.md): local operations.
 
 Stages are reported separately: `discovered → local-candidate → local-verified → main → deployed → accepted`. A passing test, HTTP 200, or synthetic source does not prove a real Ovi source has rendered.
