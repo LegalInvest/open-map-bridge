@@ -23,6 +23,10 @@
     "test:e2e": "playwright test",
     "test:e2e:authorized-qr": "playwright test --config playwright.authorized.config.ts"
   },
+  "dependencies": {
+    "jpeg-js": "0.4.4",
+    "pngjs": "7.0.0"
+  },
   "devDependencies": {
     "@playwright/test": "1.62.1",
     "@testing-library/jest-dom": "7.0.1",
