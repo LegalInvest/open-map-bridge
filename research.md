@@ -29,7 +29,7 @@
 - `FIX-BATCH-003` 已由 PR #5 合并为 main `1d0ebc4`：精确回环 Host/Origin、cross-site、Bearer、CSRF、固定窗口限流、安全响应头、服务端 app ID 与路径权限；Vite 代理只在服务端持有 UI token，SDK 直连要求独立应用 token。CI `33161851375` 首轮全绿；这仍不是上游 DNS/IP 门或实际 Ovi probe/ready。
 - `FIX-BATCH-004` 已由 PR #7 合并为 main `5b6f06e`：删除 Ovi 虚构年度日期生成器，生产适配器只接受严格 schema＋唯一 ID 的注入日期；无目录明确拒绝，未登记与 `missing/failed` 日期 ID 零请求返回未找到；操作者 probe 日期不是目录。CI `33163589956` 首轮全绿；真实目录提供者、probe/ready 和真实瓦片仍未完成。
 - `FIX-BATCH-005` 已由 PR #9 合并为 main `f84ae20`：`@omb/temporal-source` 统一实际 ISO 日期、顺序窗口、受限 AOI/date ID、规范十进制安全整数、z≤30 与 x/y<2^z；旧时序 API、V1、SDK、Ovi/合成适配器复用。首次 CI `33164557423` 的 414/400 分层失败已保留；第二次 `33164783702` 全绿。该批零真实外联。
-- `FIX-BATCH-006` 已形成 `local-candidate`：共享 1 MiB 原文件、精确 base64 上界和 4 KiB JSON 信封预算；只为 `.ovmap` 检查路由设置计算后的 bodyLimit，前端读取前拒绝超限，后端分别返回 `INPUT_OVMAP_LIMIT`/`INPUT_BODY_LIMIT` 413。恰好边界、加一字节、超信封和前端零读取/零 fetch 反例已写，待 PR CI。
+- `FIX-BATCH-006` 已由 PR #11 合并为 main `cfab0c2`：共享 1 MiB 原文件、精确 base64 上界和 4 KiB JSON 信封预算；只为 `.ovmap` 检查路由设置计算后的 bodyLimit，前端读取前拒绝超限，后端分别返回 `INPUT_OVMAP_LIMIT`/`INPUT_BODY_LIMIT` 413。CI `33165515010` 验证恰好边界、加一字节、超信封和前端零读取/零 fetch；零真实文件/外联。
 
 ### 搜索与核验边界
 
@@ -132,7 +132,7 @@
 |---|---|---|---|
 | 项目目录 | 新建 `/Users/assis/Documents/Codex/2026-08-27/open-map-bridge` | 本轮文件系统创建 | 2026-08-27 |
 | 既有同类本地仓库 | 未发现 | `find /Users/assis/Documents/Codex -maxdepth 2` 仅命中既有 VegFlow mapping 目录，无 Ovi/OpenMapBridge 项目 | 2026-08-27 |
-| Git 仓库 | GitHub main `f8733da`；当前候选分支 `codex/audit-p1-upload-envelope` 基于该提交，remote 为 `https://github.com/LegalInvest/open-map-bridge.git` | `git branch --show-current`、`git rev-parse HEAD origin/main`、`git remote -v`、PR #10 | 2026-08-28 18:56 |
+| Git 仓库 | GitHub main `cfab0c2`；当前证据分支 `codex/audit-p1-upload-envelope-evidence` 基于该提交，remote 为 `https://github.com/LegalInvest/open-map-bridge.git` | `git branch --show-current`、`git rev-parse HEAD origin/main`、`git remote -v`、PR #11 | 2026-08-28 19:02 |
 | 根卷空间 | 18:56 约 5.2 GiB，低于 8 GiB 门；停止本机构建、测试、浏览器、下载和缓存 | `df -h /System/Volumes/Data` | 2026-08-28 18:56 |
 | Node/Docker 工具链 | 本机 Node `v26.7.0`、npm `11.19.0`、Docker `29.4.0`、Compose `5.1.2`；计划冻结 Node `24.20.0` LTS 作为目标运行时 | 版本命令；[Node 官方发布表](https://nodejs.org/en/about/previous-releases) | 2026-08-27 |
 | 奥维桌面客户端 | 先发现旧 2.6.3；随后从官方分发安装并验签 10.6.0 到独立应用路径，未覆盖旧版 | 应用版本、代码签名、公证和官方安装包校验 | 2026-08-27 |
@@ -301,10 +301,10 @@ fixtures/synthetic/temporal  无外网的 20 年彩色/带标签时序瓦片
 | 二次开发 V1 | 脱敏源目录、能力协商、严格应用清单、TypeScript SDK 和本地日期/瓦片消费已实现；configured OviBridge 不授予运行能力 | local-verified slice | `packages/developer-sdk`、`apps/gateway/src/{developer,routes/developer}.ts`、8 项聚焦测试和实际 HTTP |
 | 技术交底持续同步 | 中文技术交底书覆盖架构、流程、数据、安全、特征候选、实施例和当前证据边界；source set 生成 SHA-256，CI 检查陈旧 | local-verified mechanism | `docs/技术交底书.md`、`scripts/update-technical-disclosure.mjs`、`npm run disclosure:check`；精确文件数/指纹以交底元数据为准 |
 | 可视化/自动化方向 | 用户已批准继续实施；准备度四步账本、去重、process/job API 和驾驶舱已进入 main | main for 001A / later slices missing | `16f445c`、CI `33155671827`；2026-08-28 |
-| 审计问题账本 | 161 个 tracked files 静态审计形成 38 组问题与公开 backlog；前五批已进 main，第六批统一 `.ovmap` 上传信封并待 CI | FIX-BATCH-001/002/003/004/005 main / FIX-BATCH-006 local-candidate / remaining discovered | `docs/问题账本.md`、PR #1/#3/#5/#7/#9/#10；2026-08-28 18:56 |
-| 工作区基线 | GitHub main `f8733da`；当前 `codex/audit-p1-upload-envelope` 含 FIX-BATCH-006 产品/文档候选；约 5.2 GiB 低于 8 GiB 门 | main verified / candidate unverified / capacity blocked | `git status/log/rev-parse`、`df`；2026-08-28 18:56 |
-| 自动测试 | 当前 main 的远端门通过 37 个 Vitest 文件/162 tests＋2 Node、8 workspace 类型检查、生产构建、4 Chrome E2E 和 139 文件交底新鲜度；既有 2 条授权本地 E2E 未在公共 CI 运行 | main CI verified / authorized-local historical | CI `33164783702`；2026-08-28 18:51 |
-| GitHub main | 公共唯一主仓 `LegalInvest/open-map-bridge`；FIX-BATCH-005 证据由 PR #10 回写后 main 为 `f8733da` | main for 001A + FIX-BATCH-001/002/003/004/005；FIX-BATCH-006 尚在分支 | PR #1–#10、CI `33165036211`；2026-08-28 18:56 |
+| 审计问题账本 | 161 个 tracked files 静态审计形成 38 组问题与公开 backlog；前六批已进 main，第六批统一 `.ovmap` 上传信封 | FIX-BATCH-001/002/003/004/005/006 main / remaining discovered | `docs/问题账本.md`、PR #1/#3/#5/#7/#9/#11、CI `33165515010`；2026-08-28 19:02 |
+| 工作区基线 | GitHub main `cfab0c2`；当前证据分支只回写 FIX-BATCH-006 的 main/CI 事实；约 5.2 GiB 低于 8 GiB 门 | product main / evidence candidate / capacity blocked | `git status/log/rev-parse`、`df`；2026-08-28 19:02 |
+| 自动测试 | 当前 main 的远端门通过 37 个 Vitest 文件/167 tests＋2 Node、8 workspace 类型检查、生产构建、4 Chrome E2E 和 140 文件交底新鲜度；既有 2 条授权本地 E2E 未在公共 CI 运行 | main CI verified / authorized-local historical | CI `33165515010`；2026-08-28 19:02 |
+| GitHub main | 公共唯一主仓 `LegalInvest/open-map-bridge`；FIX-BATCH-006 产品由 PR #11 合并为 `cfab0c2` | main for 001A + FIX-BATCH-001/002/003/004/005/006；证据回写在独立分支 | PR #1–#11、CI `33165515010`；2026-08-28 19:02 |
 | 部署 | 无 | missing | 未授权/未实施 |
 | 业务验收 | 真实 QR 安全预览和真实 `.ovmap` 五图层已过；真实 QR 瓦片渲染与用户独立签收未过 | import slice local-verified / AC-001 partial / accepted missing | `docs/acceptance/import-v0-local.md` |
 
@@ -323,7 +323,7 @@ fixtures/synthetic/temporal  无外网的 20 年彩色/带标签时序瓦片
 | NFR-001 | SSRF/解压/开放代理防护 | 解压/记录边界已验证；零外联 path/host/port/IP 静态策略已进入 main，元数据永久阻断，私网/裸 IP/企业域名转人工门 | `apps/gateway/src/security/source-policy.ts` | policy/route 反例由 CI `33155671827` 通过 | parser/static policy main | 缺请求时 DNS 解析结果、重绑定和实际网络执行门 | 2026-08-28 |
 | OMB-AUD-021 / NFR-004/006 | Ovi 响应资源与图片真实性 | main `de36012` 使用 Web Stream 逐块限制 5 MiB，只接受 200，其他状态丢弃正文，成功仅接受 PNG/JPEG 并检查 magic、完整解码、单边 2048 和 RGBA 长度 | `apps/gateway/src/temporal/{ovi-bridge,image-validation}.ts` | 合法 PNG/JPEG、错误正文、无长度/声明长度超限、MIME 伪装、损坏和超尺寸反例由 CI `33160315934` 通过 | main | 未形成真实 probe/ready；请求前 DNS/IP 门仍缺 | 2026-08-28 17:41 |
 | OMB-AUD-020 / IF-006 / NFR-001/004 | 本地 gateway 入站信任边界 | main `1d0ebc4` 在首个 onRequest hook 校验精确 Host/Origin/Fetch-Site、constant-time Bearer、app ID/路径权限、写请求 CSRF 和每 principal/IP 固定窗口限流；Vite 服务端代理持有 UI token/CSRF，但保留浏览器原始 Origin/Fetch-Site并限制自身 Host | `apps/gateway/src/security/gateway-access.ts`、`config.ts`、`vite.config.ts`、SDK client | 恶意 Host/Origin/cross-site、无/错 token/CSRF、app ID/权限不足、超限反例及 4 Chrome E2E 由 CI `33161851375` 通过 | main | 上游请求时 DNS/IP/重绑定和 vault 仍缺；本批零外联 | 2026-08-28 18:04 |
-| OMB-AUD-010 / IF-001 / NFR-004 | `.ovmap` 上传信封真值 | FIX-BATCH-006 候选共享 1 MiB 文件、base64 上界、4 KiB JSON 信封并只在导入路由设置 bodyLimit；前端预检，后端稳定区分文件/信封 413 | `packages/source-schema/src/import-limits.ts`、gateway import route、Web client | 恰好 1 MiB、加一字节、超信封、前端读取/fetch 反例已写；待 PR CI | local-candidate | 本机容量门下未执行；CI 前不晋级 main | 2026-08-28 18:56 |
+| OMB-AUD-010 / IF-001 / NFR-004 | `.ovmap` 上传信封真值 | main `cfab0c2` 共享 1 MiB 文件、base64 上界、4 KiB JSON 信封并只在导入路由设置 bodyLimit；前端预检，后端稳定区分文件/信封 413 | `packages/source-schema/src/import-limits.ts`、gateway import route、Web client | CI `33165515010` 通过恰好 1 MiB、加一字节、超信封、前端读取/fetch 反例及全门 | main | 本机容量门下未执行；QR 图片/预览内存资源门仍开放 | 2026-08-28 19:02 |
 | NFR-007 | 合法开源依赖 | 候选已发现 | lockfiles、THIRD_PARTY | license audit | discovered | 版本/许可证/安全公告待任务0复核 | 2026-08-27 |
 | AC-001 至 AC-010 | 业务验收 | AC-002/003 本地通过；AC-001 完成真实预览但未出图；其余部分/未运行 | E2E + 真实浏览器 | 对应 AC | mixed, no cross-level rollup | 下一门为 vault/SSRF/probe/render | 2026-08-28 |
 | JRN-007 / FR-009 / OMB-AUD-004 | 历史源日期和真实瓦片 | 合成 20 年源已验证；configured Ovi 已从消费端隐藏，空 probe 返回失败；main 已删除 request-date 年度占位，只接受已验证注入日期，无目录与未登记 ID fail closed 且零请求 | `packages/temporal-source`、`apps/gateway/src/{temporal,routes/temporal}.ts` | 无目录、未登记/missing/failed ID 零请求、schema/唯一性/窗口过滤由 CI `33163589956` 通过；AC-011 未运行 | date truth main / configured truth main / real adapter blocked | 缺真实日期目录提供者、最小解码探测和 ready 晋级 | 2026-08-28 18:32 |

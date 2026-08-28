@@ -89,3 +89,7 @@
 - FIX-BATCH-006 候选：`@omb/source-schema` 共享 1 MiB 原文件、精确 base64 上界和 4 KiB JSON 信封预算；只有 `/api/import/inspect/ovmap` 使用计算后的路由级 bodyLimit，其他 API 不放宽。前端在读取前拒绝大文件且不再发送无用文件名；后端规范化 base64，并把解码后文件超限与 HTTP 信封超限分别映射为稳定 413。
 - 边界验收已写：恰好 1 MiB 必须越过 HTTP 门到达格式解析；1 MiB＋1 字节由业务层 `INPUT_OVMAP_LIMIT` 拒绝；超编码信封由 HTTP 层 `INPUT_BODY_LIMIT` 拒绝；前端超限不得读取文件或 fetch。当前仅 `local-candidate`，18:56 本机约 5.2 GiB，未运行测试/构建/浏览器。
 - 唯一最安全下一步：完成 FIX-BATCH-006 的交底指纹和静态 diff 门，提交 PR 由 GitHub CI 验证；全绿最多把 OMB-AUD-010 晋级 main，不代表其他导入资源上限或真实图源验收完成。
+- 2026-08-28 19:02：PR #11 CI `33165515010` 首轮全绿：37 个 Vitest 文件/167 tests＋2 Node tests、8 workspace typecheck、生产构建、4 Chrome E2E 和交底新鲜度检查全部通过；PR 随后 squash 合并为 main `cfab0c2`。
+- 批次结果：`OMB-AUD-010` 达到 main；恰好 1 MiB 的 `.ovmap` 可越过 HTTP 门到达格式解析，解码后加一字节和超 JSON 信封分别稳定 413，其他 API body limit 未扩大。没有读取真实文件、发真实外联、部署或用户业务验收。
+- 当前证据分支：`codex/audit-p1-upload-envelope-evidence`，只回写 main/CI 证据。本机仍低于 8 GiB 门。
+- 唯一最安全下一步：合并 FIX-BATCH-006 证据回写后，为 `FIX-BATCH-007` 冻结 OMB-AUD-018 的预览 TTL/数量/字节 LRU 与 QR 图片字节/像素/倍率上限，再分层实现；不得把 `.ovmap` 信封修复误写成全部非可信输入资源门完成。
