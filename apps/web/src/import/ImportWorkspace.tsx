@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type DragEvent } from 'react';
-import type { ImportPreview, MapSourceDefinition } from '@omb/source-schema';
+import { OVMAP_FILE_MAX_BYTES, type ImportPreview, type MapSourceDefinition } from '@omb/source-schema';
 import type { ImportApi } from '../api/client.js';
 import { browserQrReader, type QrReader } from './qr-reader.js';
 
@@ -177,7 +177,7 @@ export function ImportWorkspace({ api, qrReader = browserQrReader, onOpenAutomat
               {tab === 'ovmap' ? (
                 <div className="drop-zone" onDragOver={(event) => event.preventDefault()} onDrop={handleDrop}>
                   <strong>拖入或选择 .ovmap 文件</strong>
-                  <span>上限 1 MiB；先做魔数、长度、解压比和记录边界检查。</span>
+                  <span>上限 {OVMAP_FILE_MAX_BYTES / (1024 * 1024)} MiB；先做魔数、长度、解压比和记录边界检查。</span>
                   <label className="file-button">
                     选择 .ovmap 文件
                     <input

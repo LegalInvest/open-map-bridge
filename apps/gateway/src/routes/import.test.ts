@@ -1,5 +1,10 @@
 import { afterEach, expect, it, vi } from 'vitest';
 import { buildSyntheticRecord37Ovmap } from '@omb/ovmap-codec/synthetic';
+import {
+  OVMAP_BASE64_MAX_CHARS,
+  OVMAP_FILE_MAX_BYTES,
+  OVMAP_INSPECT_BODY_MAX_BYTES,
+} from '@omb/source-schema';
 import { buildTestApp as buildApp } from '../test-app.js';
 
 const apps: Array<Awaited<ReturnType<typeof buildApp>>> = [];
@@ -66,4 +71,51 @@ it('returns a stable safe error for malformed input', async () => {
   const response = await app.inject({ method: 'POST', url: '/api/import/inspect/ovmap', payload: { bytesBase64: 'AAAA' } });
   expect(response.statusCode).toBe(400);
   expect(response.json()).toMatchObject({ error: { code: 'FORMAT_IMPORT', retryable: false } });
+});
+
+it('lets an exactly 1 MiB decoded file reach the format parser instead of the HTTP body gate', async () => {
+  const app = await buildApp({ dataPath: null });
+  apps.push(app);
+  const response = await app.inject({
+    method: 'POST',
+    url: '/api/import/inspect/ovmap',
+    payload: { bytesBase64: Buffer.alloc(OVMAP_FILE_MAX_BYTES).toString('base64') },
+  });
+  expect(response.statusCode).toBe(400);
+  expect(response.json()).toMatchObject({ error: { code: 'FORMAT_IMPORT', detail: { parseCode: 'FORMAT_MAGIC' } } });
+});
+
+it('rejects one decoded byte over the file limit with a stable application error', async () => {
+  const app = await buildApp({ dataPath: null });
+  apps.push(app);
+  const response = await app.inject({
+    method: 'POST',
+    url: '/api/import/inspect/ovmap',
+    payload: { bytesBase64: Buffer.alloc(OVMAP_FILE_MAX_BYTES + 1).toString('base64') },
+  });
+  expect(response.statusCode).toBe(413);
+  expect(response.json()).toEqual({
+    error: {
+      code: 'INPUT_OVMAP_LIMIT',
+      message: '.ovmap 文件不能超过 1 MiB',
+      retryable: false,
+      nextAction: '请检查输入后重试',
+      detail: { maxBytes: OVMAP_FILE_MAX_BYTES },
+    },
+  });
+});
+
+it('maps an oversized encoded JSON envelope to a stable HTTP body error', async () => {
+  expect(OVMAP_BASE64_MAX_CHARS).toBeLessThan(OVMAP_INSPECT_BODY_MAX_BYTES);
+  const app = await buildApp({ dataPath: null });
+  apps.push(app);
+  const response = await app.inject({
+    method: 'POST',
+    url: '/api/import/inspect/ovmap',
+    payload: { bytesBase64: 'A'.repeat(OVMAP_INSPECT_BODY_MAX_BYTES) },
+  });
+  expect(response.statusCode).toBe(413);
+  expect(response.json()).toMatchObject({
+    error: { code: 'INPUT_BODY_LIMIT', detail: { maxBytes: OVMAP_INSPECT_BODY_MAX_BYTES } },
+  });
 });
