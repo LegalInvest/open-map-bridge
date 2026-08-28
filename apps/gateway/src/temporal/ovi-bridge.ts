@@ -1,5 +1,5 @@
 import {
-  buildAnnualRequestCatalog,
+  parseTemporalDateEntry,
   type TemporalDateEntry,
   type TemporalSourceAdapter,
   type TemporalTileResponse,
@@ -9,6 +9,7 @@ import { validateDecodedTile } from './image-validation.js';
 interface OviBridgeOptions {
   baseUrl: string;
   mapType: number;
+  verifiedDates?: readonly TemporalDateEntry[];
   fetchImpl?: typeof fetch;
 }
 
@@ -57,6 +58,7 @@ function requireTileInteger(value: number, name: string): void {
 export class OviBridgeAdapter implements TemporalSourceAdapter {
   private readonly baseUrl: URL;
   private readonly mapType: number;
+  private readonly verifiedDates: Map<string, TemporalDateEntry>;
   private readonly fetchImpl: typeof fetch;
 
   constructor(options: OviBridgeOptions) {
@@ -70,6 +72,9 @@ export class OviBridgeAdapter implements TemporalSourceAdapter {
     if (!Number.isInteger(options.mapType) || options.mapType <= 0) throw new Error('mapType must be a positive integer');
     this.baseUrl = baseUrl;
     this.mapType = options.mapType;
+    const verifiedDates = (options.verifiedDates ?? []).map(parseTemporalDateEntry);
+    this.verifiedDates = new Map(verifiedDates.map((entry) => [entry.id, entry]));
+    if (this.verifiedDates.size !== verifiedDates.length) throw new Error('Ovi verified date IDs must be unique');
     this.fetchImpl = options.fetchImpl ?? fetch;
   }
 
@@ -79,9 +84,10 @@ export class OviBridgeAdapter implements TemporalSourceAdapter {
 
   async listDates(input: { aoiId: string; from: string; to: string }): Promise<TemporalDateEntry[]> {
     if (!input.aoiId) throw new Error('aoiId is required');
-    const fromYear = Number(input.from.slice(0, 4));
-    const toYear = Number(input.to.slice(0, 4));
-    return buildAnnualRequestCatalog(fromYear, toYear);
+    if (this.verifiedDates.size === 0) throw new Error('Ovi bridge has no verified date catalog');
+    return [...this.verifiedDates.values()]
+      .filter((entry) => entry.requestDate >= input.from && entry.requestDate <= input.to)
+      .map((entry) => structuredClone(entry));
   }
 
   pathFor(input: OviPathInput): string {
@@ -94,9 +100,11 @@ export class OviBridgeAdapter implements TemporalSourceAdapter {
   }
 
   async tile(input: { dateId: string; z: number; x: number; y: number }): Promise<TemporalTileResponse> {
-    const yearMatch = /^annual-(\d{4})$/.exec(input.dateId);
-    if (!yearMatch?.[1]) return { status: 404, contentType: 'application/json', body: new Uint8Array() };
-    const requestDate = `${yearMatch[1]}-06-30`;
+    const date = this.verifiedDates.get(input.dateId);
+    if (!date || ['missing', 'failed'].includes(date.availability)) {
+      return { status: 404, contentType: 'application/json', body: new Uint8Array() };
+    }
+    const requestDate = date.requestDate;
     const url = new URL(this.pathFor({ requestDate, z: input.z, x: input.x, y: input.y }), this.baseUrl);
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 10_000);

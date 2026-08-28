@@ -94,7 +94,7 @@ it('binds an opaque Ovi import to its persisted UUID while keeping configured ru
 
   const tile = await app.inject({
     method: 'GET',
-    url: `/api/temporal/tiles/${encodeURIComponent(importedId)}/annual-2018/8/212/102`,
+    url: `/api/temporal/tiles/${encodeURIComponent(importedId)}/unverified-date/8/212/102`,
   });
   expect(tile.statusCode).toBe(409);
   expect(tile.json()).toEqual({ error: 'source-not-ready' });

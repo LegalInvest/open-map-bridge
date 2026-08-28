@@ -1,5 +1,7 @@
 # Temporal Lakes V0 Implementation Plan
 
+> **2026-08-28 真值纠偏：** 下文历史步骤中关于 `annual-catalog` 的内容已被 OMB-AUD-004 取代。生产 Ovi 适配器只能公开经授权来源核验并注入的日期；没有已验证目录时，`listDates` 必须明确失败，未知 `dateId` 必须在零网络请求下返回未找到。操作者选择的 probe 日期只是测试输入，不是日期目录。已删除的年度目录生成器不得重建。
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Pull up a localhost Web application that compares aligned 2006–2025 imagery for user-confirmed Baoying Lake and Gaoyou Lake AOIs, first against a deterministic synthetic temporal source and then through a loopback-only official Ovital Web-tile bridge.
