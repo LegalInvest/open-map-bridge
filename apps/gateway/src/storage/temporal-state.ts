@@ -2,6 +2,7 @@ import { mkdir, open, readFile, rename } from 'node:fs/promises';
 import { dirname } from 'node:path';
 import { normalizeViewState, type ViewState } from '@omb/temporal-source';
 import { parseAreaOfInterest, type AreaOfInterest } from '@omb/aois';
+import { parseMapSourceDefinition, type ImportReceipt, type MapSourceDefinition } from '@omb/source-schema';
 
 export interface FrameReceipt {
   dateId: string;
@@ -23,6 +24,23 @@ export interface ComparisonReceipt {
 interface TemporalState {
   aois: AreaOfInterest[];
   comparisons: ComparisonReceipt[];
+  importSources: MapSourceDefinition[];
+  importReceipts: ImportReceipt[];
+}
+
+function parseImportReceipt(value: unknown): ImportReceipt {
+  if (typeof value !== 'object' || value === null) throw new Error('import receipt must be an object');
+  const raw = value as Record<string, unknown>;
+  if (
+    typeof raw.receiptId !== 'string' ||
+    typeof raw.batchId !== 'string' ||
+    typeof raw.inputSha256 !== 'string' ||
+    typeof raw.parser !== 'string' ||
+    !Array.isArray(raw.results)
+  ) {
+    throw new Error('invalid import receipt');
+  }
+  return structuredClone(value) as ImportReceipt;
 }
 
 function parseComparison(value: unknown): ComparisonReceipt {
@@ -56,20 +74,34 @@ export class TemporalStateRepository {
 
   static async open(path: string | null, presets: readonly AreaOfInterest[]): Promise<TemporalStateRepository> {
     if (path === null) {
-      return new TemporalStateRepository(null, { aois: presets.map((aoi) => structuredClone(aoi)), comparisons: [] });
+      return new TemporalStateRepository(null, {
+        aois: presets.map((aoi) => structuredClone(aoi)),
+        comparisons: [],
+        importSources: [],
+        importReceipts: [],
+      });
     }
     try {
-      const parsed = JSON.parse(await readFile(path, 'utf8')) as { aois?: unknown; comparisons?: unknown };
+      const parsed = JSON.parse(await readFile(path, 'utf8')) as {
+        aois?: unknown;
+        comparisons?: unknown;
+        importSources?: unknown;
+        importReceipts?: unknown;
+      };
       if (!Array.isArray(parsed.aois) || !Array.isArray(parsed.comparisons)) throw new Error('invalid temporal state');
       return new TemporalStateRepository(path, {
         aois: parsed.aois.map(parseAreaOfInterest),
         comparisons: parsed.comparisons.map(parseComparison),
+        importSources: Array.isArray(parsed.importSources) ? parsed.importSources.map(parseMapSourceDefinition) : [],
+        importReceipts: Array.isArray(parsed.importReceipts) ? parsed.importReceipts.map(parseImportReceipt) : [],
       });
     } catch (error) {
       if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
       const repository = new TemporalStateRepository(path, {
         aois: presets.map((aoi) => structuredClone(aoi)),
         comparisons: [],
+        importSources: [],
+        importReceipts: [],
       });
       await repository.persist();
       return repository;
@@ -82,6 +114,14 @@ export class TemporalStateRepository {
 
   listComparisons(): ComparisonReceipt[] {
     return structuredClone(this.state.comparisons);
+  }
+
+  listImportSources(): MapSourceDefinition[] {
+    return structuredClone(this.state.importSources);
+  }
+
+  listImportReceipts(): ImportReceipt[] {
+    return structuredClone(this.state.importReceipts);
   }
 
   async appendAoi(aoi: AreaOfInterest): Promise<void> {
@@ -98,13 +138,31 @@ export class TemporalStateRepository {
     await this.persist();
   }
 
-  private async persist(): Promise<void> {
+  async appendConfirmedImport(input: { sources: MapSourceDefinition[]; receipt: ImportReceipt }): Promise<void> {
+    const sources = input.sources.map(parseMapSourceDefinition);
+    if (sources.some((source) => source.status !== 'confirmed')) throw new Error('import source must be confirmed');
+    if (sources.some((source) => this.state.importSources.some((existing) => existing.id === source.id))) {
+      throw new Error('duplicate import source');
+    }
+    if (this.state.importReceipts.some((receipt) => receipt.receiptId === input.receipt.receiptId)) {
+      throw new Error('duplicate import receipt');
+    }
+    const next: TemporalState = {
+      ...this.state,
+      importSources: [...this.state.importSources, ...sources],
+      importReceipts: [...this.state.importReceipts, parseImportReceipt(input.receipt)],
+    };
+    await this.persist(next);
+    this.state = next;
+  }
+
+  private async persist(state: TemporalState = this.state): Promise<void> {
     if (this.path === null) return;
     await mkdir(dirname(this.path), { recursive: true });
     const temporary = `${this.path}.${process.pid}.tmp`;
     const handle = await open(temporary, 'w', 0o600);
     try {
-      await handle.writeFile(`${JSON.stringify(this.state, null, 2)}\n`, 'utf8');
+      await handle.writeFile(`${JSON.stringify(state, null, 2)}\n`, 'utf8');
       await handle.sync();
     } finally {
       await handle.close();

@@ -97,12 +97,12 @@
 |---|---|---|---|
 | QRInput | 图片/摄像头中的编码载荷 | 输入，不等于合法图源或可用地图 | 用户文件/摄像头 |
 | OVMapFile | 奥维自定义地图配置容器 | 可能单图层/多图层；在线配置通常不含瓦片 | 用户文件 |
-| MapSourceDefinition | 目标开放内部模型 | planned；需版本化 | 平台解析/用户修正 |
+| MapSourceDefinition | 目标开放内部模型 | v1 local-verified；QR/ovmap 共用 | 平台解析/用户修正 |
 | CredentialRef | token 等秘密引用 | 明文不得进入普通模型/日志 | 用户本地输入 |
-| ImportReceipt | 脱敏事实账本 | planned；每批/每图层 | 平台生成 |
+| ImportReceipt | 脱敏事实账本 | confirmed 批次已实现；探测/渲染字段待后续 | 平台生成 |
 | ProbeResult | 最小网络探测结果 | HTTP 成功不等于渲染成功 | 本地网关 |
 | SDB companion | 奥维离线地图数据 | V0 只识别依赖，完整导入 planned | 用户文件 |
-| FourFramePolicy | 动态 20 年窗口与四期选择 | approved / planned；不得复制日期补齐 | 平台纯函数 |
+| FourFramePolicy | 动态 20 年窗口与四期选择 | local-verified；不得复制日期补齐 | 平台纯函数 |
 
 ## 6. 资产与环境地图
 
@@ -166,8 +166,9 @@ python3 -c 'read bytes; inspect header; zlib.decompress(bytes[24:]); list ASCII 
 
 - 官方确认二维码可以导入自定义地图，但没有公开线协议。
 - 使用 macOS Vision 对公开二维码做内存级结构检查：QR payload 长 271 bytes，头为 `ovobj`，查询键顺序为 `t,id,na,po,he,oy,df,hn,ul`；没有输出或保存这些键的值。字段 `id/na/hn/ul` 的业务表现可作为首版候选，其他代码保持原值，待差分证据确认。
+- 2026-08-28 Chrome 对用户授权真实二维码完成图片解码和本地检查，证明它属于另一真实变体：结构键含 `at/ad/al`，`ul` 是 72 字符、不以 `/` 或 HTTP 开头且不含 XYZ 变量的不透明协议值。未输出任何字段值；实现丢弃 `at/ad/al` 和不透明 `ul`，只保留 `needs-credential/needsOviBridge` 事实。
 - 星图云官方二维码场景需要用户导入后替换自己的 token，证明二维码可能只含模板或占位凭证。
-- V0 必须同时支持摄像头和图片上传；无摄像头不得阻断旅程。
+- 图片上传已由用户真实二维码 E2E 验证；摄像头成功/取消/卸载停止轨道由组件代码和单元测试验证，硬件权限旅程尚未人工签收。无摄像头可切回图片上传。
 
 ## 9. 开源来源与复用判断
 
@@ -230,7 +231,7 @@ QR/文件 → 纯本地 inspect → version adapter → MapSourceDefinition prev
 → tile proxy → OpenLayers render → receipt + persisted state
 ```
 
-上述时序路径中的日期事实、AOI 创建/版本、动态 20 年窗口、自动唯一四期、几何自适应、网关、四屏、卷帘、播放和观察面板已经实现；真实奥维瓦片仍被第三方接口监听确认门阻塞。2026-08-28 用户已把 QR/`.ovmap` 通用导入主线重新提升为当前实现切片；代码仍为 missing，不能沿用 planned 叙述掩盖入口缺口。当前没有 CI、远端制品、公网部署或真实奥维瓦片验收。
+上述导入路径中的开放 schema、显式状态机、QR 图片/摄像头、`ovobj` 两种真实结构、`.ovmap record37-zlib`、零上游预览、授权确认、原子 JSON 保存、回执和刷新恢复已实现；安全网络策略、凭证保险库、最小探测、瓦片代理和真实渲染仍缺失。时序路径中的日期事实、AOI 创建/版本、动态 20 年窗口、自动唯一四期、几何自适应、四屏、卷帘、播放和观察面板也已实现；真实奥维瓦片仍被第三方接口监听确认门阻塞。当前没有 CI、远端制品、公网部署或用户独立签收。
 
 历史影像增量目标路径：
 
@@ -252,47 +253,48 @@ fixtures/synthetic/temporal  无外网的 20 年彩色/带标签时序瓦片
 |---|---|---|---|
 | 产品裁决 | V0 方向和书面规格均获用户明确批准 | spec-approved | 当前线程 |
 | 书面规格与实施计划 | `goal.md`、`research.md`、设计文档和 10 项实施计划已落盘；当前切片已重新排序为导入优先 | spec-approved / implementing | 本地文件、Git commit 与用户回复 |
-| 实施计划 | `docs/superpowers/plans/2026-08-27-open-map-bridge-v0-import.md`，10 个任务、81 个步骤 | plan-ready，待选择执行方式 | 本地计划文件与计划自检 |
+| 实施计划 | `docs/superpowers/plans/2026-08-27-open-map-bridge-v0-import.md`，10 个任务、81 个步骤 | executing；导入切片完成，网络/渲染切片待续 | 本地计划、代码与验收记录 |
 | 现有产品 | Web＋本地网关已有一键运行入口 | local-candidate | `npm run dev`；仅回环监听 |
-| `.ovmap` 魔数/压缩 | 一个公开样本完成内存级观察 | discovered | 第 7 节命令与结果 |
-| 二维码协议 | 官方确认流程；私有载荷字段未建 fixture | discovered | 官方文档、同线程观察 |
-| 用户历史二维码 | 官方奥维 10.6.0 已真实导入并识别 GEE 历史协议，时间轴出现 | discovered / official-client-imported | 官方客户端可见行为；具体日期与瓦片尚未返回 |
+| `.ovmap` 解析/UI | 公开 455-byte 样本经 codec 与 Chrome 均列出 5 图层；无上游请求 | AC-002 local-verified | compatibility test + authorized-local E2E |
+| 二维码协议 | 普通模板结构和 `at/ad/al + opaque ul` 真实变体进入版本化 adapter | parser local-verified | 单元测试、用户真实 QR Chrome E2E |
+| 用户历史二维码 | 官方客户端已导入并出现时间轴；开放 Web 已形成安全预览但未保存私有值或出图 | real-preview local-verified / render blocked | 官方客户端可见行为 + authorized-local E2E |
 | 双湖 AOI | 用户提供含两块红框的参考图 | discovered / approximate | 当前附件；无空间参考，尚未形成确认 GeoJSON |
 | Ovi Web 桥接 | 官方文档证明接口形态；本地适配器已验证只接受回环 origin、年度请求日期和 5 MiB 上限；本机官方服务尚未启用和请求 | adapter local-verified / real compatibility-gate blocked | `apps/gateway/src/temporal/ovi-bridge.ts` 与 6 个相关测试；需验证官方监听和特殊历史源出图 |
 | 时序 Web UI | 四屏、卷帘、播放、AOI 编辑和观察面板已实现 | local-candidate | Chrome E2E 通过；真实源未过门 |
-| 时序工作区基线 | 隔离分支已建立；环境门、精确依赖锁和四个空 workspace typecheck 通过 | local-candidate / scaffold-only | `npm run env:check && npm test && npm run typecheck`；Node 26.7.0、npm 11.19.0、197 packages、0 vulnerabilities；2026-08-27 |
-| 自动测试 | 单元/组件/网关/环境门和 Chrome E2E 均已运行 | local-verified | `npm test`、`npm run typecheck`、`npm run build`、`npm run test:e2e` |
+| 导入 Web UI | 默认首页提供二维码图片、摄像头和 `.ovmap` 点击/拖入，预览后授权保存 | local-verified slice | 4 默认 E2E + 2 授权本地 E2E |
+| 工作区基线 | 隔离分支；Node 26.7.0、npm 11.19.0、244 packages、0 vulnerabilities；8 GiB 磁盘门 | local-verified | `npm run env:check` 与 lockfile；2026-08-28 |
+| 自动测试 | 84 Vitest + 2 Node、7 workspace 类型检查、生产构建和 6 Chrome E2E 均通过 | local-verified | 完整命令链；2026-08-28 |
 | GitHub main | 无主仓 | missing | 未创建远端 |
 | 部署 | 无 | missing | 未授权/未实施 |
-| 业务验收 | 合成时序浏览器旅程已过；真实 QR/`.ovmap` 导入旅程尚无 | temporal synthetic local-verified / import missing | 自动化证据与当前代码盘点 |
+| 业务验收 | 真实 QR 安全预览和真实 `.ovmap` 五图层已过；真实 QR 瓦片渲染与用户独立签收未过 | import slice local-verified / AC-001 partial / accepted missing | `docs/acceptance/import-v0-local.md` |
 
 ## 13. 规格—代码—发布追踪矩阵
 
 | ID | 产品目标/行为 | 当前现实 | 目标路径/接口 | 测试/E2E | 阶段 | 差距/阻塞 | 最后核验 |
 |---|---|---|---|---|---|---|---|
-| JRN-001 / FR-001 | 真实二维码到出图 | 官方客户端已导入用户样本；开放产品无入口 | `apps/web`、`packages/qr-import` | AC-001 | implementing / product missing | 先完成图片/摄像头解码和保存；真实出图另过探测门 | 2026-08-28 |
-| JRN-002 / FR-002 | 多图层 `.ovmap` | 已观察一个五记录公开样本；产品无 codec | `packages/ovmap-codec`、IF-001 | AC-002/003 | implementing / codec missing | 首版只承诺 `record37-zlib`，未知家族拒绝 | 2026-08-28 |
-| FR-003 / DATA-001 | 统一开放模型 | 规格已定义字段 | `packages/source-schema` | schema round-trip | planned | 缺 schema 与迁移代码 | 2026-08-27 |
-| FR-004 / BR-004/005 | 安全预览、零外联、秘密 | 仅规格 | `packages/security`、UI-003 | AC-004/009 | planned | 缺威胁测试和密钥方案 | 2026-08-27 |
+| JRN-001 / FR-001 | 真实二维码到出图 | 用户 QR 已在 Chrome 解码成脱敏预览；合成 QR 已授权保存/刷新 | `apps/web/src/import`、`packages/qr-import` | AC-001 partial | preview local-verified / render blocked | 私有值未入 vault；未探测/出图 | 2026-08-28 |
+| JRN-002 / FR-002 | 多图层 `.ovmap` | 公开真实 5 图层样本经 codec 与 UI 通过 | `packages/ovmap-codec`、IF-001 | AC-002/003 | local-verified family | 只覆盖 `record37-zlib`；其他家族 unsupported | 2026-08-28 |
+| FR-003 / DATA-001 | 统一开放模型 | schema v1、Zod 约束和显式状态机已实现 | `packages/source-schema` | schema/state tests | local-verified | 未来版本迁移尚无 v2 fixture | 2026-08-28 |
+| FR-004 / BR-004/005 | 安全预览、零外联、秘密 | 检查零上游、秘密剥离、授权前后端门已实现 | `apps/gateway/src/import`、`apps/web/src/import` | unit/route/E2E | partial local-verified | URL/IP SSRF 策略与 vault 未实现 | 2026-08-28 |
 | FR-005 / IF-003 | 代理和真实渲染 | 仅推荐架构 | `apps/gateway`、`apps/web` | AC-005/007 | planned | 缺协议、CORS、SSRF和真实源 E2E | 2026-08-27 |
-| FR-006 / DATA-002 | 保存、回执和重启恢复 | 仅规格 | gateway persistence | AC-006 | planned | 缺数据库选择核验、迁移和删除语义 | 2026-08-27 |
-| FR-007 | 部分成功和诊断 | 仅规格 | UI-004、receipt service | AC-003/008/009 | planned | 缺错误码和反例 fixture | 2026-08-27 |
+| FR-006 / DATA-002 | 保存、回执和重启恢复 | confirmed 定义/回执原子 JSON 保存，重开仓库和刷新恢复 | gateway persistence | AC-006 partial | local-verified for confirmed | 凭证、删除/撤销和生产迁移未实现 | 2026-08-28 |
+| FR-007 | 部分成功和诊断 | 稳定解析错误和 confirmed 回执已实现 | UI-004、receipt service | AC-003/008/009 | partial local-verified | 缺逐层探测、重试、撤销 | 2026-08-28 |
 | FR-008 / IF-004 | 开放导出 | 仅规格 | source-schema export | AC-010 | planned | 缺开放 schema 文档与 QR 容量策略 | 2026-08-27 |
-| NFR-001 | SSRF/解压/开放代理防护 | 风险已识别 | security/gateway | 恶意反例套件 | planned | 缺实现与红→绿证据 | 2026-08-27 |
+| NFR-001 | SSRF/解压/开放代理防护 | 解压/记录边界反例已实现；尚无网络动作 | security/gateway | 恶意反例套件 | parser local-verified / network planned | 缺 URL 与解析后 IP 策略 | 2026-08-28 |
 | NFR-007 | 合法开源依赖 | 候选已发现 | lockfiles、THIRD_PARTY | license audit | discovered | 版本/许可证/安全公告待任务0复核 | 2026-08-27 |
-| AC-001 至 AC-010 | 业务验收 | 导入相关均未运行 | E2E + 真实浏览器 | 对应 AC | missing | 当前最高优先级，先贯通双入口解析/保存 | 2026-08-28 |
+| AC-001 至 AC-010 | 业务验收 | AC-002/003 本地通过；AC-001 完成真实预览但未出图；其余部分/未运行 | E2E + 真实浏览器 | 对应 AC | mixed, no cross-level rollup | 下一门为 vault/SSRF/probe/render | 2026-08-28 |
 | JRN-007 / FR-009 | 历史源日期和真实瓦片 | 日期事实、合成 20 年源、安全 OviBridge、注册源瓦片 API 已本地验证；官方客户端仅导入成功 | `packages/temporal-source`、`apps/gateway/src/{temporal,routes/temporal}.ts` | gateway/contract suite 22 tests；AC-011 未运行 | synthetic local-verified / real adapter blocked | 官方日期目录仍下载；Web 服务未启用 | 2026-08-27 |
-| JRN-008 / FR-010 | 双湖 AOI 确认 | GeoJSON 校验、两个独立 approximate 预设和不可变版本追加已本地验证 | `packages/aois/src/{schema,presets}.ts`；editor planned | 5 unit tests；AC-012/013/014 未运行 | contract local-verified / UI missing | 预设不是精确边界；缺地图编辑确认 | 2026-08-27 |
+| JRN-008 / FR-010 | 双湖 AOI 确认 | GeoJSON 校验、独立 approximate 预设、地图新建/编辑和不可变版本追加已本地验证 | `packages/aois`、`apps/web/src/history/Aoi*` | unit + Chrome E2E | synthetic UI local-verified | 预设不是用户在真实影像上确认的精确边界 | 2026-08-28 |
 | JRN-009 / FR-011/012 | 四屏、卷帘和播放 | 四屏、逐屏状态、共享/回放 ViewState、卷帘、播放和缺年隔离均已本地构建 | `apps/web/src/history` | UI/sync tests + Chrome E2E passed | synthetic local-verified | 真实奥维源和用户 AOI 未接受 | 2026-08-27 |
 | FR-013 / BR-014 | 变化观察证据等级 | 可见对象、原因假设和独立证据门已实现 | `apps/web/src/history/ObservationPanel.tsx` | component tests passed；AC-016 synthetic-only | UI local-verified | 尚无真实观察、外部逐年证据或用户接受 | 2026-08-27 |
 | JRN-007/008 / FR-010/014 | 任意框选后自动四期 | POST 创建、服务端 `area-*` 身份、矩形拖拽/多边形绘制、动态 20 年窗口、唯一四期、几何 fit 和真实浏览器非湖区旅程均已实现 | `packages/aois`、`packages/temporal-source`、`apps/gateway/src/routes/aois.ts`、`apps/web/src/history` | 单元/组件/路由测试 + 非湖区 Chrome E2E | synthetic local-verified / generic UI local-candidate | 真实奥维四日期闸门与用户独立签收未完成 | 2026-08-27 20:09 |
 
-阶段计数不能跨级汇总：合成链路已有 `local-verified`；开放工作台整体为 `local-candidate`；真实奥维、`main`、`deployed` 和用户 `accepted` 均未达到。
+阶段计数不能跨级汇总：`SLICE-V0-IMPORT-001` 和合成时序链路分别达到 `local-verified`；真实二维码渲染、完整 AC-001、`main`、`deployed` 和用户 `accepted` 均未达到。
 
 ## 14. 风险与未决项
 
 1. **协议漂移**：`.ovmap` 可能跨版本改变头部、压缩、字段和记录布局。对策是显式适配器和 golden fixture，不做无边界扫描。
-2. **二维码私有协议**：官方未公开 wire schema。需要合法样本、独立观察和失败关闭。
+2. **二维码私有协议**：官方未公开 wire schema。用户样本证明至少存在普通模板与 `at/ad/al + opaque ul` 两种变体；未知字段继续失败关闭，私有值必须进 vault 或官方桥而非普通 JSON。
 3. **许可证**：多个最相关 GitHub 候选没有明确 LICENSE；只能借鉴行为，不复制代码。
 4. **图源授权**：公开配置可能盗链或含共享 token。产品必须显示来源未知并要求用户确认，不内置。
 5. **SSRF/秘密**：本地代理天然高风险。客户端不能传任意 URL；后端策略为最终裁决。
@@ -315,7 +317,7 @@ fixtures/synthetic/temporal  无外网的 20 年彩色/带标签时序瓦片
 | GitHub | 奥维相关仓库/样本 | 多查询族、代码搜索和重点仓库静态核验 | 第 9 节 | 中 | 私有/删除/未索引仓库不可见 |
 | 本地资产 | 是否已有项目 | 工作区深度 2 目录/关键文件 | find 输出 | 高 | 深层无关项目未扫描，因绿地命名已足够 |
 | 二进制样本 | `.ovmap` 基本容器 | 一个公开 455-byte 样本 | 魔数、zlib、字符串 | 中 | 字段边界、历史版本、加密未知 |
-| 运行链 | Web UI 到真实出图 | 合成时序消费链已验证；导入链尚无产品 | 本地测试与当前代码盘点 | 高 | 需先实施双入口，再单独验证真实图源 |
+| 运行链 | Web UI 到真实出图 | 双入口解析/确认保存与合成时序消费链均验证 | 全量测试和 6 条 Chrome E2E | 高 | 中间的 vault/SSRF/probe/真实 tile proxy 尚缺 |
 | 发布链 | GitHub/CI/部署 | 尚未建立 | missing | 高 | 未获当前远端写入/部署范围 |
 
 继续检索的停止条件已满足到“可以写 V0 规格”，但不满足“可以声称完整兼容”。实施任务 0 要补依赖版本、合法 fixture 和运行命令。

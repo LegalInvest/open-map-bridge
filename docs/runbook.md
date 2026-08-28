@@ -1,7 +1,10 @@
-# OpenMapBridge 通用四期历史影像本地运行手册
+# OpenMapBridge 本地运行手册
 
 ## 当前可运行范围
 
+- 图源导入工作台（默认首页）：二维码图片、摄像头扫一扫和 `.ovmap` 点击/拖入；检查阶段零上游请求，显示脱敏预览，授权勾选后保存 `confirmed` 配置与回执，刷新/重启可恢复。
+- 二维码：支持开放 `oms1:` 和经真实样本验证的 `ovobj` 结构；`at/ad/al` 和不透明 `ul` 不回显、不持久化，图层会明确标记需要本机奥维桥接或后续凭证保险库。
+- `.ovmap`：首个版本只支持 `OviO + record37-zlib` 家族；公开 455-byte 样本可列出 5 个图层。其他家族稳定拒绝，不承诺虚假全兼容。
 - 浏览器工作台：在地图上框选任意矩形或多边形并命名，网关保存后自动覆盖最近 20 个完整 UTC 自然年，选四个不重复且尽量等距的日期，支持四屏对齐、卷帘、播放、缺年状态、AOI 修订和观察证据等级。
 - 宝应湖、高邮湖只作为样例与回归夹具，不是产品边界。
 - 默认图源：确定性的本地合成源。它只用于证明交互和状态，不是卫星影像。
@@ -22,9 +25,26 @@ npm run dev
 - Web：`http://127.0.0.1:5173`
 - 网关：`http://127.0.0.1:4174`
 
-按 `Ctrl+C` 同时停止两个服务。运行状态保存在 `data/temporal-state.json`；真实瓦片、二维码和奥维凭证不写入该文件。
+按 `Ctrl+C` 同时停止两个服务。运行状态保存在 `data/temporal-state.json`；只保存开放定义和脱敏回执。二维码原图/载荷、`.ovmap` 原文件、真实瓦片、`at/ad/al`、不透明 `ul` 和奥维凭证不写入该文件。
 
-## 合成源验收
+## 导入验收
+
+```bash
+npm run fixtures:acquire
+npm run fixtures:verify
+npm run test:compat
+npm run test:e2e
+```
+
+公开 fixture 只作本地 clean-room 解析证据，已 gitignore，不赋予其嵌入图源的使用权。授权真实二维码只做预览门时运行：
+
+```bash
+OMB_ACCEPTANCE_QR='/absolute/path/to/authorized-qr.png' npm run test:e2e:authorized-qr
+```
+
+该命令不会勾选授权或请求二维码中的服务器。默认 E2E 使用合成 QR 完成“预览→授权→保存→刷新恢复”，用合成五图层 `.ovmap` 完成选择旅程；授权本地门另外验证用户真实二维码和公开真实 `.ovmap` 的浏览器解码。
+
+## 历史影像合成源验收
 
 ```bash
 npm test

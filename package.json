@@ -13,11 +13,15 @@
   ],
   "scripts": {
     "env:check": "node scripts/verify-environment.mjs",
+    "fixtures:acquire": "node scripts/acquire-research-fixtures.mjs",
+    "fixtures:verify": "node scripts/verify-local-fixtures.mjs",
     "test": "node --test scripts/*.test.mjs && vitest run --passWithNoTests",
+    "test:compat": "vitest run --config vitest.compat.config.ts",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "build": "npm run build --workspaces --if-present",
     "dev": "node scripts/dev.mjs",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "test:e2e:authorized-qr": "playwright test --config playwright.authorized.config.ts"
   },
   "devDependencies": {
     "@playwright/test": "1.62.1",

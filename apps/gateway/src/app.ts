@@ -6,6 +6,8 @@ import { TemporalStateRepository } from './storage/temporal-state.js';
 import { TemporalSourceRegistry } from './temporal/registry.js';
 import { SyntheticTemporalAdapter } from './temporal/synthetic-adapter.js';
 import { OviBridgeAdapter } from './temporal/ovi-bridge.js';
+import { createImportInspector } from './import/inspector.js';
+import { registerImportRoutes } from './routes/import.js';
 
 interface BuildAppOptions {
   dataPath: string | null;
@@ -37,5 +39,6 @@ export async function buildApp(options: BuildAppOptions): Promise<FastifyInstanc
   app.get('/api/comparisons', async () => repository.listComparisons());
   registerAoiRoutes(app, repository);
   registerTemporalRoutes(app, registry);
+  registerImportRoutes(app, createImportInspector(), repository);
   return app;
 }

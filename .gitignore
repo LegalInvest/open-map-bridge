@@ -6,5 +6,7 @@ playwright-report/
 test-results/
 data/
 cache/
+fixtures/local/*
+!fixtures/local/README.md
 .env
 *.log

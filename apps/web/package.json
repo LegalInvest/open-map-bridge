@@ -10,9 +10,15 @@
   },
   "dependencies": {
     "@omb/aois": "0.0.0",
+    "@omb/source-schema": "0.0.0",
     "@omb/temporal-source": "0.0.0",
+    "@zxing/browser": "0.2.1",
     "ol": "10.10.0",
+    "qrcode": "1.5.4",
     "react": "19.2.8",
     "react-dom": "19.2.8"
+  },
+  "devDependencies": {
+    "@types/qrcode": "1.5.6"
   }
 }

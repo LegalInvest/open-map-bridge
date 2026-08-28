@@ -21,3 +21,6 @@
 - 2026-08-28：用户明确把二维码扫描和 `.ovmap` 导入重新提升为项目最高优先级；当前切片切换为 `SLICE-V0-IMPORT-001`。
 - 当前实现事实：时序/AOI/四期对比为 `local-verified` 合成链路；QR 图片/摄像头、`ovobj` 解析、`.ovmap` codec、安全预览、确认保存和真实图源渲染均尚未实现。
 - 当前执行顺序：开放 schema → `.ovmap record37-zlib` 有界 codec → `ovobj`/开放二维码 → 零外联检查 API → 双入口 UI → 确认保存 → 正反例与浏览器 E2E。
+- 2026-08-28：完成 `SLICE-V0-IMPORT-001` 本地实现。新增二维码图片/摄像头、`.ovmap` 点击/拖入、安全预览、授权门、统一 `MapSourceDefinition`、确认配置/回执原子保存和刷新恢复；状态停在 `confirmed`，未冒充已探测/已出图。
+- 用户真实二维码经 Chrome 实扫通过；证据显示实际变体含结构键 `at/ad/al`，`ul` 为 72 字符不透明协议值。实现只记录需要凭证/奥维桥接，不回显或持久化这些值。
+- 公开真实 455-byte `.ovmap` 经 codec 与浏览器双门列出 5 图层；检查阶段未请求其嵌入 host。全量门：84 Vitest + 2 Node、7 workspace 类型检查、生产构建、1 compatibility test、4 默认 Chrome E2E、2 授权本地 E2E 全过。

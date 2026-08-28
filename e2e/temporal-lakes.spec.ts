@@ -3,6 +3,7 @@ import { expect, test } from '@playwright/test';
 test('draws an arbitrary non-preset area and automatically creates a four-frame comparison', async ({ page }) => {
   await page.goto('/');
   await expect(page).toHaveTitle('OpenMapBridge · 通用四期历史影像');
+  await page.getByRole('button', { name: '历史影像四期' }).click();
   await expect(page.getByRole('heading', { name: '历史影像四期对比' })).toBeVisible();
   await expect(page.getByLabel('面板日期')).toHaveCount(4);
 
@@ -47,6 +48,7 @@ test('compares both lake presets with aligned views, isolated failures, and an e
   });
 
   await page.goto('/');
+  await page.getByRole('button', { name: '历史影像四期' }).click();
   await expect(page.getByRole('heading', { name: '历史影像四期对比' })).toBeVisible();
   await expect(page.getByText('当前：合成验收源')).toBeVisible();
   await expect(page.getByText('范围待确认')).toBeVisible();
