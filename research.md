@@ -11,13 +11,14 @@
 - 2026-08-27 用户提供并授权试用一张“奥维高清历史影像91”二维码；要求同一个图源选择多个历史年份，并批准“官方奥维本机桥接＋开放 Web 对比核心”。
 - 首批业务验收：宝应湖、高邮湖用户框选区域 2006–2025 的对齐影像、四期对比和时间播放；污染、过度渔猎/养殖或开发原因只作为待验证假设。
 - 2026-08-27 用户纠偏：产品不是双湖专用时间轴，而是任意图源上框选任意区域后一次自动得到四张、展现约 20 年变化；双湖只做实验。用户随后明确批准“方案 A”，即保留开放内核、先贯通官方奥维本机桥接真实源，再扩展协议矩阵和规模。
+- 2026-08-28 用户再次纠偏：项目最核心应先打通奥维图源导入；二维码图片/摄像头扫描和 `.ovmap` 文件都必须真实实现。当前切片由消费端四期对比切回 `SLICE-V0-IMPORT-001`，既有时序能力保留为下游回归。
 
 ### 本轮回答
 
 - 固化产品旅程、规则、数据、接口、安全和验收。
 - 记录当前 `.ovmap`/二维码证据、开源候选、项目资产和技术推荐。
-- 当前增量先更新通用框选四期规格与计划，再用 TDD 开发；不抓取大范围地图、不部署公网、不连接企业服务器。
-- 2026-08-27 19:52 当前实现已完成合成源上的四屏、卷帘、播放、缺年状态和观察证据等级；14 个 Vitest 文件共 32 测试，加 2 个 Node 测试通过。该结论仍是 `local-verified` 合成代码证据，不代表任意 AOI 创建或真实奥维瓦片已经可用。
+- 当前增量按已批准导入计划用 TDD 实现：开放 schema、`.ovmap record37-zlib`、`ovobj`/开放二维码、零外联检查、双入口 UI、授权确认和本地保存；不抓取大范围地图、不部署公网、不连接企业服务器。
+- 2026-08-27 20:14 当前实现已完成合成源上的任意 AOI、四屏、卷帘、播放、缺年状态和观察证据等级；48 个 Vitest 加 2 个 Node 测试、类型检查、生产构建和 2 条 Chrome E2E 通过。该结论仍是 `local-verified` 合成消费链路，不代表 QR/`.ovmap` 已导入或真实奥维瓦片已经可用。
 
 ### 搜索与核验边界
 
@@ -35,12 +36,13 @@
 - Leader Skill：`/Users/assis/.codex/skills/leader/SKILL.md`
 - Skill SHA-256：`477ed37e9381a866cc04622fee62a5ab167208d2db77ae03e04eaf13c26f6e8c`
 - Skill 修改时间：`2026-08-24T17:21:56+0800`
-- 已完整读取：`product-specification.md`、`anatomy.md`、`context-acquisition.md`、`dual-translation.md`、`evolution.md`
+- 已完整读取：`product-specification.md`、`anatomy.md`、`context-acquisition.md`、`dual-translation.md`、`research-orchestration.md`、`evolution.md`
 - reference SHA-256：
   - product-specification：`56d2f5d083c2d4074109fe3c9b9a04542a858d849754be5fdb1394d93cc70a40`
   - anatomy：`99492cea539426065460fa4c482d609460d09a4e3b87b5a4dcb0586bd9b52c08`
   - context-acquisition：`c4efe9db9b728e2ffe1f19d26d8c6f6005b3f1650afbfe7b9bc079a5587d6608`
   - dual-translation：`4dd5898ddbaed2450eccde27954db2a2c483fa53c7fa0db53bfa7eadc8220915`
+  - research-orchestration：`3a91ff4564f695c87c333151b573f0747b4f48d23ec981bd416cf30224cbdf09`
   - evolution：`81b732cf786e71f318808c2752fc46aa704bd8e54ba108b73873dd4e78608676`
 
 不得把聊天中出现的账号、口令、密钥或服务器密码写入项目。本文件没有保存这些秘密。
@@ -87,7 +89,7 @@
 - 把“联网和出图”延后到用户看清配置并确认之后。
 - 把解析、授权、探测、渲染、保存分成可观察状态。
 - 把封闭配置转为开放模型和可迁移回执。
-- 把固定“宝应湖/高邮湖”入口改为任意矩形/多边形框选；系统自动计算最近 20 个完整自然年并选择最多四个唯一日期。
+- 先把二维码图片/摄像头与 `.ovmap` 两种入口汇入同一开放模型；用户保存后，再进入任意矩形/多边形框选和四期历史影像消费链路。
 
 ## 5. 业务对象与口径
 
@@ -110,8 +112,8 @@
 |---|---|---|---|
 | 项目目录 | 新建 `/Users/assis/Documents/Codex/2026-08-27/open-map-bridge` | 本轮文件系统创建 | 2026-08-27 |
 | 既有同类本地仓库 | 未发现 | `find /Users/assis/Documents/Codex -maxdepth 2` 仅命中既有 VegFlow mapping 目录，无 Ovi/OpenMapBridge 项目 | 2026-08-27 |
-| Git 仓库 | 已初始化本地 `main`；首个规格 commit `5abe01b`；无 remote | `git log -1 --oneline`、`git status --short` | 2026-08-27 |
-| 根卷空间 | 2026-08-27 19:52 复核约 13 GiB 可用；此前同日曾剧烈波动，当前执行门提高为 8 GiB | `df -h /System/Volumes/Data` | 2026-08-27 |
+| Git 仓库 | 隔离工作树分支 `feature/temporal-lakes-v0`，当前基线 `13d4162`；无 remote | `git branch --show-current`、`git log -1 --oneline`、`git remote -v` | 2026-08-28 |
+| 根卷空间 | 2026-08-28 开工复核约 15 GiB 可用；此前曾剧烈波动，当前执行门为 8 GiB | `df -h /` | 2026-08-28 |
 | Node/Docker 工具链 | 本机 Node `v26.7.0`、npm `11.19.0`、Docker `29.4.0`、Compose `5.1.2`；计划冻结 Node `24.20.0` LTS 作为目标运行时 | 版本命令；[Node 官方发布表](https://nodejs.org/en/about/previous-releases) | 2026-08-27 |
 | 奥维桌面客户端 | 先发现旧 2.6.3；随后从官方分发安装并验签 10.6.0 到独立应用路径，未覆盖旧版 | 应用版本、代码签名、公证和官方安装包校验 | 2026-08-27 |
 
@@ -126,7 +128,7 @@
 
 ### GitHub 与远端
 
-- 当前机器 GitHub CLI 在此前同线程核验为已登录账号 `LegalInvest`；当前项目尚无主仓、remote、main 或 CI。
+- 当前机器 GitHub CLI 在此前同线程核验为已登录账号 `LegalInvest`；当前隔离工作树无 remote、主仓或 CI。
 - 用户批准产品方向不等于授权创建远端仓库、推送、公开发布或部署；这些阶段必须单独取证和遵循目标范围。
 - 两台云服务器不在当前 V0 规格交付范围，本轮未连接。
 
@@ -228,7 +230,7 @@ QR/文件 → 纯本地 inspect → version adapter → MapSourceDefinition prev
 → tile proxy → OpenLayers render → receipt + persisted state
 ```
 
-上述时序路径中的日期事实、AOI 创建/版本、动态 20 年窗口、自动唯一四期、几何自适应、网关、四屏、卷帘、播放和观察面板已经实现；真实奥维瓦片仍被第三方接口监听确认门阻塞。QR/`.ovmap` 通用导入主线仍是 planned。当前没有 CI、远端制品、公网部署或真实奥维瓦片验收。
+上述时序路径中的日期事实、AOI 创建/版本、动态 20 年窗口、自动唯一四期、几何自适应、网关、四屏、卷帘、播放和观察面板已经实现；真实奥维瓦片仍被第三方接口监听确认门阻塞。2026-08-28 用户已把 QR/`.ovmap` 通用导入主线重新提升为当前实现切片；代码仍为 missing，不能沿用 planned 叙述掩盖入口缺口。当前没有 CI、远端制品、公网部署或真实奥维瓦片验收。
 
 历史影像增量目标路径：
 
@@ -249,7 +251,7 @@ fixtures/synthetic/temporal  无外网的 20 年彩色/带标签时序瓦片
 | 层 | 事实 | 阶段 | 证据 |
 |---|---|---|---|
 | 产品裁决 | V0 方向和书面规格均获用户明确批准 | spec-approved | 当前线程 |
-| 书面规格与实施计划 | `goal.md`、`research.md`、设计文档和 10 项实施计划已落盘 | spec-approved / plan-ready | 本地文件、Git commit 与用户回复 |
+| 书面规格与实施计划 | `goal.md`、`research.md`、设计文档和 10 项实施计划已落盘；当前切片已重新排序为导入优先 | spec-approved / implementing | 本地文件、Git commit 与用户回复 |
 | 实施计划 | `docs/superpowers/plans/2026-08-27-open-map-bridge-v0-import.md`，10 个任务、81 个步骤 | plan-ready，待选择执行方式 | 本地计划文件与计划自检 |
 | 现有产品 | Web＋本地网关已有一键运行入口 | local-candidate | `npm run dev`；仅回环监听 |
 | `.ovmap` 魔数/压缩 | 一个公开样本完成内存级观察 | discovered | 第 7 节命令与结果 |
@@ -262,14 +264,14 @@ fixtures/synthetic/temporal  无外网的 20 年彩色/带标签时序瓦片
 | 自动测试 | 单元/组件/网关/环境门和 Chrome E2E 均已运行 | local-verified | `npm test`、`npm run typecheck`、`npm run build`、`npm run test:e2e` |
 | GitHub main | 无主仓 | missing | 未创建远端 |
 | 部署 | 无 | missing | 未授权/未实施 |
-| 业务验收 | 无真实 Web UI 旅程 | missing | 未实施 |
+| 业务验收 | 合成时序浏览器旅程已过；真实 QR/`.ovmap` 导入旅程尚无 | temporal synthetic local-verified / import missing | 自动化证据与当前代码盘点 |
 
 ## 13. 规格—代码—发布追踪矩阵
 
 | ID | 产品目标/行为 | 当前现实 | 目标路径/接口 | 测试/E2E | 阶段 | 差距/阻塞 | 最后核验 |
 |---|---|---|---|---|---|---|---|
-| JRN-001 / FR-001 | 真实二维码到出图 | 无实现 | `apps/web`、`packages/qr-import` | AC-001 | planned | 缺合法真实 QR fixture、代码 | 2026-08-27 |
-| JRN-002 / FR-002 | 多图层 `.ovmap` | 仅观察一个样本 | `packages/ovmap-codec`、IF-001 | AC-002/003 | discovered | 缺字段级解析和版本矩阵 | 2026-08-27 |
+| JRN-001 / FR-001 | 真实二维码到出图 | 官方客户端已导入用户样本；开放产品无入口 | `apps/web`、`packages/qr-import` | AC-001 | implementing / product missing | 先完成图片/摄像头解码和保存；真实出图另过探测门 | 2026-08-28 |
+| JRN-002 / FR-002 | 多图层 `.ovmap` | 已观察一个五记录公开样本；产品无 codec | `packages/ovmap-codec`、IF-001 | AC-002/003 | implementing / codec missing | 首版只承诺 `record37-zlib`，未知家族拒绝 | 2026-08-28 |
 | FR-003 / DATA-001 | 统一开放模型 | 规格已定义字段 | `packages/source-schema` | schema round-trip | planned | 缺 schema 与迁移代码 | 2026-08-27 |
 | FR-004 / BR-004/005 | 安全预览、零外联、秘密 | 仅规格 | `packages/security`、UI-003 | AC-004/009 | planned | 缺威胁测试和密钥方案 | 2026-08-27 |
 | FR-005 / IF-003 | 代理和真实渲染 | 仅推荐架构 | `apps/gateway`、`apps/web` | AC-005/007 | planned | 缺协议、CORS、SSRF和真实源 E2E | 2026-08-27 |
@@ -278,7 +280,7 @@ fixtures/synthetic/temporal  无外网的 20 年彩色/带标签时序瓦片
 | FR-008 / IF-004 | 开放导出 | 仅规格 | source-schema export | AC-010 | planned | 缺开放 schema 文档与 QR 容量策略 | 2026-08-27 |
 | NFR-001 | SSRF/解压/开放代理防护 | 风险已识别 | security/gateway | 恶意反例套件 | planned | 缺实现与红→绿证据 | 2026-08-27 |
 | NFR-007 | 合法开源依赖 | 候选已发现 | lockfiles、THIRD_PARTY | license audit | discovered | 版本/许可证/安全公告待任务0复核 | 2026-08-27 |
-| AC-001 至 AC-010 | 业务验收 | 均未运行 | E2E + 真实浏览器 | 对应 AC | missing | 无代码入口 | 2026-08-27 |
+| AC-001 至 AC-010 | 业务验收 | 导入相关均未运行 | E2E + 真实浏览器 | 对应 AC | missing | 当前最高优先级，先贯通双入口解析/保存 | 2026-08-28 |
 | JRN-007 / FR-009 | 历史源日期和真实瓦片 | 日期事实、合成 20 年源、安全 OviBridge、注册源瓦片 API 已本地验证；官方客户端仅导入成功 | `packages/temporal-source`、`apps/gateway/src/{temporal,routes/temporal}.ts` | gateway/contract suite 22 tests；AC-011 未运行 | synthetic local-verified / real adapter blocked | 官方日期目录仍下载；Web 服务未启用 | 2026-08-27 |
 | JRN-008 / FR-010 | 双湖 AOI 确认 | GeoJSON 校验、两个独立 approximate 预设和不可变版本追加已本地验证 | `packages/aois/src/{schema,presets}.ts`；editor planned | 5 unit tests；AC-012/013/014 未运行 | contract local-verified / UI missing | 预设不是精确边界；缺地图编辑确认 | 2026-08-27 |
 | JRN-009 / FR-011/012 | 四屏、卷帘和播放 | 四屏、逐屏状态、共享/回放 ViewState、卷帘、播放和缺年隔离均已本地构建 | `apps/web/src/history` | UI/sync tests + Chrome E2E passed | synthetic local-verified | 真实奥维源和用户 AOI 未接受 | 2026-08-27 |
@@ -308,12 +310,12 @@ fixtures/synthetic/temporal  无外网的 20 年彩色/带标签时序瓦片
 
 | 来源层 | 目标 | 已查 | 证据 | 可信度 | 未查/原因 |
 |---|---|---|---|---|---|
-| 用户意图 | 目标、终端、V0 | 当前线程全部相关消息 | 用户原话与批准 | 高 | 真实 QR 样本未提供 |
+| 用户意图 | 目标、终端、V0 | 当前线程全部相关消息 | 用户原话与批准 | 高 | 用户 QR 图片已提供；载荷不得落库或输出 |
 | 官方产品 | QR、`.ovmap`、字段、`.sdb` | 决定性帮助页 | 第 3 节链接 | 高 | 私有二进制 schema 未公开 |
 | GitHub | 奥维相关仓库/样本 | 多查询族、代码搜索和重点仓库静态核验 | 第 9 节 | 中 | 私有/删除/未索引仓库不可见 |
 | 本地资产 | 是否已有项目 | 工作区深度 2 目录/关键文件 | find 输出 | 高 | 深层无关项目未扫描，因绿地命名已足够 |
 | 二进制样本 | `.ovmap` 基本容器 | 一个公开 455-byte 样本 | 魔数、zlib、字符串 | 中 | 字段边界、历史版本、加密未知 |
-| 运行链 | Web UI 到真实出图 | 尚无产品 | missing | 高 | 需实施后验证 |
+| 运行链 | Web UI 到真实出图 | 合成时序消费链已验证；导入链尚无产品 | 本地测试与当前代码盘点 | 高 | 需先实施双入口，再单独验证真实图源 |
 | 发布链 | GitHub/CI/部署 | 尚未建立 | missing | 高 | 未获当前远端写入/部署范围 |
 
 继续检索的停止条件已满足到“可以写 V0 规格”，但不满足“可以声称完整兼容”。实施任务 0 要补依赖版本、合法 fixture 和运行命令。
@@ -332,3 +334,5 @@ fixtures/synthetic/temporal  无外网的 20 年彩色/带标签时序瓦片
 `EV-CAND-001 | 2026-08-27 | 旧规格把多时相遥感放到后续，且把 QR 主要当单图源；用户纠正同一个历史二维码可选择多个年份 | 官方奥维 10.6.0 实际导入后识别 GEE 历史影像并出现时间轴 | 根因是未在真实官方客户端验证特殊协议就冻结了单图源主线 | 当前项目新增 JRN-007 至 JRN-010、FR-009 至 FR-013、AC-011 至 AC-016，并把日期目录建模为运行时事实 | 待真实日期/瓦片复验 | 单项目一次 | 暂不修改全局 Skill | 该领域特殊，不应泛化为所有二维码 | proposed`
 
 `EV-CAND-002 | 2026-08-27 | 旧历史影像规格和 UI 把双湖写成产品主体，用户再次纠正“最终是通用系统”，随后收敛为任意区域一次四张跨 20 年 | goal.md、HistoryWorkspace、gateway 默认值和 E2E 均存在 lake/2006–2025 硬编码 | 根因是把首批验收夹具反向写成产品入口 | 当前项目批准通用框选四期设计，双湖降为 fixtures，新增 POST AOI、动态窗口、唯一四期和非湖区 E2E 计划 | 待实现复验 | 同项目第二次用户纠偏 | 暂不修改全局 Skill；Leader 已有“验收样例不得反向定义产品”原则 | 泛化规则已存在，先修项目执行 | proposed`
+
+`EV-CAND-003 | 2026-08-28 | 消费端四期对比已经形成完整合成链路，但产品入口仍不能读取用户最关键的二维码和 .ovmap；用户第三次纠偏把导入提升为核心 | 当前仓库只有 aois/temporal-source，packages/source-schema、qr-import、ovmap-codec 和导入 UI 均不存在 | 根因是优先交付了可见的历史影像界面，却跨过了上游图源获取与事实晋级门 | goal.md 切换为 V0.4，当前实施顺序改为 schema→双 codec→零外联预览→授权保存→后续真实渲染 | 待本轮代码和浏览器复验 | 同项目第三次用户纠偏 | 暂不修改全局 Skill；把纠偏作为项目执行审计项 | 若再次先做消费端，应触发停止并回到入口闭环 | proposed`
