@@ -61,3 +61,7 @@
 - 2026-08-28 17:58：启动 `FIX-BATCH-003`（分支 `codex/audit-p1-gateway-trust-boundary`），范围冻结为 OMB-AUD-020：精确回环 Host/Origin、`Sec-Fetch-Site`、Bearer、写请求 CSRF、固定窗口限流、安全响应头和服务端 app ID/路径权限；开发 Web token 仅由本地代理注入，SDK 改用独立应用 token 和认证瓦片 fetch。
 - 当前阶段：`local-candidate`；未连接真实源、未启动浏览器、未执行本机测试/构建。17:58 根卷约 5.5 GiB，继续由 PR CI 验证。
 - 唯一最安全下一步：完成 FIX-BATCH-003 文档/交底和静态检查后提交 PR；CI 全绿最多把 OMB-AUD-020 推进 main，不解除上游 DNS/IP、vault、真实 probe/ready 和真实日期阻塞。
+- 2026-08-28 18:04：PR #5 CI `33161851375` 首轮全绿：37 个 Vitest 文件/128 tests＋2 Node tests、8 workspace typecheck、生产构建、4 Chrome E2E。PR #5 随后 squash 合并为 main `1d0ebc4`。
+- 批次结果：`OMB-AUD-020` 达到 main；入站 local gateway 已有 Host/Origin/cross-site/Bearer/CSRF/app 权限/限流门。无真实奥维请求、无部署、无用户业务验收；上游请求时 DNS/IP、vault、probe/ready 和日期仍开放。
+- 当前文档分支：`codex/audit-p1-gateway-trust-evidence`，只回写 main/CI 证据。18:04 根卷约 5.5 GiB，仍低于 8 GiB 门。
+- 唯一最安全下一步：为 `FIX-BATCH-004` 冻结 `OMB-AUD-004`，移除 Ovi `listDates` 的虚构年度目录；在真实目录提供者和证据存在前明确“不支持/未知”，继续零外联。
