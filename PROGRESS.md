@@ -99,3 +99,7 @@
 - 唯一最安全下一步：完成 FIX-BATCH-007 交底指纹和静态 diff 门，提交 PR 由 GitHub CI 验证；全绿最多把 OMB-AUD-018 晋级 main，不解除 OMB-AUD-019 的确认消费/存储错误语义或真实图源阻塞。
 - 2026-08-28 19:12：PR #13 首次 CI `33166210759` 红灯。全部单元测试已通过；Web workspace 严格类型检查在两个测试 `new File([png(...)])` 处拒绝 `Uint8Array<ArrayBufferLike>` 作为要求 `ArrayBuffer` 的 BlobPart，随后构建和 Chrome E2E 未运行。生产资源门逻辑没有在该 run 中报错。
 - 修正：测试 PNG helper 直接分配并返回明确 `ArrayBuffer`，不放宽 DOM 类型、不改生产逻辑。唯一最安全下一步是同步红灯证据、更新交底指纹并推送 PR #13 重跑；全门绿前仍不得晋级。
+- 2026-08-28 19:15：PR #13 第二轮 CI `33166313733` 全绿：39 个 Vitest 文件/175 tests＋2 Node tests、8 workspace typecheck、生产构建、4 Chrome E2E 和 143 文件交底新鲜度全部通过；PR 随后 squash 合并为 main `873705b`。
+- 批次结果：`OMB-AUD-018` 达到 main；预览缓存具备主动 TTL/64 条/4 MiB LRU，二维码图片在 object URL、ZXing、放大 canvas 前受 8 MiB/16 MiPx/格式头/倍率门约束。未读取用户图片、未上传原图、未外联、未部署或用户验收；相机视频帧不在本问题完成定义内。
+- 当前证据分支：`codex/audit-p1-import-resource-bounds-evidence`，只回写 main/CI 证据。本机仍低于 8 GiB 门。
+- 唯一最安全下一步：合并 FIX-BATCH-007 证据回写后，为 FIX-BATCH-008 冻结 OMB-AUD-019 的“验证完成后消费/幂等重试”和输入、冲突、容量、存储错误分层；不得继续把所有异常压成预览失效 400。
