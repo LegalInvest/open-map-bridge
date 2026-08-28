@@ -27,4 +27,7 @@
 - 2026-08-28：用户明确最终结果必须支持“基于奥维地图图源进行二次开发”；当前切片切为 `SLICE-V0-SDK-001`，但不降低 QR/`.ovmap` 导入和真实渲染验收。
 - 已新增 `@omb/developer-sdk`、严格 V1 应用清单和 `/api/v1/developer` 源/日期/瓦片接口。开发者描述采用字段白名单；confirmed 导入源只有 `metadata`，合成 ready 适配器才有 `temporal-catalog/tiles`，配置但未探测的 OviBridge 不授予运行能力。
 - 本地验收：92 Vitest + 2 Node、8 workspace 类型检查、生产构建、4 默认 Chrome E2E 和 2 条用户授权本地兼容 E2E 全过；实际 HTTP 验证目录、2006–2025 共 20 个日期和 SVG 瓦片均成功。服务已恢复在 `127.0.0.1:5173/4174`。
-- 当前阶段：`SLICE-V0-SDK-001 local-verified`；真实奥维源仍是 `metadata-only/render blocked`，`main/deployed/accepted` 均未达到。唯一下一步是让同一 imported source ID 通过 vault/SSRF/最小探测并绑定 OviBridge，再由 V1 SDK 读取真实日期与瓦片。
+- 当前阶段：`SLICE-V0-SDK-001 local-verified`；产品代码的 GitHub `main` 状态见下方远端证据。真实奥维源仍是 `metadata-only/render blocked`，`deployed/accepted` 未达到。唯一下一步是让同一 imported source ID 通过 vault/SSRF/最小探测并绑定 OviBridge，再由 V1 SDK 读取真实日期与瓦片。
+- 2026-08-28：本地根目录 `/Users/assis/Documents/Codex/2026-08-27/open-map-bridge` 已快进为最新 `main`；公共 GitHub 主仓已创建：`https://github.com/LegalInvest/open-map-bridge`，Apache-2.0、README、贡献指南、安全披露和仓库主题已就绪，私密漏洞报告已开启。
+- 首次远端 CI 暴露 macOS 专用 `/usr/bin/sips`，已改为 `pngjs/jpeg-js` 跨平台像素归一化；本地全门再次通过。提交 `4b90939` 的 GitHub CI run `33146192919` 已通过 92 Vitest + 2 Node、8 workspace typecheck、build 和 4 Chrome E2E。
+- 阶段更新：记录到 `4b90939` 的产品代码已达到 `main`；仍无公网部署，真实奥维瓦片与用户业务签收未达到 `deployed/accepted`。唯一产品下一步保持不变：同一 imported source ID 的 vault/SSRF/probe/runtime binding。
