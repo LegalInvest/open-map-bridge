@@ -1,5 +1,7 @@
 # Generic Four-Frame Historical Imagery Implementation Plan
 
+> **2026-08-28 真值纠偏：** 本计划只保留四期选择算法；Ovi 年度请求目录已被 OMB-AUD-004 删除。操作者选择的 probe 日期不是源日期目录，生产 Ovi 适配器只能使用经授权来源核验并注入的日期。
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Let a user draw and save any map area, automatically select four requestable dates across the most recent 20 complete years, and render those dates in the existing aligned four-pane workspace before attempting the real Ovi bridge acceptance gate.
@@ -55,7 +57,7 @@ Filter out `missing` and `failed`, prefer `available` to `unknown`, create four 
 
 - [ ] **Step 4: Run focused and package tests**
 
-Run: `npx vitest run packages/temporal-source/src/four-frame.test.ts packages/temporal-source/src/annual-catalog.test.ts`
+Run: `npx vitest run packages/temporal-source/src/four-frame.test.ts`
 Expected: PASS.
 
 - [ ] **Step 5: Commit**
@@ -268,4 +270,3 @@ Run `npm run dev` with Ovi environment only when the real bridge gate passed; ot
 git add goal.md research.md PROGRESS.md BLOCKED.md docs/superpowers
 git commit -m "docs: define generic four-frame journey"
 ```
-

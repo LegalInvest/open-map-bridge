@@ -43,15 +43,24 @@ async function sourceFingerprint() {
     .filter(Boolean)
     .filter((path) => path !== 'docs/技术交底书.md')
     .sort();
-  if (paths.length === 0) throw new Error('technical disclosure source set is empty');
   const hash = createHash('sha256');
+  let fileCount = 0;
   for (const path of paths) {
+    let contents;
+    try {
+      contents = await readFile(join(root, path));
+    } catch (error) {
+      if (error && typeof error === 'object' && 'code' in error && error.code === 'ENOENT') continue;
+      throw error;
+    }
     hash.update(path, 'utf8');
     hash.update('\0');
-    hash.update(await readFile(join(root, path)));
+    hash.update(contents);
     hash.update('\0');
+    fileCount += 1;
   }
-  return { fingerprint: hash.digest('hex'), fileCount: paths.length };
+  if (fileCount === 0) throw new Error('technical disclosure source set is empty');
+  return { fingerprint: hash.digest('hex'), fileCount };
 }
 
 function shanghaiTimestamp() {

@@ -7,9 +7,9 @@
 - 状态：Approved / Implementing；用户于 2026-08-28 明确最终结果必须能基于已导入奥维图源进行二次开发
 - 产品裁决者：用户
 - 当前整合者：本 Codex 主线程
-- 更新时间：2026-08-28 18:04（Asia/Shanghai）
+- 更新时间：2026-08-28 18:28（Asia/Shanghai）
 - 适用目录：`/Users/assis/Documents/Codex/2026-08-27/open-map-bridge`
-- 当前切片：`FIX-BATCH-003 main`（PR #5，`1d0ebc4`，CI `33161851375`）；本地 gateway 入站 Host/Origin/DNS-rebinding、Bearer、CSRF、服务端应用权限与限流门已进入 main。下一批尚未写入代码；真实 probe 编排、ready 晋级、真实日期、部署与用户验收仍未达到
+- 当前切片：`FIX-BATCH-004 local-candidate`（分支 `codex/audit-p0-ovi-date-truth`）；删除 Ovi 虚构年度日期目录，只允许已验证日期项，无目录明确失败且未知 ID 零请求。FIX-BATCH-003 及证据已在 GitHub main `c73e318`；本批待 PR CI，真实目录提供者、probe/ready、部署与用户验收仍未达到
 - 上版：V0.4 奥维兼容双入口导入实施版
 
 <!-- GOAL_CAPSULE_START -->
@@ -21,9 +21,9 @@
 
 硬约束：clean-room 独立实现；不得复制奥维专有代码、商标或绕过会员/设备绑定；不得内置、记录或传播第三方 token；解析前不联网，确认前不请求图源；未知版本、解压异常、内网目标或不安全 URL 必须 fail closed；“文件已解析”“探测成功”“成功出图”是不同事实；任何成功都要有导入回执和可复现实证。
 
-当前只允许修改本项目目录；禁止清理用户文件、接触生产服务器、部署公网、批量抓取图源或离线下载 20 年整域瓦片。不得把真实秘密写入 fixture、日志、回执、普通 JSON 或前端。可用空间低于 8 GiB 立即停止本机构建、测试、截图和新增缓存；2026-08-28 18:04 最新约 5.5 GiB，低于门禁，本轮只能做小型源码/文档并由 GitHub PR CI 验证。发现越界需求写入 `BLOCKED.md`。
+当前只允许修改本项目目录；禁止清理用户文件、接触生产服务器、部署公网、批量抓取图源或离线下载 20 年整域瓦片。不得把真实秘密写入 fixture、日志、回执、普通 JSON 或前端。可用空间低于 8 GiB 立即停止本机构建、测试、截图和新增缓存；2026-08-28 18:28 最新约 5.3 GiB，低于门禁，本轮只能做小型源码/文档并由 GitHub PR CI 验证。发现越界需求写入 `BLOCKED.md`。
 
-`FIX-BATCH-001/002/003` 已进入 main `1d0ebc4`。第三批只收紧 gateway 入站边界：精确回环 Host、允许 Origin、跨站 Fetch-Site、Bearer、写请求 CSRF、自带权限的应用令牌、固定窗口限流和安全响应头；本地 Vite 代理只在服务端注入临时 UI token，token 不进入浏览器 bundle。它不执行真实 probe，也不授予 ready。
+`FIX-BATCH-001/002/003` 已进入产品 main `1d0ebc4`，证据回写后 GitHub main 为 `c73e318`。`FIX-BATCH-004` 当前仅为候选：删除 Ovi 的固定年度请求目录，只允许经授权来源核验后注入并通过 schema 的日期；无目录时明确拒绝，未知日期 ID 在零上游请求下返回未找到。它不提供真实目录、不执行真实 probe，也不授予 ready。
 
 第三批完成条件已由 CI `33161851375` 的 128 Vitest＋2 Node、8 workspace 类型检查、生产构建和 4 条 Chrome E2E 验证并进入 main：缺失/错误 Host、恶意 Origin、cross-site、缺失/错误 token、app ID 不符、权限不足、写请求缺 CSRF 和超限均在路由前稳定拒绝且不回显秘密；官方 Web 全旅程继续通过；直连 SDK 必须用独立 app token，服务端权限不能被 manifest 扩大。这不代表真实 probe 或 ready。项目最终完成条件仍是同一 source ID 获得有证据的 `tiles/temporal-catalog`，且至少两个真实日期返回可解码、非空并内容不同的瓦片。
 <!-- GOAL_CAPSULE_END -->
@@ -32,7 +32,7 @@
 
 用户于 2026-08-28 批准逐一修复全量审计问题。修复采用小批次、可回滚、逐项取证的方式；完整清单、优先级、状态、验收和追加记录见 `docs/问题账本.md`。
 
-`FIX-BATCH-003` 已进入 main，关联 `OMB-AUD-020`，保护 JRN-001/JRN-007/JRN-011、BR-001/015/017、IF-006、FR-009/014/017、NFR-001/004/006 和 AC-005/017/019/021。该批未新增外联入口、未调用真实奥维、未改变 configured 状态；测试用 `buildTestApp` 显式关闭入站门，生产 `server.ts` 必须解析并注入安全配置。
+`FIX-BATCH-004` 关联 `OMB-AUD-004`，保护 JRN-007、BR-011/015/016、FR-009/014 和 AC-011/012。完成候选必须满足：无已验证目录时 `listDates` 明确失败；未知、missing、failed 日期 ID 不发请求；只有通过 `TemporalDateEntry` 严格校验且 ID 唯一的注入项可按窗口返回；旧年度生成器删除；probe 日期只作为探测输入。真实目录提供者和真实影像验收不在该候选的完成声明中。
 
 ## 一页产品定义
 
@@ -832,3 +832,4 @@ V1 公共类型和错误语义通过契约测试冻结；新增可选能力不�
 - 2026-08-28：`FIX-BATCH-002` 经 PR #3 合并为 main `de36012`；首次 CI `33160137300`、第二次 `33160229102` 的失败已保留，第三次 `33160315934` 通过 122 Vitest＋2 Node、8 workspace typecheck、build 和 4 Chrome E2E。021 达到 main，002 仅解码前置达到 main；真实探测/ready 仍开放。
 - 2026-08-28：启动 `FIX-BATCH-003`，为本地 gateway 增加精确回环 Host/Origin、DNS-rebinding/cross-site、Bearer、CSRF、服务端应用权限、限流和安全响应头候选；Vite 代理注入临时 UI token，SDK 使用独立 app token。当前仅 `local-candidate`，本机约 5.5 GiB 未测试/构建，待 PR CI。
 - 2026-08-28：`FIX-BATCH-003` 经 PR #5 合并为 main `1d0ebc4`；CI `33161851375` 首轮通过 128 Vitest＋2 Node、8 workspace typecheck、build 和 4 Chrome E2E。020 达到 main；上游 DNS/IP、vault、真实探测/ready 仍开放。
+- 2026-08-28：启动 `FIX-BATCH-004`，删除 Ovi 虚构年度日期目录并只接受已验证注入日期；无目录明确失败，未知日期 ID 零请求。当前为 `local-candidate`，本机约 5.4 GiB 未测试/构建，待 PR CI；真实日期目录提供者和真实影像仍开放。

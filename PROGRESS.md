@@ -65,3 +65,8 @@
 - 批次结果：`OMB-AUD-020` 达到 main；入站 local gateway 已有 Host/Origin/cross-site/Bearer/CSRF/app 权限/限流门。无真实奥维请求、无部署、无用户业务验收；上游请求时 DNS/IP、vault、probe/ready 和日期仍开放。
 - 当前文档分支：`codex/audit-p1-gateway-trust-evidence`，只回写 main/CI 证据。18:04 根卷约 5.5 GiB，仍低于 8 GiB 门。
 - 唯一最安全下一步：为 `FIX-BATCH-004` 冻结 `OMB-AUD-004`，移除 Ovi `listDates` 的虚构年度目录；在真实目录提供者和证据存在前明确“不支持/未知”，继续零外联。
+- 2026-08-28 18:11：`FIX-BATCH-004` 已形成 `local-candidate`（分支 `codex/audit-p0-ovi-date-truth`）。删除 `annual-catalog` 年度生成器；OviBridge 只接受经 `TemporalDateEntry` 严格校验且 ID 唯一的注入日期；无目录时 `listDates` 明确失败，未登记 ID 以及已登记为 `missing/failed` 的 ID 在调用 fetch 前返回未找到；窗口只过滤已验证项。已登记的 `availability=unknown` 仍可按既有策略作为探测候选，不与“未登记 ID”混淆。
+- 文档真值同步：运行手册明确四个 probe 日期只是操作者测试输入，原设计和两份历史计划标注年度目录规则已被 OMB-AUD-004 取代；`goal.md`、`research.md`、`BLOCKED.md`、技术交底书和问题账本同步候选阶段。真实日期目录提供者、真实 probe/ready、瓦片和用户验收仍未完成。
+- 当前阶段：`local-candidate`，不是 `local-verified/main/deployed/accepted`。18:28 `/System/Volumes/Data` 约 5.3 GiB，低于 8 GiB 门；本机测试、构建、浏览器、下载和影像生成继续暂停，且本批没有发出真实请求。
+- 2026-08-28 18:28：首次交底指纹更新因 git 索引仍列出已删除的 `annual-catalog` 文件而 `ENOENT`；该失败已保留。指纹脚本改为在删除变更中只计算仍存在的源码，随后 `update/check` 对 137 个文件、指纹 `64873c34d881` 通过。该兼容修复不关闭 OMB-AUD-035 的指纹覆盖范围问题。
+- 唯一最安全下一步：提交 FIX-BATCH-004 PR 并以 GitHub CI 验证；全绿并合并后最多把 OMB-AUD-004 的“不伪造/无目录失败”规则推进 main，不得据此声称真实年份目录或影像可用。
