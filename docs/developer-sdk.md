@@ -21,7 +21,7 @@
 | GET | `/api/v1/developer/sources/:id/dates?aoiId=&from=&to=` | 仅有 `temporal-catalog` 时可用 |
 | GET | `/api/v1/developer/sources/:id/tiles/:dateId/:z/:x/:y` | 仅有 `tiles` 时可用；禁止任何查询参数 |
 
-日期和瓦片入口与旧时序 API 共用 `@omb/temporal-source` 严格 schema：`from/to` 必须是实际存在的 `YYYY-MM-DD` 日历日且 `from <= to`；AOI/date ID 长度为 1–160，禁止首尾空白和控制符；路径坐标只接受无符号规范十进制安全整数（不接受前导零、科学计数或小数），`z <= 30` 且 `x/y < 2^z`。稳定错误包括 `aoi-id-required`、`invalid-aoi-id`、`invalid-date-window`、`invalid-date-id`、`invalid-coordinate` 和 `query-not-allowed`。SDK 在 fetch 前执行相同验证。
+日期和瓦片入口与旧时序 API 共用 `@omb/temporal-source` 严格 schema：`from/to` 必须是实际存在的 `YYYY-MM-DD` 日历日且 `from <= to`；AOI/date ID 长度为 1–160，禁止首尾空白和控制符；路径坐标只接受无符号规范十进制安全整数（不接受前导零、科学计数或小数），`z <= 30` 且 `x/y < 2^z`。稳定业务错误包括 `aoi-id-required`、`invalid-aoi-id`、`invalid-date-window`、`invalid-date-id`、`invalid-coordinate` 和 `query-not-allowed`。HTTP 客户端还必须接受更早的协议层拒绝：超过 Fastify 路径参数长度门的 URL 会在进入业务路由前返回 414，而不是放宽服务器门后再返回 `invalid-date-id`。SDK 在 fetch 前执行相同业务验证，因此不会为这类非法输入发请求。
 
 响应不会出现 `hosts`、`pathTemplate`、`queryParameters`、`credentialRef`、`sourceProvenance`、`compatibilityExtension`、输入哈希或原始载荷。调用方不能把上游 URL、host、token 或自定义请求头作为业务参数；唯一允许的认证头由 SDK 从本机应用令牌生成。
 

@@ -183,10 +183,6 @@ it('applies the same strict date, ID, and coordinate contract to V1 routes', asy
       path: 'dates?aoiId=%20area-1&from=2006-01-01&to=2025-12-31',
       error: 'invalid-aoi-id',
     },
-    {
-      path: `tiles/${'x'.repeat(161)}/8/212/102`,
-      error: 'invalid-date-id',
-    },
     { path: 'tiles/scene-2006/1e1/0/0', error: 'invalid-coordinate' },
     { path: 'tiles/scene-2006/8/256/0', error: 'invalid-coordinate' },
   ]) {
@@ -197,4 +193,14 @@ it('applies the same strict date, ID, and coordinate contract to V1 routes', asy
     expect(response.statusCode).toBe(400);
     expect(response.json()).toEqual({ error });
   }
+});
+
+it('keeps the HTTP path-length gate ahead of the V1 tile route', async () => {
+  const app = await buildApp({ dataPath: null });
+  apps.push(app);
+  const response = await app.inject({
+    method: 'GET',
+    url: `/api/v1/developer/sources/synthetic-lakes/tiles/${'x'.repeat(161)}/8/212/102`,
+  });
+  expect(response.statusCode).toBe(414);
 });

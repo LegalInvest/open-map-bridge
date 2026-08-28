@@ -7,9 +7,9 @@
 - 状态：Approved / Implementing；用户于 2026-08-28 明确最终结果必须能基于已导入奥维图源进行二次开发
 - 产品裁决者：用户
 - 当前整合者：本 Codex 主线程
-- 更新时间：2026-08-28 18:40（Asia/Shanghai）
+- 更新时间：2026-08-28 18:47（Asia/Shanghai）
 - 适用目录：`/Users/assis/Documents/Codex/2026-08-27/open-map-bridge`
-- 当前切片：`FIX-BATCH-005 local-candidate`（分支 `codex/audit-p1-temporal-input-truth`）；旧 API、V1、SDK 和适配器统一实际 ISO 日期、顺序窗口、受限 ID 与瓦片边界 schema。FIX-BATCH-004 及证据已在 GitHub main `1e7308f`；本批待 PR CI，真实目录/provider/probe/ready、部署与用户验收仍未达到
+- 当前切片：`FIX-BATCH-005 local-candidate`（PR #9，分支 `codex/audit-p1-temporal-input-truth`）；旧 API、V1、SDK 和适配器统一实际 ISO 日期、顺序窗口、受限 ID 与瓦片边界 schema。首次 CI `33164557423` 为 159/161 Vitest 通过，两个超长路径用例因更早 HTTP 414 而红；已保留安全门并修正断言，待重跑。FIX-BATCH-004 及证据已在 GitHub main `1e7308f`；真实目录/provider/probe/ready、部署与用户验收仍未达到
 - 上版：V0.4 奥维兼容双入口导入实施版
 
 <!-- GOAL_CAPSULE_START -->
@@ -21,7 +21,7 @@
 
 硬约束：clean-room 独立实现；不得复制奥维专有代码、商标或绕过会员/设备绑定；不得内置、记录或传播第三方 token；解析前不联网，确认前不请求图源；未知版本、解压异常、内网目标或不安全 URL 必须 fail closed；“文件已解析”“探测成功”“成功出图”是不同事实；任何成功都要有导入回执和可复现实证。
 
-当前只允许修改本项目目录；禁止清理用户文件、接触生产服务器、部署公网、批量抓取图源或离线下载 20 年整域瓦片。不得把真实秘密写入 fixture、日志、回执、普通 JSON 或前端。可用空间低于 8 GiB 立即停止本机构建、测试、截图和新增缓存；2026-08-28 18:40 最新约 5.3 GiB，低于门禁，本轮只能做小型源码/文档并由 GitHub PR CI 验证。发现越界需求写入 `BLOCKED.md`。
+当前只允许修改本项目目录；禁止清理用户文件、接触生产服务器、部署公网、批量抓取图源或离线下载 20 年整域瓦片。不得把真实秘密写入 fixture、日志、回执、普通 JSON 或前端。可用空间低于 8 GiB 立即停止本机构建、测试、截图和新增缓存；2026-08-28 18:47 最新约 5.2 GiB，低于门禁，本轮只能做小型源码/文档并由 GitHub PR CI 验证。发现越界需求写入 `BLOCKED.md`。
 
 `FIX-BATCH-001/002/003/004` 已进入产品 main `5b6f06e`，证据回写后 GitHub main 为 `1e7308f`。`FIX-BATCH-005` 当前仅为候选：将日期、窗口、AOI/date ID 和瓦片坐标真值下沉到 `@omb/temporal-source`，由旧 API、V1、SDK 和适配器共同执行。它不发真实请求、不改变 source lifecycle，也不授予 ready。
 
@@ -32,7 +32,7 @@
 
 用户于 2026-08-28 批准逐一修复全量审计问题。修复采用小批次、可回滚、逐项取证的方式；完整清单、优先级、状态、验收和追加记录见 `docs/问题账本.md`。
 
-`FIX-BATCH-005` 关联 `OMB-AUD-022`，保护 JRN-007/009/011、BR-011/016/017、FR-009/012/014/016、IF-006/007 和 AC-011/014/015/018。完成候选必须满足：`YYYY-MM-DD` 是实际 UTC 日历日且 from≤to；AOI/date ID 为 1–160 字符、无首尾空白/控制符；路径坐标只接受规范十进制安全非负整数，z≤30 且 x/y<2^z；旧 API、V1、SDK 与适配器复用同一 schema；错误码稳定且无效输入不触发适配器 fetch。
+`FIX-BATCH-005` 关联 `OMB-AUD-022`，保护 JRN-007/009/011、BR-011/016/017、FR-009/012/014/016、IF-006/007 和 AC-011/014/015/018。完成候选必须满足：`YYYY-MM-DD` 是实际 UTC 日历日且 from≤to；AOI/date ID 为 1–160 字符、无首尾空白/控制符；路径坐标只接受规范十进制安全非负整数，z≤30 且 x/y<2^z；旧 API、V1、SDK 与适配器复用同一 schema；错误码稳定且无效输入不触发适配器 fetch。HTTP 层可以在进入 schema 前对超长路径以 414 更早 fail closed；不得为统一错误码放宽服务器路径参数门。
 
 ## 一页产品定义
 
@@ -835,3 +835,4 @@ V1 公共类型和错误语义通过契约测试冻结；新增可选能力不�
 - 2026-08-28：启动 `FIX-BATCH-004`，删除 Ovi 虚构年度日期目录并只接受已验证注入日期；无目录明确失败，未知日期 ID 零请求。当前为 `local-candidate`，本机约 5.4 GiB 未测试/构建，待 PR CI；真实日期目录提供者和真实影像仍开放。
 - 2026-08-28：`FIX-BATCH-004` 经 PR #7 合并为 main `5b6f06e`；CI `33163589956` 首轮通过 36 个 Vitest 文件/128 tests＋2 Node、8 workspace typecheck、build 和 4 Chrome E2E。004 的不伪造/无目录失败规则达到 main；真实目录提供者、probe/ready 和真实影像仍开放。
 - 2026-08-28：启动 `FIX-BATCH-005`，把时序实际日期、顺序窗口、AOI/date ID 和瓦片坐标下沉为共享 schema，接入旧 API、V1、SDK 与两个适配器。当前为 `local-candidate`，本机约 5.3 GiB 未测试/构建，待 PR CI；零真实外联。
+- 2026-08-28：PR #9 首次 CI `33164557423` 在 161 个 Vitest 中通过 159 个；两个 161 字符 dateId 路径被 Fastify 在路由前以 414 拒绝，原测试误期望 400。保留该安全门并把路由断言改为 414；package/SDK 继续验证 160 字符业务契约，等待全门重跑。

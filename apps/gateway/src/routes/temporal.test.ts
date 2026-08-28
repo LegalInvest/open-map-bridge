@@ -83,7 +83,6 @@ it.each([
 });
 
 it.each([
-  { path: `${'x'.repeat(161)}/8/212/102`, error: 'invalid-date-id' },
   { path: 'scene-2006/01/0/0', error: 'invalid-coordinate' },
   { path: 'scene-2006/1e1/0/0', error: 'invalid-coordinate' },
   { path: 'scene-2006/31/0/0', error: 'invalid-coordinate' },
@@ -98,4 +97,14 @@ it.each([
   });
   expect(response.statusCode).toBe(400);
   expect(response.json()).toEqual({ error });
+});
+
+it('keeps the HTTP path-length gate ahead of the legacy tile route', async () => {
+  const app = await buildApp({ dataPath: null });
+  apps.push(app);
+  const response = await app.inject({
+    method: 'GET',
+    url: `/api/temporal/tiles/synthetic-lakes/${'x'.repeat(161)}/8/212/102`,
+  });
+  expect(response.statusCode).toBe(414);
 });

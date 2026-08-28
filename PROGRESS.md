@@ -78,3 +78,6 @@
 - 接入范围：旧 `/api/temporal`、V1 `/api/v1/developer`、TypeScript SDK、OviBridge 和合成适配器均复用同一规则；新增伪日期、反向窗口、空白/超长 ID、前导零、科学计数、小数和越界 x/y 反例。所有候选均零真实外联。
 - 当前阶段：`local-candidate`，不是 `local-verified/main/deployed/accepted`。18:40 根卷约 5.3 GiB，低于 8 GiB 门；未运行本机测试、构建或浏览器。
 - 唯一最安全下一步：完成 FIX-BATCH-005 文档/交底静态门后提交 PR，由 GitHub CI 验证共享 schema、8 workspace 类型、构建和公开 Chrome 旅程；全绿最多推进 OMB-AUD-022 到 main。
+- 2026-08-28 18:47：PR #9 首次 CI `33164557423` 红灯已取证。37 个 Vitest 文件/161 tests 中 159 通过；共享 schema、SDK 与适配器反例均通过，两个路由用例因 161 字符路径参数被 Fastify 在路由前以 414 拒绝、而测试误期望业务层 400 失败。CI 因单测失败未进入 8 workspace typecheck、构建和 Chrome E2E。
+- 修正裁决：保留 Fastify 默认路径参数长度安全门，不为统一错误码放宽 URL 接收范围；route 测试明确断言 414，package/SDK 测试继续证明 160 字符业务契约。本机 18:47 约 5.2 GiB，继续止测、止构建、止浏览器。
+- 唯一最安全下一步：提交该分层断言和全量文档同步到 PR #9，等待 GitHub CI 重跑；只有全部门全绿并合并后，OMB-AUD-022 才能从 `local-candidate` 晋级 main。
