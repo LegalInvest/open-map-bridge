@@ -1,7 +1,11 @@
 import {
   parseTemporalDateEntry,
+  parseTemporalDateWindow,
+  parseTemporalTileRequest,
   type TemporalDateEntry,
+  type TemporalDateWindow,
   type TemporalSourceAdapter,
+  type TemporalTileRequest,
   type TemporalTileResponse,
 } from '@omb/temporal-source';
 
@@ -16,18 +20,6 @@ function parseSceneYear(dateId: string): number | null {
   return year >= 1000 && year <= 9999 ? year : null;
 }
 
-function boundaryYear(value: string): number {
-  const match = /^(\d{4})-\d{2}-\d{2}$/.exec(value);
-  if (!match?.[1] || Number.isNaN(Date.parse(`${value}T00:00:00Z`))) {
-    throw new TypeError('date range must use valid ISO calendar dates');
-  }
-  return Number(match[1]);
-}
-
-function validTileCoordinate(value: number, zoom: number): boolean {
-  return Number.isInteger(value) && value >= 0 && value < 2 ** zoom;
-}
-
 export class SyntheticTemporalAdapter implements TemporalSourceAdapter {
   private readonly missingYears: ReadonlySet<number>;
 
@@ -39,10 +31,10 @@ export class SyntheticTemporalAdapter implements TemporalSourceAdapter {
     return { ok: true, detail: 'deterministic local synthetic source' };
   }
 
-  async listDates(input: { aoiId: string; from: string; to: string }): Promise<TemporalDateEntry[]> {
-    if (!input.aoiId) throw new Error('aoiId is required');
-    const fromYear = boundaryYear(input.from);
-    const toYear = boundaryYear(input.to);
+  async listDates(input: TemporalDateWindow): Promise<TemporalDateEntry[]> {
+    const parsed = parseTemporalDateWindow(input);
+    const fromYear = Number(parsed.from.slice(0, 4));
+    const toYear = Number(parsed.to.slice(0, 4));
     if (toYear < fromYear || toYear - fromYear > 200) throw new RangeError('date range is invalid or too large');
     return Array.from({ length: toYear - fromYear + 1 }, (_, offset) => {
       const year = fromYear + offset;
@@ -55,19 +47,17 @@ export class SyntheticTemporalAdapter implements TemporalSourceAdapter {
         availability: this.missingYears.has(year) ? 'missing' : 'available',
         provenance: 'synthetic-temporal-v1',
       });
-    }).filter((entry) => entry.requestDate >= input.from && entry.requestDate <= input.to);
+    }).filter((entry) => entry.requestDate >= parsed.from && entry.requestDate <= parsed.to);
   }
 
-  async tile(input: { dateId: string; z: number; x: number; y: number }): Promise<TemporalTileResponse> {
-    const year = parseSceneYear(input.dateId);
+  async tile(input: TemporalTileRequest): Promise<TemporalTileResponse> {
+    const parsed = parseTemporalTileRequest(input);
+    const year = parseSceneYear(parsed.dateId);
     if (year === null || this.missingYears.has(year)) {
       return { status: 404, contentType: 'application/json', body: new TextEncoder().encode('{"error":"missing"}') };
     }
-    if (!Number.isInteger(input.z) || input.z < 0 || input.z > 22) {
+    if (parsed.z > 22) {
       return { status: 400, contentType: 'application/json', body: new TextEncoder().encode('{"error":"bad-z"}') };
-    }
-    if (!validTileCoordinate(input.x, input.z) || !validTileCoordinate(input.y, input.z)) {
-      return { status: 400, contentType: 'application/json', body: new TextEncoder().encode('{"error":"bad-coordinate"}') };
     }
 
     const progress = (year % 20) / 19;
@@ -81,7 +71,7 @@ export class SyntheticTemporalAdapter implements TemporalSourceAdapter {
 <path d="M28 82 L222 196 M16 160 L198 56" stroke="#e9e1bd" stroke-width="3" opacity="0.6"/>
 <rect x="8" y="8" width="240" height="44" rx="6" fill="#071a2e" opacity="0.78"/>
 <text x="18" y="29" font-family="system-ui,sans-serif" font-size="15" fill="white">SYNTHETIC · ${year}</text>
-<text x="18" y="46" font-family="monospace" font-size="11" fill="#d5e8ff">z${input.z} / x${input.x} / y${input.y}</text>
+<text x="18" y="46" font-family="monospace" font-size="11" fill="#d5e8ff">z${parsed.z} / x${parsed.x} / y${parsed.y}</text>
 </svg>`;
     return { status: 200, contentType: 'image/svg+xml', body: new TextEncoder().encode(svg) };
   }

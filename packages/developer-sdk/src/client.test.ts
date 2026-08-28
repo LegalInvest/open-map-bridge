@@ -27,6 +27,22 @@ const metadataOnly: DeveloperSourceDescriptor = {
   links: { self: '/api/v1/developer/sources/018f4d39-32f1-7a31-9f60-81c6b453b886' },
 };
 
+const ready = {
+  ...metadataOnly,
+  id: 'synthetic-lakes',
+  providerKind: 'synthetic',
+  protocol: 'temporal-adapter',
+  lifecycle: 'ready',
+  accessStatus: 'ready',
+  capabilities: ['metadata', 'temporal-catalog', 'tiles'],
+  datePrecision: 'capture-date',
+  links: {
+    self: '/api/v1/developer/sources/synthetic-lakes',
+    dates: '/api/v1/developer/sources/synthetic-lakes/dates',
+    tileTemplate: '/api/v1/developer/sources/synthetic-lakes/tiles/{dateId}/{z}/{x}/{y}',
+  },
+} satisfies DeveloperSourceDescriptor;
+
 it('rejects unavailable capabilities before fetch', async () => {
   const fetcher = vi.fn<typeof fetch>();
   const client = new OpenMapBridgeClient({ manifest, fetcher });
@@ -40,21 +56,6 @@ it('rejects unavailable capabilities before fetch', async () => {
 });
 
 it('uses only V1 local gateway paths for ready sources', async () => {
-  const ready = {
-    ...metadataOnly,
-    id: 'synthetic-lakes',
-    providerKind: 'synthetic',
-    protocol: 'temporal-adapter',
-    lifecycle: 'ready',
-    accessStatus: 'ready',
-    capabilities: ['metadata', 'temporal-catalog', 'tiles'],
-    datePrecision: 'capture-date',
-    links: {
-      self: '/api/v1/developer/sources/synthetic-lakes',
-      dates: '/api/v1/developer/sources/synthetic-lakes/dates',
-      tileTemplate: '/api/v1/developer/sources/synthetic-lakes/tiles/{dateId}/{z}/{x}/{y}',
-    },
-  } satisfies DeveloperSourceDescriptor;
   const fetcher = vi.fn<typeof fetch>().mockResolvedValue(
     new Response(
       JSON.stringify([
@@ -93,6 +94,33 @@ it('uses only V1 local gateway paths for ready sources', async () => {
     contentType: 'image/png',
     body: new Uint8Array(4),
   });
+});
+
+it('rejects invalid temporal inputs before fetch', async () => {
+  const fetcher = vi.fn<typeof fetch>();
+  const client = new OpenMapBridgeClient({ manifest, fetcher });
+
+  for (const { input, code } of [
+    { input: { aoiId: ' area-1', from: '2006-01-01', to: '2025-12-31' }, code: 'invalid-aoi-id' },
+    { input: { aoiId: 'area-1', from: '2025-02-29', to: '2025-12-31' }, code: 'invalid-date-window' },
+    { input: { aoiId: 'area-1', from: '2025-12-31', to: '2006-01-01' }, code: 'invalid-date-window' },
+  ]) {
+    await expect(client.listDates(ready, input)).rejects.toMatchObject({ code });
+  }
+  for (const { input, code } of [
+    { input: { dateId: 'x'.repeat(161), z: 8, x: 212, y: 102 }, code: 'invalid-date-id' },
+    { input: { dateId: 'scene-2006', z: 31, x: 0, y: 0 }, code: 'invalid-coordinate' },
+    { input: { dateId: 'scene-2006', z: 8, x: 256, y: 0 }, code: 'invalid-coordinate' },
+    { input: { dateId: 'scene-2006', z: 8, x: 1.5, y: 0 }, code: 'invalid-coordinate' },
+  ]) {
+    try {
+      client.tileUrl(ready, input);
+      throw new Error('expected tileUrl to reject invalid input');
+    } catch (error) {
+      expect(error).toMatchObject({ code });
+    }
+  }
+  expect(fetcher).not.toHaveBeenCalled();
 });
 
 it('requires a separate gateway token for direct loopback access', () => {

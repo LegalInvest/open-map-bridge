@@ -3,8 +3,7 @@ import { completeYearWindow } from '@omb/temporal-source';
 import type { TemporalSourceRegistry } from '../temporal/registry.js';
 import type { TemporalStateRepository } from '../storage/temporal-state.js';
 import { listDeveloperSources } from '../developer/descriptors.js';
-
-const isoDate = /^\d{4}-\d{2}-\d{2}$/;
+import { parseDateWindowQuery, parseTilePath } from './temporal-input.js';
 
 export function registerDeveloperRoutes(
   app: FastifyInstance,
@@ -29,20 +28,12 @@ export function registerDeveloperRoutes(
     if (!source.capabilities.includes('temporal-catalog')) {
       return reply.code(409).send({ error: 'capability-not-available', capability: 'temporal-catalog' });
     }
-    const query = request.query as Record<string, string | undefined>;
-    if (Object.keys(query).some((key) => !['aoiId', 'from', 'to'].includes(key))) {
-      return reply.code(400).send({ error: 'query-not-allowed' });
-    }
-    if (!query.aoiId || query.aoiId.length > 160) return reply.code(400).send({ error: 'aoi-id-required' });
     const defaultWindow = completeYearWindow(new Date().getUTCFullYear());
-    const from = query.from ?? defaultWindow.from;
-    const to = query.to ?? defaultWindow.to;
-    if (!isoDate.test(from) || !isoDate.test(to) || from > to) {
-      return reply.code(400).send({ error: 'invalid-date-window' });
-    }
+    const parsed = parseDateWindowQuery(request.query as Record<string, unknown>, defaultWindow);
+    if (!parsed.ok) return reply.code(400).send({ error: parsed.error });
     const record = registry.get(id);
     if (!record) return reply.code(409).send({ error: 'capability-not-available', capability: 'temporal-catalog' });
-    return record.adapter.listDates({ aoiId: query.aoiId, from, to });
+    return record.adapter.listDates(parsed.value);
   });
 
   app.get('/api/v1/developer/sources/:id/tiles/:dateId/:z/:x/:y', async (request, reply) => {
@@ -53,18 +44,11 @@ export function registerDeveloperRoutes(
     if (!source.capabilities.includes('tiles')) {
       return reply.code(409).send({ error: 'capability-not-available', capability: 'tiles' });
     }
-    const coordinates = { z: Number(params.z), x: Number(params.x), y: Number(params.y) };
-    if (
-      Object.values(coordinates).some((value) => !Number.isSafeInteger(value) || value < 0) ||
-      coordinates.z > 30 ||
-      coordinates.x >= 2 ** coordinates.z ||
-      coordinates.y >= 2 ** coordinates.z
-    ) {
-      return reply.code(400).send({ error: 'invalid-coordinate' });
-    }
+    const parsed = parseTilePath(params);
+    if (!parsed.ok) return reply.code(400).send({ error: parsed.error });
     const record = registry.get(params.id);
     if (!record) return reply.code(409).send({ error: 'capability-not-available', capability: 'tiles' });
-    const tile = await record.adapter.tile({ dateId: params.dateId, ...coordinates });
+    const tile = await record.adapter.tile(parsed.value);
     return reply.code(tile.status).type(tile.contentType).send(Buffer.from(tile.body));
   });
 }

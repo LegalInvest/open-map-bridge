@@ -1,7 +1,11 @@
 import {
   parseTemporalDateEntry,
+  parseTemporalDateWindow,
+  parseTemporalTileRequest,
   type TemporalDateEntry,
+  type TemporalDateWindow,
   type TemporalSourceAdapter,
+  type TemporalTileRequest,
   type TemporalTileResponse,
 } from '@omb/temporal-source';
 import { validateDecodedTile } from './image-validation.js';
@@ -82,11 +86,11 @@ export class OviBridgeAdapter implements TemporalSourceAdapter {
     return { ok: false, detail: 'loopback configuration accepted; no tile has been verified' };
   }
 
-  async listDates(input: { aoiId: string; from: string; to: string }): Promise<TemporalDateEntry[]> {
-    if (!input.aoiId) throw new Error('aoiId is required');
+  async listDates(input: TemporalDateWindow): Promise<TemporalDateEntry[]> {
+    const parsed = parseTemporalDateWindow(input);
     if (this.verifiedDates.size === 0) throw new Error('Ovi bridge has no verified date catalog');
     return [...this.verifiedDates.values()]
-      .filter((entry) => entry.requestDate >= input.from && entry.requestDate <= input.to)
+      .filter((entry) => entry.requestDate >= parsed.from && entry.requestDate <= parsed.to)
       .map((entry) => structuredClone(entry));
   }
 
@@ -99,13 +103,14 @@ export class OviBridgeAdapter implements TemporalSourceAdapter {
     return `/getomap_${this.mapType}_${input.z}_${input.x}_${input.y}_jpg_${compactDate}.jpg`;
   }
 
-  async tile(input: { dateId: string; z: number; x: number; y: number }): Promise<TemporalTileResponse> {
-    const date = this.verifiedDates.get(input.dateId);
+  async tile(input: TemporalTileRequest): Promise<TemporalTileResponse> {
+    const parsed = parseTemporalTileRequest(input);
+    const date = this.verifiedDates.get(parsed.dateId);
     if (!date || ['missing', 'failed'].includes(date.availability)) {
       return { status: 404, contentType: 'application/json', body: new Uint8Array() };
     }
     const requestDate = date.requestDate;
-    const url = new URL(this.pathFor({ requestDate, z: input.z, x: input.x, y: input.y }), this.baseUrl);
+    const url = new URL(this.pathFor({ requestDate, z: parsed.z, x: parsed.x, y: parsed.y }), this.baseUrl);
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 10_000);
     try {

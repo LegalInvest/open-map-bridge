@@ -1,5 +1,10 @@
 import { z } from 'zod';
-import { parseTemporalDateEntry, type TemporalDateEntry } from '@omb/temporal-source';
+import {
+  parseTemporalDateEntry,
+  temporalDateWindowSchema,
+  temporalTileRequestSchema,
+  type TemporalDateEntry,
+} from '@omb/temporal-source';
 import {
   developerSourceDescriptorSchema,
   parseDeveloperAppManifest,
@@ -42,21 +47,6 @@ function normalizeBaseUrl(value: string): string {
     throw new DeveloperSdkError('non-loopback-base-url');
   }
   return trimmed;
-}
-
-function assertDate(value: string): void {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) throw new DeveloperSdkError('invalid-date');
-}
-
-function assertCoordinate(value: number): void {
-  if (!Number.isSafeInteger(value) || value < 0) throw new DeveloperSdkError('invalid-coordinate');
-}
-
-function assertTileCoordinate(z: number, x: number, y: number): void {
-  assertCoordinate(z);
-  assertCoordinate(x);
-  assertCoordinate(y);
-  if (z > 30 || x >= 2 ** z || y >= 2 ** z) throw new DeveloperSdkError('invalid-coordinate');
 }
 
 export function assertSourceCapability(
@@ -108,11 +98,12 @@ export class OpenMapBridgeClient {
   ): Promise<TemporalDateEntry[]> {
     this.assertPermission('temporal-catalog');
     assertSourceCapability(source, 'temporal-catalog');
-    if (!input.aoiId || input.aoiId.length > 160) throw new DeveloperSdkError('invalid-aoi-id');
-    assertDate(input.from);
-    assertDate(input.to);
-    if (input.from > input.to) throw new DeveloperSdkError('invalid-date-window');
-    const query = new URLSearchParams({ aoiId: input.aoiId, from: input.from, to: input.to });
+    const parsed = temporalDateWindowSchema.safeParse(input);
+    if (!parsed.success) {
+      const invalidAoi = parsed.error.issues.some((issue) => issue.path[0] === 'aoiId');
+      throw new DeveloperSdkError(invalidAoi ? 'invalid-aoi-id' : 'invalid-date-window');
+    }
+    const query = new URLSearchParams(parsed.data);
     const raw = await this.readJson(`${source.links.dates}?${query.toString()}`);
     return z.array(z.unknown()).parse(raw).map(parseTemporalDateEntry);
   }
@@ -123,15 +114,18 @@ export class OpenMapBridgeClient {
   ): string {
     this.assertPermission('tiles');
     assertSourceCapability(source, 'tiles');
-    if (!input.dateId || input.dateId.length > 160) throw new DeveloperSdkError('invalid-date-id');
-    assertTileCoordinate(input.z, input.x, input.y);
+    const parsed = temporalTileRequestSchema.safeParse(input);
+    if (!parsed.success) {
+      const invalidDateId = parsed.error.issues.some((issue) => issue.path[0] === 'dateId');
+      throw new DeveloperSdkError(invalidDateId ? 'invalid-date-id' : 'invalid-coordinate');
+    }
     const template = source.links.tileTemplate;
     if (!template) throw new DeveloperSdkError('capability-not-available');
     const path = template
-      .replace('{dateId}', encodeURIComponent(input.dateId))
-      .replace('{z}', String(input.z))
-      .replace('{x}', String(input.x))
-      .replace('{y}', String(input.y));
+      .replace('{dateId}', encodeURIComponent(parsed.data.dateId))
+      .replace('{z}', String(parsed.data.z))
+      .replace('{x}', String(parsed.data.x))
+      .replace('{y}', String(parsed.data.y));
     return `${this.baseUrl}${path}`;
   }
 

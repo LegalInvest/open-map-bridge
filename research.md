@@ -28,6 +28,7 @@
 - `FIX-BATCH-002` 已由 PR #3 合并为 main `de36012`：流式 5 MiB 硬上限、只接受状态 200、其他状态正文隔离、PNG/JPEG MIME/magic/完整解码/2048 维度门。首次/第二次红灯保留；CI `33160315934` 对最终提交全绿。这仍不是实际 Ovi probe/ready。
 - `FIX-BATCH-003` 已由 PR #5 合并为 main `1d0ebc4`：精确回环 Host/Origin、cross-site、Bearer、CSRF、固定窗口限流、安全响应头、服务端 app ID 与路径权限；Vite 代理只在服务端持有 UI token，SDK 直连要求独立应用 token。CI `33161851375` 首轮全绿；这仍不是上游 DNS/IP 门或实际 Ovi probe/ready。
 - `FIX-BATCH-004` 已由 PR #7 合并为 main `5b6f06e`：删除 Ovi 虚构年度日期生成器，生产适配器只接受严格 schema＋唯一 ID 的注入日期；无目录明确拒绝，未登记与 `missing/failed` 日期 ID 零请求返回未找到；操作者 probe 日期不是目录。CI `33163589956` 首轮全绿；真实目录提供者、probe/ready 和真实瓦片仍未完成。
+- `FIX-BATCH-005` 已形成 `local-candidate`：`@omb/temporal-source` 统一实际 ISO 日期、顺序窗口、受限 AOI/date ID、规范十进制安全整数、z≤30 与 x/y<2^z；旧时序 API、V1、SDK、Ovi/合成适配器复用。PR #9 首次 CI `33164557423` 为 159/161 Vitest 通过；两个 161 字符路径参数在业务路由前被 Fastify 以 414 拒绝，已保留该门并修正测试分层，待重跑；零真实外联。
 
 ### 搜索与核验边界
 
@@ -130,8 +131,8 @@
 |---|---|---|---|
 | 项目目录 | 新建 `/Users/assis/Documents/Codex/2026-08-27/open-map-bridge` | 本轮文件系统创建 | 2026-08-27 |
 | 既有同类本地仓库 | 未发现 | `find /Users/assis/Documents/Codex -maxdepth 2` 仅命中既有 VegFlow mapping 目录，无 Ovi/OpenMapBridge 项目 | 2026-08-27 |
-| Git 仓库 | GitHub main `5b6f06e`；当前证据分支 `codex/audit-p0-ovi-date-truth-evidence` 基于该提交，remote 为 `https://github.com/LegalInvest/open-map-bridge.git` | `git branch --show-current`、`git rev-parse HEAD origin/main`、`git remote -v` | 2026-08-28 18:32 |
-| 根卷空间 | 18:32 约 5.3 GiB，低于 8 GiB 门；停止本机构建、测试、浏览器、下载和缓存 | `df -h /System/Volumes/Data` | 2026-08-28 18:32 |
+| Git 仓库 | GitHub main `1e7308f`；当前候选分支 `codex/audit-p1-temporal-input-truth` 的 PR #9 基于该提交，首个候选提交 `05b7efe`，remote 为 `https://github.com/LegalInvest/open-map-bridge.git` | `git branch --show-current`、`git rev-parse HEAD origin/main`、`git remote -v`、PR #9 | 2026-08-28 18:47 |
+| 根卷空间 | 18:47 约 5.2 GiB，低于 8 GiB 门；停止本机构建、测试、浏览器、下载和缓存 | `df -h /System/Volumes/Data` | 2026-08-28 18:47 |
 | Node/Docker 工具链 | 本机 Node `v26.7.0`、npm `11.19.0`、Docker `29.4.0`、Compose `5.1.2`；计划冻结 Node `24.20.0` LTS 作为目标运行时 | 版本命令；[Node 官方发布表](https://nodejs.org/en/about/previous-releases) | 2026-08-27 |
 | 奥维桌面客户端 | 先发现旧 2.6.3；随后从官方分发安装并验签 10.6.0 到独立应用路径，未覆盖旧版 | 应用版本、代码签名、公证和官方安装包校验 | 2026-08-27 |
 
@@ -299,10 +300,10 @@ fixtures/synthetic/temporal  无外网的 20 年彩色/带标签时序瓦片
 | 二次开发 V1 | 脱敏源目录、能力协商、严格应用清单、TypeScript SDK 和本地日期/瓦片消费已实现；configured OviBridge 不授予运行能力 | local-verified slice | `packages/developer-sdk`、`apps/gateway/src/{developer,routes/developer}.ts`、8 项聚焦测试和实际 HTTP |
 | 技术交底持续同步 | 中文技术交底书覆盖架构、流程、数据、安全、特征候选、实施例和当前证据边界；source set 生成 SHA-256，CI 检查陈旧 | local-verified mechanism | `docs/技术交底书.md`、`scripts/update-technical-disclosure.mjs`、`npm run disclosure:check`；精确文件数/指纹以交底元数据为准 |
 | 可视化/自动化方向 | 用户已批准继续实施；准备度四步账本、去重、process/job API 和驾驶舱已进入 main | main for 001A / later slices missing | `16f445c`、CI `33155671827`；2026-08-28 |
-| 审计问题账本 | 161 个 tracked files 静态审计形成 38 组问题与公开 backlog；前四批已进 main，剩余项继续分批 | FIX-BATCH-001/002/003/004 main / remaining discovered | `docs/问题账本.md`、PR #1/#3/#5/#7、CI `33159198541`/`33160315934`/`33161851375`/`33163589956`；2026-08-28 18:32 |
-| 工作区基线 | GitHub main `5b6f06e`；当前证据分支只回写 FIX-BATCH-004 main/CI 事实；约 5.3 GiB 低于 8 GiB 门 | main verified / capacity blocked | `git status/log/rev-parse`、`df`；2026-08-28 18:32 |
-| 自动测试 | 当前 main 的远端门通过 36 个 Vitest 文件/128 tests＋2 Node、8 workspace 类型检查、生产构建和 4 Chrome E2E；既有 2 条授权本地 E2E 未在公共 CI 运行 | main CI verified / authorized-local historical | CI `33163589956`；2026-08-28 18:32 |
-| GitHub main | 公共唯一主仓 `LegalInvest/open-map-bridge`；FIX-BATCH-004 由 PR #7 合并为 `5b6f06e` | main for 001A + FIX-BATCH-001/002/003/004 | PR #1–#7、CI `33159198541`/`33160315934`/`33161851375`/`33163589956`；2026-08-28 18:32 |
+| 审计问题账本 | 161 个 tracked files 静态审计形成 38 组问题与公开 backlog；前四批已进 main，第五批统一时序输入真值，PR #9 首次 CI 红灯已取证并修正断言 | FIX-BATCH-001/002/003/004 main / FIX-BATCH-005 local-candidate / remaining discovered | `docs/问题账本.md`、PR #1/#3/#5/#7/#9、既有 CI；2026-08-28 18:47 |
+| 工作区基线 | GitHub main `1e7308f`；当前 `codex/audit-p1-temporal-input-truth` 含 FIX-BATCH-005 产品/文档候选与 HTTP 414 分层断言；约 5.2 GiB 低于 8 GiB 门 | main verified / candidate unverified / capacity blocked | `git status/log/rev-parse`、`df`；2026-08-28 18:47 |
+| 自动测试 | 当前 main 的远端门通过 36 个 Vitest 文件/128 tests＋2 Node、8 workspace 类型检查、生产构建和 4 Chrome E2E；既有 2 条授权本地 E2E 未在公共 CI 运行 | main CI verified / authorized-local historical | 证据 CI `33163859991`；2026-08-28 18:35 |
+| GitHub main | 公共唯一主仓 `LegalInvest/open-map-bridge`；FIX-BATCH-004 产品由 PR #7 合并为 `5b6f06e`，证据由 PR #8 回写后 main 为 `1e7308f` | main for 001A + FIX-BATCH-001/002/003/004；FIX-BATCH-005 尚在分支 | PR #1–#8、既有 CI；2026-08-28 18:40 |
 | 部署 | 无 | missing | 未授权/未实施 |
 | 业务验收 | 真实 QR 安全预览和真实 `.ovmap` 五图层已过；真实 QR 瓦片渲染与用户独立签收未过 | import slice local-verified / AC-001 partial / accepted missing | `docs/acceptance/import-v0-local.md` |
 
@@ -324,6 +325,7 @@ fixtures/synthetic/temporal  无外网的 20 年彩色/带标签时序瓦片
 | NFR-007 | 合法开源依赖 | 候选已发现 | lockfiles、THIRD_PARTY | license audit | discovered | 版本/许可证/安全公告待任务0复核 | 2026-08-27 |
 | AC-001 至 AC-010 | 业务验收 | AC-002/003 本地通过；AC-001 完成真实预览但未出图；其余部分/未运行 | E2E + 真实浏览器 | 对应 AC | mixed, no cross-level rollup | 下一门为 vault/SSRF/probe/render | 2026-08-28 |
 | JRN-007 / FR-009 / OMB-AUD-004 | 历史源日期和真实瓦片 | 合成 20 年源已验证；configured Ovi 已从消费端隐藏，空 probe 返回失败；main 已删除 request-date 年度占位，只接受已验证注入日期，无目录与未登记 ID fail closed 且零请求 | `packages/temporal-source`、`apps/gateway/src/{temporal,routes/temporal}.ts` | 无目录、未登记/missing/failed ID 零请求、schema/唯一性/窗口过滤由 CI `33163589956` 通过；AC-011 未运行 | date truth main / configured truth main / real adapter blocked | 缺真实日期目录提供者、最小解码探测和 ready 晋级 | 2026-08-28 18:32 |
+| OMB-AUD-022 / IF-006/007 | 时序输入真值 | FIX-BATCH-005 候选把实际日期、窗口顺序、ID 长度/控制符、规范路径整数和 Web Mercator 瓦片边界下沉为共享 schema；旧 API、V1、SDK 和适配器使用同一规则；HTTP 层保留更早的超长参数 414 | `packages/temporal-source/src/schema.ts`、`apps/gateway/src/routes/temporal-input.ts`、SDK client | PR #9 首次 CI `33164557423`：159/161 Vitest 通过；2 个 414/400 断言已修，待全门重跑 | local-candidate | 本机容量门下未执行；CI 全绿前不晋级 main | 2026-08-28 18:47 |
 | JRN-008 / FR-010 | 双湖 AOI 确认 | GeoJSON 校验、独立 approximate 预设、地图新建/编辑和不可变版本追加已本地验证 | `packages/aois`、`apps/web/src/history/Aoi*` | unit + Chrome E2E | synthetic UI local-verified | 预设不是用户在真实影像上确认的精确边界 | 2026-08-28 |
 | JRN-009 / FR-011/012 | 四屏、卷帘和播放 | 四屏、逐屏状态、共享/回放 ViewState、卷帘、播放和缺年隔离均已本地构建 | `apps/web/src/history` | UI/sync tests + Chrome E2E passed | synthetic local-verified | 真实奥维源和用户 AOI 未接受 | 2026-08-27 |
 | FR-013 / BR-014 | 变化观察证据等级 | 可见对象、原因假设和独立证据门已实现 | `apps/web/src/history/ObservationPanel.tsx` | component tests passed；AC-016 synthetic-only | UI local-verified | 尚无真实观察、外部逐年证据或用户接受 | 2026-08-27 |
@@ -363,7 +365,7 @@ fixtures/synthetic/temporal  无外网的 20 年彩色/带标签时序瓦片
 | 本地资产 | 是否已有项目 | 工作区深度 2 目录/关键文件 | find 输出 | 高 | 深层无关项目未扫描，因绿地命名已足够 |
 | 二进制样本 | `.ovmap` 基本容器 | 一个公开 455-byte 样本 | 魔数、zlib、字符串 | 中 | 字段边界、历史版本、加密未知 |
 | 运行链 | Web UI 到真实出图 | 双入口/合成消费链有既有 CI；FIX-BATCH-001/002 修复同 UUID/configured 真值和响应解码门并进入 main | main + issue ledger | 高 | vault/SSRF/probe/真实 tile proxy 等仍缺 |
-| 发布链 | GitHub/CI/部署 | 公共 GitHub main 与 PR CI 已建立；公网应用部署仍未建立 | main verified / deployment missing | 高 | GitHub main `5b6f06e`；无生产 gateway 制品或环境 |
+| 发布链 | GitHub/CI/部署 | 公共 GitHub main 与 PR CI 已建立；公网应用部署仍未建立 | main verified / deployment missing | 高 | GitHub main `1e7308f`；无生产 gateway 制品或环境 |
 | 产品入口 | 可视化和自动化现实 | 本机空间低于 8 GiB，未操作浏览器；远端 Chrome 完成导入→任务→刷新恢复 | 源码与 CI E2E | 高 | main 已验证；本机和用户独立签收仍未做 |
 | 外部标准 | 时空元数据、任务与 telemetry | STAC、OGC Processes、OpenLayers、OpenTelemetry、STAC Browser 官方页 | 第 3 节链接；2026-08-28 | 高 | 尚未做依赖选型或标准合规测试 |
 
