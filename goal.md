@@ -7,9 +7,9 @@
 - 状态：Approved / Implementing；用户于 2026-08-28 明确最终结果必须能基于已导入奥维图源进行二次开发
 - 产品裁决者：用户
 - 当前整合者：本 Codex 主线程
-- 更新时间：2026-08-28 19:12（Asia/Shanghai）
+- 更新时间：2026-08-28 19:15（Asia/Shanghai）
 - 适用目录：`/Users/assis/Documents/Codex/2026-08-27/open-map-bridge`
-- 当前切片：`FIX-BATCH-007 local-candidate`（PR #13，分支 `codex/audit-p1-import-resource-bounds`）；为预览缓存建立 TTL/数量/字节 LRU，为二维码图片建立解码前字节/格式/像素/倍率门。首次 CI `33166210759` 单测通过后在 Web 测试 fixture 的 ArrayBufferLike/BlobPart 类型门失败；已改用明确 ArrayBuffer，待重跑。GitHub main 仍为 `98a9828`；真实目录/provider/probe/ready、部署与用户验收仍未达到
+- 当前切片：`FIX-BATCH-007 main`；预览缓存已有 TTL/数量/字节 LRU，二维码图片已有 object URL/ZXing 前字节/格式/像素/倍率门。PR #13 已合并为 `873705b`，首次红灯 `33166210759` 保留，最终 CI `33166313733` 全绿；当前只在证据分支回写 main/CI。真实目录/provider/probe/ready、部署与用户验收仍未达到
 - 上版：V0.4 奥维兼容双入口导入实施版
 
 <!-- GOAL_CAPSULE_START -->
@@ -23,7 +23,7 @@
 
 当前只允许修改本项目目录；禁止清理用户文件、接触生产服务器、部署公网、批量抓取图源或离线下载 20 年整域瓦片。不得把真实秘密写入 fixture、日志、回执、普通 JSON 或前端。可用空间低于 8 GiB 立即停止本机构建、测试、截图和新增缓存；2026-08-28 19:09 最新约 5.2 GiB，低于门禁，本轮只能做小型源码/文档并由 GitHub PR CI 验证。发现越界需求写入 `BLOCKED.md`。
 
-`FIX-BATCH-001/002/003/004/005/006` 已进入 GitHub main `cfab0c2`。第六批只对 `.ovmap` 检查路由建立一致的文件/base64/HTTP 信封门并由 CI `33165515010` 验证；它不读取真实文件、不发真实请求、不改变 source lifecycle，也不授予 ready。
+`FIX-BATCH-001/002/003/004/005/006/007` 已进入 GitHub main `873705b`。第七批为未确认预览和 QR 图片建立资源上限并由 CI `33166313733` 验证；它不读取用户图片、不上传原图、不发真实请求、不改变 source lifecycle，也不授予 ready。
 
 第三批完成条件已由 CI `33161851375` 的 128 Vitest＋2 Node、8 workspace 类型检查、生产构建和 4 条 Chrome E2E 验证并进入 main：缺失/错误 Host、恶意 Origin、cross-site、缺失/错误 token、app ID 不符、权限不足、写请求缺 CSRF 和超限均在路由前稳定拒绝且不回显秘密；官方 Web 全旅程继续通过；直连 SDK 必须用独立 app token，服务端权限不能被 manifest 扩大。这不代表真实 probe 或 ready。项目最终完成条件仍是同一 source ID 获得有证据的 `tiles/temporal-catalog`，且至少两个真实日期返回可解码、非空并内容不同的瓦片。
 <!-- GOAL_CAPSULE_END -->
@@ -845,3 +845,4 @@ V1 公共类型和错误语义通过契约测试冻结；新增可选能力不�
 - 2026-08-28：PR #11 CI `33165515010` 首轮通过 37 个 Vitest 文件/167 tests＋2 Node、8 workspace typecheck、生产构建、4 Chrome E2E 和交底新鲜度，随后合并为 main `cfab0c2`。OMB-AUD-010 达到 main；QR 图片资源门、预览 LRU、真实图源与用户验收不随之晋级。
 - 2026-08-28：FIX-BATCH-006 证据 PR #12 经 CI `33165750762` 合并，main 为 `98a9828`；启动 FIX-BATCH-007，增加预览 LRU 和二维码图片解码前资源门，当前仅 `local-candidate`，待 PR CI。
 - 2026-08-28：PR #13 首次 CI `33166210759` 单测通过后在 Web 类型检查因测试 `Uint8Array<ArrayBufferLike>` 不满足 BlobPart 失败；构建/Chrome 未运行。测试 helper 改为明确 ArrayBuffer，失败保留并待重跑。
+- 2026-08-28：PR #13 第二轮 CI `33166313733` 通过 39 个 Vitest 文件/175 tests＋2 Node、8 workspace typecheck、生产构建、4 Chrome E2E 和交底新鲜度，随后合并为 main `873705b`。OMB-AUD-018 达到 main；相机帧、真实图源、部署和用户验收不随之晋级。
