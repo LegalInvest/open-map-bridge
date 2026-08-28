@@ -23,6 +23,12 @@ function validJpeg(): Uint8Array {
   return jpeg.encode({ width: 1, height: 1, data: new Uint8Array([12, 34, 56, 255]) }, 90).data;
 }
 
+function responseBody(bytes: Uint8Array): ArrayBuffer {
+  const copy = new Uint8Array(bytes.byteLength);
+  copy.set(bytes);
+  return copy.buffer;
+}
+
 it.each(['http://0.0.0.0:19991', 'http://192.168.1.9:19991', 'https://example.com']) (
   'rejects non-loopback %s',
   (baseUrl) => {
@@ -52,7 +58,8 @@ it.each([
   const adapter = new OviBridgeAdapter({
     baseUrl: 'http://127.0.0.1:19991',
     mapType: 200,
-    fetchImpl: (async () => new Response(tileBytes, { status: 200, headers: { 'content-type': contentType } })) as typeof fetch,
+    fetchImpl: (async () =>
+      new Response(responseBody(tileBytes), { status: 200, headers: { 'content-type': contentType } })) as typeof fetch,
   });
   const response = await adapter.tile({ dateId: 'annual-2018', z: 8, x: 212, y: 102 });
   expect(response.status).toBe(200);
@@ -92,7 +99,7 @@ it('rejects mislabeled, malformed, and unsafe-dimension image responses', async 
   new DataView(hugeHeader.buffer).setUint32(16, 2049);
   new DataView(hugeHeader.buffer).setUint32(20, 1);
   const responses = [
-    new Response(validPng(), { status: 200, headers: { 'content-type': 'image/jpeg' } }),
+    new Response(responseBody(validPng()), { status: 200, headers: { 'content-type': 'image/jpeg' } }),
     new Response(new Uint8Array([0xff, 0xd8, 0xff, 0xd9]), {
       status: 200,
       headers: { 'content-type': 'image/jpeg' },
@@ -117,7 +124,7 @@ it.each([
     baseUrl: 'http://127.0.0.1:19991',
     mapType: 200,
     fetchImpl: (async () =>
-      new Response(validPng(), {
+      new Response(responseBody(validPng()), {
         status: 200,
         headers: { 'content-type': 'image/png', 'content-length': declaredLength },
       })) as typeof fetch,
