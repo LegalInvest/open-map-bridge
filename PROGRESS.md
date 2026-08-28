@@ -93,3 +93,9 @@
 - 批次结果：`OMB-AUD-010` 达到 main；恰好 1 MiB 的 `.ovmap` 可越过 HTTP 门到达格式解析，解码后加一字节和超 JSON 信封分别稳定 413，其他 API body limit 未扩大。没有读取真实文件、发真实外联、部署或用户业务验收。
 - 当前证据分支：`codex/audit-p1-upload-envelope-evidence`，只回写 main/CI 证据。本机仍低于 8 GiB 门。
 - 唯一最安全下一步：合并 FIX-BATCH-006 证据回写后，为 `FIX-BATCH-007` 冻结 OMB-AUD-018 的预览 TTL/数量/字节 LRU 与 QR 图片字节/像素/倍率上限，再分层实现；不得把 `.ovmap` 信封修复误写成全部非可信输入资源门完成。
+- 2026-08-28 19:09：FIX-BATCH-006 证据 PR #12 经 CI `33165750762` 全绿并合并，GitHub main 更新为 `98a9828`。随后建立 `codex/audit-p1-import-resource-bounds`，启动 FIX-BATCH-007 / OMB-AUD-018。
+- 预览资源候选：保留 15 分钟业务 TTL，同时在每次 put 主动清除过期项；Map 访问顺序实现 LRU，默认最多 64 条、JSON UTF-8 估算总量 4 MiB，单条超过总预算稳定 413；写入与读取继续结构化克隆。
+- QR 图片资源候选：文件声明和实际字节均不超过 8 MiB；在创建 object URL 和调用 ZXing 前解析 PNG/JPEG/WebP 有界文件头并限制 16,777,216 像素；实际浏览器尺寸必须与文件头一致；2×/3× canvas 仅在缩放后仍不超过同一像素预算时尝试。当前仅 `local-candidate`，本机 19:09 约 5.2 GiB，未测试/构建/浏览器。
+- 唯一最安全下一步：完成 FIX-BATCH-007 交底指纹和静态 diff 门，提交 PR 由 GitHub CI 验证；全绿最多把 OMB-AUD-018 晋级 main，不解除 OMB-AUD-019 的确认消费/存储错误语义或真实图源阻塞。
+- 2026-08-28 19:12：PR #13 首次 CI `33166210759` 红灯。全部单元测试已通过；Web workspace 严格类型检查在两个测试 `new File([png(...)])` 处拒绝 `Uint8Array<ArrayBufferLike>` 作为要求 `ArrayBuffer` 的 BlobPart，随后构建和 Chrome E2E 未运行。生产资源门逻辑没有在该 run 中报错。
+- 修正：测试 PNG helper 直接分配并返回明确 `ArrayBuffer`，不放宽 DOM 类型、不改生产逻辑。唯一最安全下一步是同步红灯证据、更新交底指纹并推送 PR #13 重跑；全门绿前仍不得晋级。

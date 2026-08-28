@@ -7,9 +7,9 @@
 - 状态：Approved / Implementing；用户于 2026-08-28 明确最终结果必须能基于已导入奥维图源进行二次开发
 - 产品裁决者：用户
 - 当前整合者：本 Codex 主线程
-- 更新时间：2026-08-28 19:02（Asia/Shanghai）
+- 更新时间：2026-08-28 19:12（Asia/Shanghai）
 - 适用目录：`/Users/assis/Documents/Codex/2026-08-27/open-map-bridge`
-- 当前切片：`FIX-BATCH-006 main`；统一 `.ovmap` 1 MiB 原文件、base64 和 HTTP JSON 信封上限，前后端共享常量与稳定 413。PR #11 已合并为 `cfab0c2`，CI `33165515010` 全绿；当前只在证据分支回写 main/CI。真实目录/provider/probe/ready、部署与用户验收仍未达到
+- 当前切片：`FIX-BATCH-007 local-candidate`（PR #13，分支 `codex/audit-p1-import-resource-bounds`）；为预览缓存建立 TTL/数量/字节 LRU，为二维码图片建立解码前字节/格式/像素/倍率门。首次 CI `33166210759` 单测通过后在 Web 测试 fixture 的 ArrayBufferLike/BlobPart 类型门失败；已改用明确 ArrayBuffer，待重跑。GitHub main 仍为 `98a9828`；真实目录/provider/probe/ready、部署与用户验收仍未达到
 - 上版：V0.4 奥维兼容双入口导入实施版
 
 <!-- GOAL_CAPSULE_START -->
@@ -21,7 +21,7 @@
 
 硬约束：clean-room 独立实现；不得复制奥维专有代码、商标或绕过会员/设备绑定；不得内置、记录或传播第三方 token；解析前不联网，确认前不请求图源；未知版本、解压异常、内网目标或不安全 URL 必须 fail closed；“文件已解析”“探测成功”“成功出图”是不同事实；任何成功都要有导入回执和可复现实证。
 
-当前只允许修改本项目目录；禁止清理用户文件、接触生产服务器、部署公网、批量抓取图源或离线下载 20 年整域瓦片。不得把真实秘密写入 fixture、日志、回执、普通 JSON 或前端。可用空间低于 8 GiB 立即停止本机构建、测试、截图和新增缓存；2026-08-28 18:56 最新约 5.2 GiB，低于门禁，本轮只能做小型源码/文档并由 GitHub PR CI 验证。发现越界需求写入 `BLOCKED.md`。
+当前只允许修改本项目目录；禁止清理用户文件、接触生产服务器、部署公网、批量抓取图源或离线下载 20 年整域瓦片。不得把真实秘密写入 fixture、日志、回执、普通 JSON 或前端。可用空间低于 8 GiB 立即停止本机构建、测试、截图和新增缓存；2026-08-28 19:09 最新约 5.2 GiB，低于门禁，本轮只能做小型源码/文档并由 GitHub PR CI 验证。发现越界需求写入 `BLOCKED.md`。
 
 `FIX-BATCH-001/002/003/004/005/006` 已进入 GitHub main `cfab0c2`。第六批只对 `.ovmap` 检查路由建立一致的文件/base64/HTTP 信封门并由 CI `33165515010` 验证；它不读取真实文件、不发真实请求、不改变 source lifecycle，也不授予 ready。
 
@@ -35,6 +35,8 @@
 `FIX-BATCH-005` 关联 `OMB-AUD-022`，保护 JRN-007/009/011、BR-011/016/017、FR-009/012/014/016、IF-006/007 和 AC-011/014/015/018。完成候选必须满足：`YYYY-MM-DD` 是实际 UTC 日历日且 from≤to；AOI/date ID 为 1–160 字符、无首尾空白/控制符；路径坐标只接受规范十进制安全非负整数，z≤30 且 x/y<2^z；旧 API、V1、SDK 与适配器复用同一 schema；错误码稳定且无效输入不触发适配器 fetch。HTTP 层可以在进入 schema 前对超长路径以 414 更早 fail closed；不得为统一错误码放宽服务器路径参数门。
 
 `FIX-BATCH-006` 关联 `OMB-AUD-010`，保护 JRN-002、BR-005、FR-002/004、IF-001 和 NFR-004。完成候选必须满足：1 MiB 原始 `.ovmap` 可越过 HTTP 信封门；base64 长度按 `4*ceil(bytes/3)` 计算；仅导入路由增加受限信封预算；1 MiB＋1 字节和超信封分别返回稳定 413；前端在读取/编码/fetch 前拒绝超限；其他 API body limit 不放宽。
+
+`FIX-BATCH-007` 关联 `OMB-AUD-018`，保护 JRN-001/002、BR-004/005、FR-001/002/004 和 NFR-004/006。完成候选必须满足：预览主动 TTL 清理、最多 64 条且总估算 4 MiB 的 LRU；单预览超预算稳定失败；QR 图片声明/实际字节≤8 MiB；在 object URL/ZXing 前从 PNG/JPEG/WebP 头验证尺寸与≤16,777,216 像素；浏览器尺寸与头一致；2×/3× 只在缩放后像素预算内运行；拒绝路径不调用解码器。
 
 ## 一页产品定义
 
@@ -841,3 +843,5 @@ V1 公共类型和错误语义通过契约测试冻结；新增可选能力不�
 - 2026-08-28：PR #9 第二轮 CI `33164783702` 通过 37 个 Vitest 文件/162 tests＋2 Node、8 workspace typecheck、生产构建、4 Chrome E2E 和交底新鲜度，随后合并为 main `f84ae20`。OMB-AUD-022 达到 main；真实奥维源、部署和用户验收不随之晋级。
 - 2026-08-28：FIX-BATCH-005 证据 PR #10 经 CI `33165036211` 合并，main 为 `f8733da`；启动 FIX-BATCH-006，统一 `.ovmap` 1 MiB 文件、base64 和 HTTP 信封边界，当前仅 `local-candidate`，待 PR CI。
 - 2026-08-28：PR #11 CI `33165515010` 首轮通过 37 个 Vitest 文件/167 tests＋2 Node、8 workspace typecheck、生产构建、4 Chrome E2E 和交底新鲜度，随后合并为 main `cfab0c2`。OMB-AUD-010 达到 main；QR 图片资源门、预览 LRU、真实图源与用户验收不随之晋级。
+- 2026-08-28：FIX-BATCH-006 证据 PR #12 经 CI `33165750762` 合并，main 为 `98a9828`；启动 FIX-BATCH-007，增加预览 LRU 和二维码图片解码前资源门，当前仅 `local-candidate`，待 PR CI。
+- 2026-08-28：PR #13 首次 CI `33166210759` 单测通过后在 Web 类型检查因测试 `Uint8Array<ArrayBufferLike>` 不满足 BlobPart 失败；构建/Chrome 未运行。测试 helper 改为明确 ArrayBuffer，失败保留并待重跑。
