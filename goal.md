@@ -7,9 +7,9 @@
 - 状态：Approved / Implementing；用户于 2026-08-28 明确最终结果必须能基于已导入奥维图源进行二次开发
 - 产品裁决者：用户
 - 当前整合者：本 Codex 主线程
-- 更新时间：2026-08-28 19:09（Asia/Shanghai）
+- 更新时间：2026-08-28 19:12（Asia/Shanghai）
 - 适用目录：`/Users/assis/Documents/Codex/2026-08-27/open-map-bridge`
-- 当前切片：`FIX-BATCH-007 local-candidate`（分支 `codex/audit-p1-import-resource-bounds`）；为预览缓存建立 TTL/数量/字节 LRU，为二维码图片建立解码前字节/格式/像素/倍率门，待 PR CI。FIX-BATCH-006 证据已由 PR #12 回写，GitHub main 为 `98a9828`；真实目录/provider/probe/ready、部署与用户验收仍未达到
+- 当前切片：`FIX-BATCH-007 local-candidate`（PR #13，分支 `codex/audit-p1-import-resource-bounds`）；为预览缓存建立 TTL/数量/字节 LRU，为二维码图片建立解码前字节/格式/像素/倍率门。首次 CI `33166210759` 单测通过后在 Web 测试 fixture 的 ArrayBufferLike/BlobPart 类型门失败；已改用明确 ArrayBuffer，待重跑。GitHub main 仍为 `98a9828`；真实目录/provider/probe/ready、部署与用户验收仍未达到
 - 上版：V0.4 奥维兼容双入口导入实施版
 
 <!-- GOAL_CAPSULE_START -->
@@ -844,3 +844,4 @@ V1 公共类型和错误语义通过契约测试冻结；新增可选能力不�
 - 2026-08-28：FIX-BATCH-005 证据 PR #10 经 CI `33165036211` 合并，main 为 `f8733da`；启动 FIX-BATCH-006，统一 `.ovmap` 1 MiB 文件、base64 和 HTTP 信封边界，当前仅 `local-candidate`，待 PR CI。
 - 2026-08-28：PR #11 CI `33165515010` 首轮通过 37 个 Vitest 文件/167 tests＋2 Node、8 workspace typecheck、生产构建、4 Chrome E2E 和交底新鲜度，随后合并为 main `cfab0c2`。OMB-AUD-010 达到 main；QR 图片资源门、预览 LRU、真实图源与用户验收不随之晋级。
 - 2026-08-28：FIX-BATCH-006 证据 PR #12 经 CI `33165750762` 合并，main 为 `98a9828`；启动 FIX-BATCH-007，增加预览 LRU 和二维码图片解码前资源门，当前仅 `local-candidate`，待 PR CI。
+- 2026-08-28：PR #13 首次 CI `33166210759` 单测通过后在 Web 类型检查因测试 `Uint8Array<ArrayBufferLike>` 不满足 BlobPart 失败；构建/Chrome 未运行。测试 helper 改为明确 ArrayBuffer，失败保留并待重跑。

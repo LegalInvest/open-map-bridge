@@ -2,14 +2,15 @@ import { describe, expect, it, vi } from 'vitest';
 import { QR_IMAGE_MAX_BYTES } from '@omb/source-schema';
 import { allowedQrPreprocessScales, createQrReader, type QrDecoderBackend } from './qr-reader.js';
 
-function png(width: number, height: number): Uint8Array {
-  const bytes = new Uint8Array(24);
+function png(width: number, height: number): ArrayBuffer {
+  const buffer = new ArrayBuffer(24);
+  const bytes = new Uint8Array(buffer);
   bytes.set([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
   new DataView(bytes.buffer).setUint32(8, 13, false);
   bytes.set(new TextEncoder().encode('IHDR'), 12);
   new DataView(bytes.buffer).setUint32(16, width, false);
   new DataView(bytes.buffer).setUint32(20, height, false);
-  return bytes;
+  return buffer;
 }
 
 describe('QR reader resource lifecycle', () => {

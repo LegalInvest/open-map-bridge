@@ -97,3 +97,5 @@
 - 预览资源候选：保留 15 分钟业务 TTL，同时在每次 put 主动清除过期项；Map 访问顺序实现 LRU，默认最多 64 条、JSON UTF-8 估算总量 4 MiB，单条超过总预算稳定 413；写入与读取继续结构化克隆。
 - QR 图片资源候选：文件声明和实际字节均不超过 8 MiB；在创建 object URL 和调用 ZXing 前解析 PNG/JPEG/WebP 有界文件头并限制 16,777,216 像素；实际浏览器尺寸必须与文件头一致；2×/3× canvas 仅在缩放后仍不超过同一像素预算时尝试。当前仅 `local-candidate`，本机 19:09 约 5.2 GiB，未测试/构建/浏览器。
 - 唯一最安全下一步：完成 FIX-BATCH-007 交底指纹和静态 diff 门，提交 PR 由 GitHub CI 验证；全绿最多把 OMB-AUD-018 晋级 main，不解除 OMB-AUD-019 的确认消费/存储错误语义或真实图源阻塞。
+- 2026-08-28 19:12：PR #13 首次 CI `33166210759` 红灯。全部单元测试已通过；Web workspace 严格类型检查在两个测试 `new File([png(...)])` 处拒绝 `Uint8Array<ArrayBufferLike>` 作为要求 `ArrayBuffer` 的 BlobPart，随后构建和 Chrome E2E 未运行。生产资源门逻辑没有在该 run 中报错。
+- 修正：测试 PNG helper 直接分配并返回明确 `ArrayBuffer`，不放宽 DOM 类型、不改生产逻辑。唯一最安全下一步是同步红灯证据、更新交底指纹并推送 PR #13 重跑；全门绿前仍不得晋级。
