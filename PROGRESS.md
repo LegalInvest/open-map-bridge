@@ -81,3 +81,7 @@
 - 2026-08-28 18:47：PR #9 首次 CI `33164557423` 红灯已取证。37 个 Vitest 文件/161 tests 中 159 通过；共享 schema、SDK 与适配器反例均通过，两个路由用例因 161 字符路径参数被 Fastify 在路由前以 414 拒绝、而测试误期望业务层 400 失败。CI 因单测失败未进入 8 workspace typecheck、构建和 Chrome E2E。
 - 修正裁决：保留 Fastify 默认路径参数长度安全门，不为统一错误码放宽 URL 接收范围；route 测试明确断言 414，package/SDK 测试继续证明 160 字符业务契约。本机 18:47 约 5.2 GiB，继续止测、止构建、止浏览器。
 - 唯一最安全下一步：提交该分层断言和全量文档同步到 PR #9，等待 GitHub CI 重跑；只有全部门全绿并合并后，OMB-AUD-022 才能从 `local-candidate` 晋级 main。
+- 2026-08-28 18:51：PR #9 第二轮 CI `33164783702` 全绿：37 个 Vitest 文件/162 tests＋2 Node tests、8 workspace typecheck、生产构建、4 Chrome E2E 和 139 文件技术交底新鲜度检查全部通过；PR 随后 squash 合并为 main `f84ae20`。
+- 批次结果：`OMB-AUD-022` 达到 main；日期/窗口/ID/瓦片坐标在旧 API、V1、SDK 和适配器之间已有共享真值，超长 HTTP 路径保留更早 414。该批没有真实奥维请求、真实日期目录、部署或用户业务验收。
+- 当前证据分支：`codex/audit-p1-temporal-input-truth-evidence`，只回写 main/CI 证据。本机仍低于 8 GiB 门。
+- 唯一最安全下一步：合并 FIX-BATCH-005 证据回写后，为 `FIX-BATCH-006` 冻结 `OMB-AUD-010` 的上传字节、base64 膨胀和 Fastify body 上限一致性，再写边界测试；不得用提高无界上限掩盖 413。
