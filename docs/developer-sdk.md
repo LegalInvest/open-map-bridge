@@ -21,7 +21,18 @@
 | GET | `/api/v1/developer/sources/:id/dates?aoiId=&from=&to=` | 仅有 `temporal-catalog` 时可用 |
 | GET | `/api/v1/developer/sources/:id/tiles/:dateId/:z/:x/:y` | 仅有 `tiles` 时可用；禁止任何查询参数 |
 
-响应不会出现 `hosts`、`pathTemplate`、`queryParameters`、`credentialRef`、`sourceProvenance`、`compatibilityExtension`、输入哈希或原始载荷。调用方不能提交 URL、host、token 或任意请求头。
+响应不会出现 `hosts`、`pathTemplate`、`queryParameters`、`credentialRef`、`sourceProvenance`、`compatibilityExtension`、输入哈希或原始载荷。调用方不能把上游 URL、host、token 或自定义请求头作为业务参数；唯一允许的认证头由 SDK 从本机应用令牌生成。
+
+## 服务端身份与权限
+
+直接连接 `127.0.0.1:4174` 的应用必须由操作者在进程环境配置独立令牌。每项包含与 manifest 完全一致的 app ID、32–256 字符本机秘密和允许的只读权限；只允许 `read-source-metadata`、`read-temporal-catalog`、`read-tiles`。示意值必须替换，真实令牌不得提交到仓库：
+
+```bash
+export OMB_DEVELOPER_TOKEN="$(node -e "process.stdout.write(require('node:crypto').randomBytes(32).toString('base64url'))")"
+export OMB_DEVELOPER_TOKENS_JSON="$(node -e "process.stdout.write(JSON.stringify([{id:'org.example.history',token:process.env.OMB_DEVELOPER_TOKEN,permissions:['read-source-metadata','read-temporal-catalog','read-tiles']}]))")"
+```
+
+服务端按 URL 再判权限：源目录/详情需要 `read-source-metadata`，日期需要 `read-temporal-catalog`，瓦片需要 `read-tiles`；应用令牌不能访问导入、AOI、任务或健康接口。Bearer 正确但 app ID 不符同样拒绝。manifest 仍用于客户端预检查，但不能替代服务端授权。
 
 ## TypeScript SDK
 
@@ -39,7 +50,9 @@ const manifest = parseDeveloperAppManifest({
   permissions: ['read-source-metadata', 'read-temporal-catalog', 'read-tiles'],
 });
 
-const client = new OpenMapBridgeClient({ baseUrl: 'http://127.0.0.1:4174', manifest });
+const gatewayToken = process.env.OMB_DEVELOPER_TOKEN;
+if (!gatewayToken) throw new Error('OMB_DEVELOPER_TOKEN is required');
+const client = new OpenMapBridgeClient({ baseUrl: 'http://127.0.0.1:4174', manifest, gatewayToken });
 const sources = await client.listSources();
 const source = sources.find((entry) => entry.capabilities.includes('temporal-catalog'));
 
@@ -49,12 +62,12 @@ if (source) {
     from: '2006-01-01',
     to: '2025-12-31',
   });
-  const tileUrl = client.tileUrl(source, { dateId: dates[0]!.id, z: 8, x: 212, y: 102 });
-  console.log(tileUrl); // 只指向本地 /api/v1/developer 路径
+  const tile = await client.fetchTile(source, { dateId: dates[0]!.id, z: 8, x: 212, y: 102 });
+  console.log(tile.contentType, tile.body.byteLength);
 }
 ```
 
-完整可类型检查示例见 `packages/developer-sdk/examples/history-consumer.ts`。能力不足时 SDK 在执行 fetch 前抛出 `DeveloperSdkError`，`code` 为 `capability-not-available`；未知 API 版本、未知权限、非回环 base URL 和非法瓦片坐标同样 fail closed。
+完整可类型检查示例见 `packages/developer-sdk/examples/history-consumer.ts`。直连回环地址未传 app token 时构造器即失败；每个 JSON/瓦片请求都带 Bearer 和 manifest app ID。能力不足时 SDK 在执行 fetch 前抛出 `DeveloperSdkError`，`code` 为 `capability-not-available`；未知 API 版本、未知权限、非回环 base URL 和非法瓦片坐标同样 fail closed。
 
 ## 接入真实奥维图源的晋级门
 

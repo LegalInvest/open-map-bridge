@@ -21,6 +21,13 @@ npm run env:check
 npm run dev
 ```
 
+普通 Web 使用无需查看令牌：`scripts/dev.mjs` 会为本次进程生成临时 `OMB_GATEWAY_TOKEN`，只传给 gateway 和 Vite 服务端代理，不进入浏览器 bundle。需要直接使用 curl 时，必须在启动前自行设置至少 32 字符的随机本机秘密，并在同一 shell 中保留：
+
+```bash
+export OMB_GATEWAY_TOKEN="$(node -e "process.stdout.write(require('node:crypto').randomBytes(32).toString('base64url'))")"
+npm run dev
+```
+
 应用只监听：
 
 - Web：`http://127.0.0.1:5173`
@@ -52,14 +59,18 @@ Web 操作：完成授权保存后点击“检查图源准备度”，或从顶�
 本地 API：
 
 ```bash
-curl -sS http://127.0.0.1:4174/api/v1/processes
+curl -sS http://127.0.0.1:4174/api/v1/processes \
+  -H "authorization: Bearer $OMB_GATEWAY_TOKEN"
 curl -sS -X POST http://127.0.0.1:4174/api/v1/processes/source-readiness/execution \
+  -H "authorization: Bearer $OMB_GATEWAY_TOKEN" \
   -H 'content-type: application/json' \
+  -H 'x-omb-csrf: 1' \
   --data '{"sourceId":"<saved-source-id>"}'
-curl -sS http://127.0.0.1:4174/api/v1/jobs
+curl -sS http://127.0.0.1:4174/api/v1/jobs \
+  -H "authorization: Bearer $OMB_GATEWAY_TOKEN"
 ```
 
-创建接口只允许 `sourceId`，不能传 URL、host、token 或跳步参数。当前没有 resume/cancel/results，也没有 DNS/HTTP/真实瓦片请求；这些属于下一切片。
+网关只接受精确回环 Host；出现不可信 Origin、`Sec-Fetch-Site: cross-site`、无效 Bearer、写请求缺 `x-omb-csrf: 1` 或超过限流时会 fail closed。创建接口只允许 `sourceId`，不能在 body 中传 URL、host、token 或跳步参数。当前没有 resume/cancel/results，也没有 DNS/HTTP/真实瓦片请求；这些属于下一切片。
 
 ## 历史影像合成源验收
 

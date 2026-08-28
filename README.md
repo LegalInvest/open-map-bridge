@@ -11,7 +11,7 @@ OpenMapBridge is an open-source, clean-room map-source bridge. It imports legall
 - Secret-safe previews, explicit authorization, confirmed-source persistence, and import receipts.
 - A persisted, deduplicated, zero-network source-readiness job with a four-step operator dashboard and explicit blockers.
 - A source-agnostic temporal adapter, arbitrary AOI drawing, aligned 1/2/4-panel comparison, swipe mode, and playback.
-- A V1 developer API and TypeScript SDK with strict manifests, capability negotiation, and local-only tile URLs.
+- A V1 developer API and TypeScript SDK with server-enforced app tokens/permissions, strict manifests, capability negotiation, and authenticated local tile fetches.
 
 Current truth matters: a parsed or confirmed source is not automatically reachable or rendered. Imported sources remain `metadata-only` until URL/IP policy, credentials, probing, and a runtime adapter have all passed.
 
@@ -27,7 +27,7 @@ npm run env:check
 npm run dev
 ```
 
-Open [http://127.0.0.1:5173](http://127.0.0.1:5173). The local gateway listens on `127.0.0.1:4174`.
+Open [http://127.0.0.1:5173](http://127.0.0.1:5173). The local gateway listens on `127.0.0.1:4174`. `npm run dev` generates an ephemeral process token when none is supplied and shares it only with the gateway and the local Vite proxy; it is not bundled into browser JavaScript. Set `OMB_GATEWAY_TOKEN` explicitly before startup only when direct CLI access is required.
 
 ## Verification
 
@@ -49,6 +49,8 @@ Do not commit real QR payloads, credentials, private `.ovmap` files, tile caches
 ## Secondary development
 
 The public V1 contract intentionally does not expose upstream hosts, URL templates, query parameters, credential references, provenance hashes, compatibility extensions, or original import bytes.
+
+Direct SDK access requires a separate app ID/token entry in `OMB_DEVELOPER_TOKENS_JSON`. The gateway binds that token to server-side read permissions; a client manifest cannot grant itself additional access. Never reuse or publish the Web process token.
 
 - Guide: [`docs/developer-sdk.md`](docs/developer-sdk.md)
 - TypeScript example: [`packages/developer-sdk/examples/history-consumer.ts`](packages/developer-sdk/examples/history-consumer.ts)
@@ -92,7 +94,7 @@ CI rejects a stale source fingerprint.
 - Use only map sources and data you are authorized to access.
 - Do not bypass memberships, device binding, authentication, licensing, or rate limits.
 - Do not publish shared tokens, private source URLs, or offline tile databases.
-- The gateway is local-only and must never become an arbitrary URL proxy.
+- The gateway is local-only, accepts exact loopback Host/Origin values, requires scoped Bearer authentication and CSRF evidence, and must never become an arbitrary URL proxy.
 - Unknown formats and capabilities fail closed.
 
 See [`SECURITY.md`](SECURITY.md) before reporting a source-import or proxy vulnerability.
