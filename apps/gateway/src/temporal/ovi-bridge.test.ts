@@ -54,11 +54,10 @@ it.each([
     mapType: 200,
     fetchImpl: (async () => new Response(tileBytes, { status: 200, headers: { 'content-type': contentType } })) as typeof fetch,
   });
-  await expect(adapter.tile({ dateId: 'annual-2018', z: 8, x: 212, y: 102 })).resolves.toMatchObject({
-    status: 200,
-    contentType,
-    body: tileBytes,
-  });
+  const response = await adapter.tile({ dateId: 'annual-2018', z: 8, x: 212, y: 102 });
+  expect(response.status).toBe(200);
+  expect(response.contentType).toBe(contentType);
+  expect(Array.from(response.body)).toEqual(Array.from(tileBytes));
 });
 
 it('does not relay a non-success upstream response body', async () => {
