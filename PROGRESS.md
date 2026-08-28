@@ -49,3 +49,8 @@
 - 批次结果：`OMB-AUD-001/003/005/023` 达到 main；`OMB-AUD-002` 只有“无真实瓦片却 probe ok”子项达到 main，真实最小探测/解码/ready 晋级仍开放。没有公网部署或真实奥维业务验收。
 - 当前文档分支：`codex/audit-p0-source-binding-evidence`，仅回写 main/CI 证据，不修改产品代码。问题账本仍有其余 P0/P1/P2 和公开 backlog，不能汇总为全部修复。
 - 唯一最安全下一步：合并本次证据回写后，以 `OMB-AUD-002/004/020/021` 为核心建立 `FIX-BATCH-002` 的安全真实探测契约；在 vault、请求时 DNS/IP/重绑定和流式解码门齐备前不发真实请求。
+- 2026-08-28 17:32：启动 `FIX-BATCH-002`（分支 `codex/audit-p1-ovi-response`），先修 `OMB-AUD-021` 并提供 `OMB-AUD-002` 的解码前置：成功响应流式 5 MiB 截断、非 2xx 正文丢弃、只接受 MIME/magic 一致且可完整解码的 PNG/JPEG、单边不超过 2048；新增合法/损坏/伪装/超尺寸/错误正文反例。
+- 当前阶段：`local-candidate`；未连接任何真实源，未启动浏览器，未执行本机测试/构建。17:32 根卷约 5.7 GiB，继续由 PR CI 验证。
+- 唯一最安全下一步：完成 FIX-BATCH-002 文档/交底同步和静态检查，提交 PR；CI 通过后再判断是否进入 main，绝不因此把 Ovi source 晋级 ready。
+- 2026-08-28 17:38：PR #3 首次 CI `33160137300` 红灯；113 个既有/新增用例中的 2 个合法图片断言因 fixture 是 Node `Buffer`、流式结果是 `Uint8Array` 的原型差异失败，图片解码本身已通过。改为逐字节断言后重跑；该失败不隐藏、不计为通过，批次仍是 `local-candidate`。
+- 2026-08-28 17:39：PR #3 第二次 CI `33160229102` 中单测已越过，随后 gateway 类型检查发现测试构造的 `Uint8Array<ArrayBufferLike>` 不满足严格 `BodyInit`。测试现显式复制为 `ArrayBuffer` 后再构造 `Response`；红灯继续保留，批次仍待重跑。

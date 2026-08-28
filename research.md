@@ -25,6 +25,7 @@
 - 2026-08-27 20:14 当前实现已完成合成源上的任意 AOI、四屏、卷帘、播放、缺年状态和观察证据等级；48 个 Vitest 加 2 个 Node 测试、类型检查、生产构建和 2 条 Chrome E2E 通过。该结论仍是 `local-verified` 合成消费链路，不代表 QR/`.ovmap` 已导入或真实奥维瓦片已经可用。
 - 当前增量实现 `SLICE-AUTOMATION-RUN-001A`：四步 `AutomationRun/Step` schema、静态主机/路径策略、脱敏凭证需求判断、运行时 registry 判断、并发去重原子保存、process/job API、任务驾驶舱和导入后入口。所有步骤 `externalRequest=false`；本机因空间门未运行测试，提交 `16f445c` 已由 GitHub CI `33155671827` 完成验证并进入 main。
 - `FIX-BATCH-001` 已由 PR #1 合并为 main `5a7e9ad`：imported Ovi 只按显式 persisted UUID 注册 configured runtime；同 legacyId 的其他源不绑定；旧时序目录只公开 ready；configured dates/tiles fail closed；空探测不再返回成功；source UUID/mapType/port 成组配置。CI `33159198541` 对源提交 `bc63661` 全绿；这不证明真实 ready。
+- 当前 `FIX-BATCH-002` 在无真实外联条件下收紧 Ovi runtime 响应：流式 5 MiB 硬上限、非 2xx 正文隔离、PNG/JPEG MIME/magic/完整解码/2048 维度门；代码和反例为 `local-candidate`，本机 5.7 GiB 门下未测试，待 PR CI。
 
 ### 搜索与核验边界
 
@@ -127,8 +128,8 @@
 |---|---|---|---|
 | 项目目录 | 新建 `/Users/assis/Documents/Codex/2026-08-27/open-map-bridge` | 本轮文件系统创建 | 2026-08-27 |
 | 既有同类本地仓库 | 未发现 | `find /Users/assis/Documents/Codex -maxdepth 2` 仅命中既有 VegFlow mapping 目录，无 Ovi/OpenMapBridge 项目 | 2026-08-27 |
-| Git 仓库 | main `5a7e9ad` 与 `origin/main` 一致；当前只在 `codex/audit-p0-source-binding-evidence` 回写合并证据；remote 为 `https://github.com/LegalInvest/open-map-bridge.git` | `git branch --show-current`、`git rev-parse main origin/main`、`git remote -v` | 2026-08-28 17:26 |
-| 根卷空间 | 17:12 约 5.8 GiB、17:22 约 7.2 GiB，仍低于 8 GiB 门；停止本机构建、测试、浏览器、下载和缓存 | `df -h /System/Volumes/Data` | 2026-08-28 17:22 |
+| Git 仓库 | main `240b91b` 与 `origin/main` 一致；当前修复分支 `codex/audit-p1-ovi-response`；remote 为 `https://github.com/LegalInvest/open-map-bridge.git` | `git branch --show-current`、`git rev-parse main origin/main`、`git remote -v` | 2026-08-28 17:32 |
+| 根卷空间 | 17:32 约 5.7 GiB，低于 8 GiB 门；停止本机构建、测试、浏览器、下载和缓存 | `df -h /System/Volumes/Data` | 2026-08-28 17:32 |
 | Node/Docker 工具链 | 本机 Node `v26.7.0`、npm `11.19.0`、Docker `29.4.0`、Compose `5.1.2`；计划冻结 Node `24.20.0` LTS 作为目标运行时 | 版本命令；[Node 官方发布表](https://nodejs.org/en/about/previous-releases) | 2026-08-27 |
 | 奥维桌面客户端 | 先发现旧 2.6.3；随后从官方分发安装并验签 10.6.0 到独立应用路径，未覆盖旧版 | 应用版本、代码签名、公证和官方安装包校验 | 2026-08-27 |
 
@@ -143,7 +144,7 @@
 
 ### GitHub 与远端
 
-- 当前机器 GitHub CLI 已核验登录账号 `LegalInvest`；唯一公共仓库为 `LegalInvest/open-map-bridge`，PR #1 已 squash 合并为 main `5a7e9ad`。
+- 当前机器 GitHub CLI 已核验登录账号 `LegalInvest`；唯一公共仓库为 `LegalInvest/open-map-bridge`，PR #1/#2 已合并，main 为 `240b91b`。
 - 当前 main 无分支保护；Dependabot security updates 关闭；未建立 code scanning analysis；secret scanning/push protection 已启用且当时为 0 alerts。治理问题进入 `OMB-AUD-029`，不能把仓库可见等同治理完成。
 - 两台云服务器不在当前 V0 规格交付范围，本轮未连接。
 
@@ -297,9 +298,9 @@ fixtures/synthetic/temporal  无外网的 20 年彩色/带标签时序瓦片
 | 技术交底持续同步 | 中文技术交底书覆盖架构、流程、数据、安全、特征候选、实施例和当前证据边界；source set 生成 SHA-256，CI 检查陈旧 | local-verified mechanism | `docs/技术交底书.md`、`scripts/update-technical-disclosure.mjs`、`npm run disclosure:check`；精确文件数/指纹以交底元数据为准 |
 | 可视化/自动化方向 | 用户已批准继续实施；准备度四步账本、去重、process/job API 和驾驶舱已进入 main | main for 001A / later slices missing | `16f445c`、CI `33155671827`；2026-08-28 |
 | 审计问题账本 | 161 个 tracked files 静态审计形成 38 组问题与公开 backlog；第一批已进 main，剩余项继续分批 | FIX-BATCH-001 main / remaining discovered | `docs/问题账本.md`、PR #1、CI `33159198541`；2026-08-28 17:26 |
-| 工作区基线 | main `5a7e9ad` 与 `origin/main` 对齐；当前证据回写分支不含产品代码；最新约 7.2 GiB 低于 8 GiB 门 | main verified / capacity blocked | `git status/log/rev-parse`、`df`；2026-08-28 17:26 |
-| 自动测试 | 当前 main 的远端门通过 108 Vitest＋2 Node、8 workspace 类型检查、生产构建和 4 Chrome E2E；既有 2 条授权本地 E2E 未在公共 CI 运行 | main CI verified / authorized-local historical | CI `33155671827`；2026-08-28 |
-| GitHub main | 公共唯一主仓 `LegalInvest/open-map-bridge`；FIX-BATCH-001 由 PR #1 合并为 `5a7e9ad` | main for 001A + FIX-BATCH-001 | PR #1、CI `33159198541`；2026-08-28 |
+| 工作区基线 | main `240b91b` 与 `origin/main` 对齐；当前 FIX-BATCH-002 分支只含响应安全候选；约 5.7 GiB 低于 8 GiB 门 | main verified / candidate / capacity blocked | `git status/log/rev-parse`、`df`；2026-08-28 17:32 |
+| 自动测试 | 当前 main 的远端门通过 113 Vitest＋2 Node、8 workspace 类型检查、生产构建和 4 Chrome E2E；既有 2 条授权本地 E2E 未在公共 CI 运行 | main CI verified / authorized-local historical | CI `33159198541`；2026-08-28 |
+| GitHub main | 公共唯一主仓 `LegalInvest/open-map-bridge`；FIX-BATCH-001 代码/证据由 PR #1/#2 合并到 `240b91b` | main for 001A + FIX-BATCH-001 | PR #1/#2、CI `33159198541`/`33159508922`；2026-08-28 |
 | 部署 | 无 | missing | 未授权/未实施 |
 | 业务验收 | 真实 QR 安全预览和真实 `.ovmap` 五图层已过；真实 QR 瓦片渲染与用户独立签收未过 | import slice local-verified / AC-001 partial / accepted missing | `docs/acceptance/import-v0-local.md` |
 
@@ -316,6 +317,7 @@ fixtures/synthetic/temporal  无外网的 20 年彩色/带标签时序瓦片
 | FR-007 | 部分成功和诊断 | 稳定解析错误和 confirmed 回执已实现 | UI-004、receipt service | AC-003/008/009 | partial local-verified | 缺逐层探测、重试、撤销 | 2026-08-28 |
 | FR-008 / IF-004 | 开放导出 | 仅规格 | source-schema export | AC-010 | planned | 缺开放 schema 文档与 QR 容量策略 | 2026-08-27 |
 | NFR-001 | SSRF/解压/开放代理防护 | 解压/记录边界已验证；零外联 path/host/port/IP 静态策略已进入 main，元数据永久阻断，私网/裸 IP/企业域名转人工门 | `apps/gateway/src/security/source-policy.ts` | policy/route 反例由 CI `33155671827` 通过 | parser/static policy main | 缺请求时 DNS 解析结果、重绑定和实际网络执行门 | 2026-08-28 |
+| OMB-AUD-021 / NFR-004/006 | Ovi 响应资源与图片真实性 | FIX-BATCH-002 候选使用 Web Stream 逐块限制 5 MiB，非 2xx 丢弃正文，成功仅接受 PNG/JPEG 并检查 magic、完整解码、单边 2048 和 RGBA 长度 | `apps/gateway/src/temporal/{ovi-bridge,image-validation}.ts` | 合法 PNG、错误正文、无长度超限、MIME 伪装、损坏和超尺寸反例已写；待 PR CI | local-candidate | 未形成真实 probe/ready；请求前 DNS/IP 门仍缺 | 2026-08-28 17:32 |
 | NFR-007 | 合法开源依赖 | 候选已发现 | lockfiles、THIRD_PARTY | license audit | discovered | 版本/许可证/安全公告待任务0复核 | 2026-08-27 |
 | AC-001 至 AC-010 | 业务验收 | AC-002/003 本地通过；AC-001 完成真实预览但未出图；其余部分/未运行 | E2E + 真实浏览器 | 对应 AC | mixed, no cross-level rollup | 下一门为 vault/SSRF/probe/render | 2026-08-28 |
 | JRN-007 / FR-009 | 历史源日期和真实瓦片 | 合成 20 年源已验证；configured Ovi 已从消费端隐藏，空 probe 返回失败；request-date 占位仍存在 | `packages/temporal-source`、`apps/gateway/src/{temporal,routes/temporal}.ts` | 相关回归由 CI `33159198541` 通过；AC-011 未运行 | configured truth main / real adapter blocked | 缺真实日期目录、最小解码探测和 ready 晋级 | 2026-08-28 |
@@ -338,7 +340,7 @@ fixtures/synthetic/temporal  无外网的 20 年彩色/带标签时序瓦片
 5. **SSRF/秘密**：本地代理天然高风险。客户端不能传任意 URL；后端策略为最终裁决。
 6. **投影正确性**：HTTP 200 图片仍可能错位。验收必须包括代表性位置的视觉/坐标检查。
 7. **`.sdb` 边界**：V0 只诊断不显示完整离线航拍；若用户把“所有 `.ovmap` 都能导入”解释为“任何配套离线影像立即可见”，需要正式扩围。
-8. **磁盘动态变化**：2026-08-28 17:12 约 5.8 GiB，17:22 波动到约 7.2 GiB，仍低于 8 GiB 门。每个安装/构建阶段前都要实时复核，不能依赖旧读数。
+8. **磁盘动态变化**：2026-08-28 17:12 约 5.8 GiB，17:22 波动到约 7.2 GiB，17:32 又降到约 5.7 GiB，始终未稳定越过 8 GiB 门。每个安装/构建阶段前都要实时复核，不能依赖旧读数。
 9. **商标/兼容表述**：必须说“兼容导入”而不是冒充奥维官方或复制品牌。
 10. **本机监听暴露**：官方客户端文档只说明端口，没有证明可绑定回环。若实际监听 `0.0.0.0`，不得启用，真实桥接保持 blocked。
 11. **日期语义**：官方 Web 接口的目标日期可能返回“该日前最近一景”，但不返回拍摄日期。UI 必须允许 `captureDate=null`。
