@@ -59,9 +59,19 @@ The public V1 contract intentionally does not expose upstream hosts, URL templat
 - [`research.md`](research.md): evidence, implementation map, and stage ledger.
 - [`PROGRESS.md`](PROGRESS.md): current checkpoint and safest next action.
 - [`BLOCKED.md`](BLOCKED.md): unresolved real-source and safety gates.
+- [`docs/技术交底书.md`](docs/技术交底书.md): timestamped technical disclosure, architecture, technical features, embodiments, and evidence boundary.
 - [`docs/runbook.md`](docs/runbook.md): local operations.
 
 Stages are reported separately: `discovered → local-candidate → local-verified → main → deployed → accepted`. A passing test, HTTP 200, or synthetic source does not prove a real Ovi source has rendered.
+
+After a material architecture, protocol, security, data-contract, or runtime-capability change, update the disclosure and its append-only log:
+
+```bash
+npm run disclosure:update -- "describe the technical change"
+npm run disclosure:check
+```
+
+CI rejects a stale source fingerprint.
 
 ## Safety and legal boundary
 

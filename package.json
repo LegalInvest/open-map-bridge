@@ -15,6 +15,8 @@
     "env:check": "node scripts/verify-environment.mjs",
     "fixtures:acquire": "node scripts/acquire-research-fixtures.mjs",
     "fixtures:verify": "node scripts/verify-local-fixtures.mjs",
+    "disclosure:update": "node scripts/update-technical-disclosure.mjs update",
+    "disclosure:check": "node scripts/update-technical-disclosure.mjs check",
     "test": "node --test scripts/*.test.mjs && vitest run --passWithNoTests",
     "test:compat": "vitest run --config vitest.compat.config.ts",
     "typecheck": "npm run typecheck --workspaces --if-present",

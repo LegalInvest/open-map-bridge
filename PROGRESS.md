@@ -31,3 +31,4 @@
 - 2026-08-28：本地根目录 `/Users/assis/Documents/Codex/2026-08-27/open-map-bridge` 已快进为最新 `main`；公共 GitHub 主仓已创建：`https://github.com/LegalInvest/open-map-bridge`，Apache-2.0、README、贡献指南、安全披露和仓库主题已就绪，私密漏洞报告已开启。
 - 首次远端 CI 暴露 macOS 专用 `/usr/bin/sips`，已改为 `pngjs/jpeg-js` 跨平台像素归一化；本地全门再次通过。提交 `4b90939` 的 GitHub CI run `33146192919` 已通过 92 Vitest + 2 Node、8 workspace typecheck、build 和 4 Chrome E2E。
 - 阶段更新：记录到 `4b90939` 的产品代码已达到 `main`；仍无公网部署，真实奥维瓦片与用户业务签收未达到 `deployed/accepted`。唯一产品下一步保持不变：同一 imported source ID 的 vault/SSRF/probe/runtime binding。
+- 2026-08-28：建立 `docs/技术交底书.md` V0.1，记录创建/更新时间、基线提交、源码 SHA-256、追加式变更日志、技术问题、完整方案、候选特征、实施例和真实完成边界。新增 `disclosure:update/check`，CI 将拒绝技术源码变化但交底书未同步的提交。

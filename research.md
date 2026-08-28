@@ -218,6 +218,7 @@ apps/web                 响应式地图与导入 UI
 apps/gateway             本地 API、凭证、策略、瓦片代理、持久化
 packages/source-schema   MapSourceDefinition、状态机、错误码
 packages/developer-sdk   脱敏源描述、能力/权限、应用清单、V1 客户端
+docs/技术交底书.md        技术问题、方案、特征候选、实施例、边界和追加式时间戳
 packages/qr-import       QR载荷适配
 packages/ovmap-codec     嗅探、有界解压、版本记录解析
 packages/protocols       XYZ/TMS/WMTS/WMS/ArcGIS 等归一化
@@ -276,6 +277,7 @@ fixtures/synthetic/temporal  无外网的 20 年彩色/带标签时序瓦片
 | 时序 Web UI | 四屏、卷帘、播放、AOI 编辑和观察面板已实现 | local-candidate | Chrome E2E 通过；真实源未过门 |
 | 导入 Web UI | 默认首页提供二维码图片、摄像头和 `.ovmap` 点击/拖入，预览后授权保存 | local-verified slice | 4 默认 E2E + 2 授权本地 E2E |
 | 二次开发 V1 | 脱敏源目录、能力协商、严格应用清单、TypeScript SDK 和本地日期/瓦片消费已实现；configured OviBridge 不授予运行能力 | local-verified slice | `packages/developer-sdk`、`apps/gateway/src/{developer,routes/developer}.ts`、8 项聚焦测试和实际 HTTP |
+| 技术交底持续同步 | 中文技术交底书覆盖架构、流程、数据、安全、特征候选、实施例和当前证据边界；122 个核心文件生成 SHA-256，CI 检查陈旧 | local-verified mechanism | `docs/技术交底书.md`、`scripts/update-technical-disclosure.mjs`、`npm run disclosure:check`；2026-08-28 |
 | 工作区基线 | 隔离分支；Node 26.7.0、npm 11.19.0、244 packages、0 vulnerabilities；8 GiB 磁盘门 | local-verified | `npm run env:check` 与 lockfile；2026-08-28 |
 | 自动测试 | 92 Vitest + 2 Node、8 workspace 类型检查、生产构建、4 默认 Chrome E2E 和 2 授权本地 E2E 均通过 | local-verified | 完整命令链；2026-08-28 |
 | GitHub main | 公共唯一主仓 `LegalInvest/open-map-bridge`；产品代码提交 `4b90939` 已进入 main，GitHub CI run `33146192919` 全绿 | main for recorded commit | GitHub repo、Actions run；2026-08-28 |
