@@ -70,3 +70,7 @@
 - 当前阶段：`local-candidate`，不是 `local-verified/main/deployed/accepted`。18:28 `/System/Volumes/Data` 约 5.3 GiB，低于 8 GiB 门；本机测试、构建、浏览器、下载和影像生成继续暂停，且本批没有发出真实请求。
 - 2026-08-28 18:28：首次交底指纹更新因 git 索引仍列出已删除的 `annual-catalog` 文件而 `ENOENT`；该失败已保留。指纹脚本改为在删除变更中只计算仍存在的源码，随后 `update/check` 对 137 个文件、指纹 `64873c34d881` 通过。该兼容修复不关闭 OMB-AUD-035 的指纹覆盖范围问题。
 - 唯一最安全下一步：提交 FIX-BATCH-004 PR 并以 GitHub CI 验证；全绿并合并后最多把 OMB-AUD-004 的“不伪造/无目录失败”规则推进 main，不得据此声称真实年份目录或影像可用。
+- 2026-08-28 18:32：PR #7 CI `33163589956` 首轮全绿：36 个 Vitest 文件/128 tests＋2 Node tests、8 workspace typecheck、生产构建、4 Chrome E2E。PR #7 随后 squash 合并为 main `5b6f06e`。
+- 批次结果：`OMB-AUD-004` 的“不伪造年度目录、无目录明确失败、未登记/missing/failed ID 零请求、已验证目录 schema/唯一性/窗口过滤”达到 main。该批没有请求真实奥维、没有真实目录提供者、没有 probe/ready、部署或用户业务验收。
+- 当前证据分支：`codex/audit-p0-ovi-date-truth-evidence`，只回写 main/CI 证据。18:32 根卷约 5.3 GiB，仍低于 8 GiB 门。
+- 唯一最安全下一步：为 `FIX-BATCH-005` 冻结 `OMB-AUD-022` 的共享严格输入 schema（真实 ISO 日期、窗口顺序、dateId/AOI 长度、z/x/y 边界），再写代码；不得在输入真值门前开始真实上游请求。
