@@ -7,9 +7,9 @@
 - 状态：Approved / Implementing；用户于 2026-08-28 明确最终结果必须能基于已导入奥维图源进行二次开发
 - 产品裁决者：用户
 - 当前整合者：本 Codex 主线程
-- 更新时间：2026-08-28 18:47（Asia/Shanghai）
+- 更新时间：2026-08-28 18:51（Asia/Shanghai）
 - 适用目录：`/Users/assis/Documents/Codex/2026-08-27/open-map-bridge`
-- 当前切片：`FIX-BATCH-005 local-candidate`（PR #9，分支 `codex/audit-p1-temporal-input-truth`）；旧 API、V1、SDK 和适配器统一实际 ISO 日期、顺序窗口、受限 ID 与瓦片边界 schema。首次 CI `33164557423` 为 159/161 Vitest 通过，两个超长路径用例因更早 HTTP 414 而红；已保留安全门并修正断言，待重跑。FIX-BATCH-004 及证据已在 GitHub main `1e7308f`；真实目录/provider/probe/ready、部署与用户验收仍未达到
+- 当前切片：`FIX-BATCH-005 main`；旧 API、V1、SDK 和适配器统一实际 ISO 日期、顺序窗口、受限 ID 与瓦片边界 schema，超长 HTTP 路径保留更早 414。PR #9 已合并为 `f84ae20`，CI `33164783702` 全绿；当前只在证据分支回写 main/CI。真实目录/provider/probe/ready、部署与用户验收仍未达到
 - 上版：V0.4 奥维兼容双入口导入实施版
 
 <!-- GOAL_CAPSULE_START -->
@@ -23,7 +23,7 @@
 
 当前只允许修改本项目目录；禁止清理用户文件、接触生产服务器、部署公网、批量抓取图源或离线下载 20 年整域瓦片。不得把真实秘密写入 fixture、日志、回执、普通 JSON 或前端。可用空间低于 8 GiB 立即停止本机构建、测试、截图和新增缓存；2026-08-28 18:47 最新约 5.2 GiB，低于门禁，本轮只能做小型源码/文档并由 GitHub PR CI 验证。发现越界需求写入 `BLOCKED.md`。
 
-`FIX-BATCH-001/002/003/004` 已进入产品 main `5b6f06e`，证据回写后 GitHub main 为 `1e7308f`。`FIX-BATCH-005` 当前仅为候选：将日期、窗口、AOI/date ID 和瓦片坐标真值下沉到 `@omb/temporal-source`，由旧 API、V1、SDK 和适配器共同执行。它不发真实请求、不改变 source lifecycle，也不授予 ready。
+`FIX-BATCH-001/002/003/004/005` 已进入 GitHub main `f84ae20`。第五批将日期、窗口、AOI/date ID 和瓦片坐标真值下沉到 `@omb/temporal-source`，由旧 API、V1、SDK 和适配器共同执行；CI `33164783702` 验证自动门。它不发真实请求、不改变 source lifecycle，也不授予 ready。
 
 第三批完成条件已由 CI `33161851375` 的 128 Vitest＋2 Node、8 workspace 类型检查、生产构建和 4 条 Chrome E2E 验证并进入 main：缺失/错误 Host、恶意 Origin、cross-site、缺失/错误 token、app ID 不符、权限不足、写请求缺 CSRF 和超限均在路由前稳定拒绝且不回显秘密；官方 Web 全旅程继续通过；直连 SDK 必须用独立 app token，服务端权限不能被 manifest 扩大。这不代表真实 probe 或 ready。项目最终完成条件仍是同一 source ID 获得有证据的 `tiles/temporal-catalog`，且至少两个真实日期返回可解码、非空并内容不同的瓦片。
 <!-- GOAL_CAPSULE_END -->
@@ -836,3 +836,4 @@ V1 公共类型和错误语义通过契约测试冻结；新增可选能力不�
 - 2026-08-28：`FIX-BATCH-004` 经 PR #7 合并为 main `5b6f06e`；CI `33163589956` 首轮通过 36 个 Vitest 文件/128 tests＋2 Node、8 workspace typecheck、build 和 4 Chrome E2E。004 的不伪造/无目录失败规则达到 main；真实目录提供者、probe/ready 和真实影像仍开放。
 - 2026-08-28：启动 `FIX-BATCH-005`，把时序实际日期、顺序窗口、AOI/date ID 和瓦片坐标下沉为共享 schema，接入旧 API、V1、SDK 与两个适配器。当前为 `local-candidate`，本机约 5.3 GiB 未测试/构建，待 PR CI；零真实外联。
 - 2026-08-28：PR #9 首次 CI `33164557423` 在 161 个 Vitest 中通过 159 个；两个 161 字符 dateId 路径被 Fastify 在路由前以 414 拒绝，原测试误期望 400。保留该安全门并把路由断言改为 414；package/SDK 继续验证 160 字符业务契约，等待全门重跑。
+- 2026-08-28：PR #9 第二轮 CI `33164783702` 通过 37 个 Vitest 文件/162 tests＋2 Node、8 workspace typecheck、生产构建、4 Chrome E2E 和交底新鲜度，随后合并为 main `f84ae20`。OMB-AUD-022 达到 main；真实奥维源、部署和用户验收不随之晋级。
