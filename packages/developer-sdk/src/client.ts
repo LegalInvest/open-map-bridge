@@ -24,6 +24,7 @@ export class DeveloperSdkError extends Error {
 interface OpenMapBridgeClientOptions {
   baseUrl?: string;
   manifest: DeveloperAppManifest;
+  gatewayToken?: string;
   fetcher?: typeof fetch;
 }
 
@@ -70,11 +71,22 @@ export function assertSourceCapability(
 export class OpenMapBridgeClient {
   private readonly baseUrl: string;
   private readonly manifest: DeveloperAppManifest;
+  private readonly gatewayToken: string | null;
   private readonly fetcher: typeof fetch;
 
   constructor(options: OpenMapBridgeClientOptions) {
     this.baseUrl = normalizeBaseUrl(options.baseUrl ?? '');
     this.manifest = parseDeveloperAppManifest(options.manifest);
+    if (
+      options.gatewayToken !== undefined &&
+      (options.gatewayToken.length < 32 || options.gatewayToken.length > 256 || /\s/.test(options.gatewayToken))
+    ) {
+      throw new DeveloperSdkError('invalid-gateway-token');
+    }
+    if (this.baseUrl !== '' && options.gatewayToken === undefined) {
+      throw new DeveloperSdkError('gateway-token-required');
+    }
+    this.gatewayToken = options.gatewayToken ?? null;
     this.fetcher = options.fetcher ?? globalThis.fetch.bind(globalThis);
   }
 
@@ -123,6 +135,19 @@ export class OpenMapBridgeClient {
     return `${this.baseUrl}${path}`;
   }
 
+  async fetchTile(
+    source: DeveloperSourceDescriptor,
+    input: { dateId: string; z: number; x: number; y: number },
+  ): Promise<{ body: Uint8Array; contentType: string }> {
+    const response = await this.fetcher(this.tileUrl(source, input), { headers: this.requestHeaders('*/*') });
+    if (!response.ok) throw new DeveloperSdkError('gateway-error', 'gateway-error', response.status);
+    const contentType = response.headers.get('content-type')?.split(';')[0]?.trim() ?? '';
+    if (!contentType.startsWith('image/')) {
+      throw new DeveloperSdkError('invalid-tile-response', 'invalid-tile-response', response.status);
+    }
+    return { body: new Uint8Array(await response.arrayBuffer()), contentType };
+  }
+
   private assertPermission(capability: DeveloperCapability): void {
     const permission = permissionForCapability(capability);
     if (!this.manifest.permissions.includes(permission)) {
@@ -131,7 +156,7 @@ export class OpenMapBridgeClient {
   }
 
   private async readJson(path: string): Promise<unknown> {
-    const response = await this.fetcher(`${this.baseUrl}${path}`, { headers: { accept: 'application/json' } });
+    const response = await this.fetcher(`${this.baseUrl}${path}`, { headers: this.requestHeaders('application/json') });
     let body: unknown;
     try {
       body = await response.json();
@@ -146,5 +171,13 @@ export class OpenMapBridgeClient {
       throw new DeveloperSdkError(code, code, response.status);
     }
     return body;
+  }
+
+  private requestHeaders(accept: string): Record<string, string> {
+    return {
+      accept,
+      'x-omb-app-id': this.manifest.id,
+      ...(this.gatewayToken ? { authorization: `Bearer ${this.gatewayToken}` } : {}),
+    };
   }
 }

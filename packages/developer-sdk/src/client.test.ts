@@ -9,6 +9,7 @@ const manifest: DeveloperAppManifest = {
   requiredCapabilities: ['metadata', 'temporal-catalog', 'tiles'],
   permissions: ['read-source-metadata', 'read-temporal-catalog', 'read-tiles'],
 };
+const gatewayToken = 'd'.repeat(43);
 
 const metadataOnly: DeveloperSourceDescriptor = {
   apiVersion: 'v1',
@@ -69,14 +70,36 @@ it('uses only V1 local gateway paths for ready sources', async () => {
       { status: 200, headers: { 'content-type': 'application/json' } },
     ),
   );
-  const client = new OpenMapBridgeClient({ baseUrl: 'http://127.0.0.1:4174/', manifest, fetcher });
+  const client = new OpenMapBridgeClient({ baseUrl: 'http://127.0.0.1:4174/', manifest, gatewayToken, fetcher });
   const dates = await client.listDates(ready, { aoiId: 'area-1', from: '2006-01-01', to: '2025-12-31' });
   expect(dates[0]?.captureDate).toBe('2006-07-15');
   expect(fetcher).toHaveBeenCalledWith(
     'http://127.0.0.1:4174/api/v1/developer/sources/synthetic-lakes/dates?aoiId=area-1&from=2006-01-01&to=2025-12-31',
-    expect.objectContaining({ headers: { accept: 'application/json' } }),
+    expect.objectContaining({
+      headers: {
+        accept: 'application/json',
+        authorization: `Bearer ${gatewayToken}`,
+        'x-omb-app-id': manifest.id,
+      },
+    }),
   );
   expect(client.tileUrl(ready, { dateId: 'scene-2006', z: 8, x: 212, y: 102 })).toBe(
     'http://127.0.0.1:4174/api/v1/developer/sources/synthetic-lakes/tiles/scene-2006/8/212/102',
   );
+  fetcher.mockResolvedValueOnce(
+    new Response(new ArrayBuffer(4), { status: 200, headers: { 'content-type': 'image/png' } }),
+  );
+  await expect(client.fetchTile(ready, { dateId: 'scene-2006', z: 8, x: 212, y: 102 })).resolves.toMatchObject({
+    contentType: 'image/png',
+    body: new Uint8Array(4),
+  });
+});
+
+it('requires a separate gateway token for direct loopback access', () => {
+  expect(() => new OpenMapBridgeClient({ baseUrl: 'http://127.0.0.1:4174', manifest })).toThrow(
+    /gateway-token-required/,
+  );
+  expect(() =>
+    new OpenMapBridgeClient({ baseUrl: 'http://127.0.0.1:4174', manifest, gatewayToken: 'short' }),
+  ).toThrow(/invalid-gateway-token/);
 });

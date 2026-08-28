@@ -1,6 +1,6 @@
 import { afterEach, expect, it, vi } from 'vitest';
 import { buildSyntheticRecord37Ovmap } from '@omb/ovmap-codec/synthetic';
-import { buildApp } from '../app.js';
+import { buildTestApp as buildApp } from '../test-app.js';
 
 const apps: Array<Awaited<ReturnType<typeof buildApp>>> = [];
 afterEach(async () => {

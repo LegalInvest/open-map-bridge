@@ -9,8 +9,8 @@ const manifest = parseDeveloperAppManifest({
   permissions: ['read-source-metadata', 'read-temporal-catalog', 'read-tiles'],
 });
 
-export async function discoverHistoricalFrames(baseUrl = 'http://127.0.0.1:4174') {
-  const client = new OpenMapBridgeClient({ baseUrl, manifest });
+export async function discoverHistoricalFrames(gatewayToken: string, baseUrl = 'http://127.0.0.1:4174') {
+  const client = new OpenMapBridgeClient({ baseUrl, manifest, gatewayToken });
   const sources = await client.listSources();
   const source = sources.find(
     (candidate) =>
@@ -24,10 +24,13 @@ export async function discoverHistoricalFrames(baseUrl = 'http://127.0.0.1:4174'
     to: '2025-12-31',
   });
   const first = dates.find((date) => date.availability === 'available');
+  const firstTile = first
+    ? await client.fetchTile(source, { dateId: first.id, z: 8, x: 212, y: 102 })
+    : null;
   return {
     status: 'ready' as const,
     source,
     dates,
-    firstTileUrl: first ? client.tileUrl(source, { dateId: first.id, z: 8, x: 212, y: 102 }) : null,
+    firstTile: firstTile ? { contentType: firstTile.contentType, byteLength: firstTile.body.byteLength } : null,
   };
 }

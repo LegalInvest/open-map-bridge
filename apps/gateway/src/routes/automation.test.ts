@@ -2,7 +2,7 @@ import { mkdtemp } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, expect, it, vi } from 'vitest';
-import { buildApp } from '../app.js';
+import { buildTestApp as buildApp } from '../test-app.js';
 
 const apps: Array<Awaited<ReturnType<typeof buildApp>>> = [];
 

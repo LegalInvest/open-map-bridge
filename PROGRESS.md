@@ -58,3 +58,6 @@
 - 批次结果：`OMB-AUD-021` 达到 main；`OMB-AUD-002` 的图片解码前置达到 main，但真实最小探测、证据保存和 ready 晋级仍开放。无真实奥维请求、无部署、无用户业务验收；大包告警继续由 `OMB-AUD-033` 跟踪。
 - 当前文档分支：`codex/audit-p1-ovi-response-evidence`，只回写 main/CI 证据。17:43 根卷约 6.1 GiB，仍低于 8 GiB 门。
 - 唯一最安全下一步：先为 `FIX-BATCH-003` 冻结 `OMB-AUD-020` 的本地 gateway 信任边界（Host/Origin/本地令牌/CSRF/限流与 DNS rebinding 反例），再写代码；该门通过前继续禁止任何真实图源请求。
+- 2026-08-28 17:58：启动 `FIX-BATCH-003`（分支 `codex/audit-p1-gateway-trust-boundary`），范围冻结为 OMB-AUD-020：精确回环 Host/Origin、`Sec-Fetch-Site`、Bearer、写请求 CSRF、固定窗口限流、安全响应头和服务端 app ID/路径权限；开发 Web token 仅由本地代理注入，SDK 改用独立应用 token 和认证瓦片 fetch。
+- 当前阶段：`local-candidate`；未连接真实源、未启动浏览器、未执行本机测试/构建。17:58 根卷约 5.5 GiB，继续由 PR CI 验证。
+- 唯一最安全下一步：完成 FIX-BATCH-003 文档/交底和静态检查后提交 PR；CI 全绿最多把 OMB-AUD-020 推进 main，不解除上游 DNS/IP、vault、真实 probe/ready 和真实日期阻塞。

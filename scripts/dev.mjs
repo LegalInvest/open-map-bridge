@@ -1,8 +1,14 @@
 import { spawn } from 'node:child_process';
+import { randomBytes } from 'node:crypto';
+
+const childEnvironment = {
+  ...process.env,
+  OMB_GATEWAY_TOKEN: process.env.OMB_GATEWAY_TOKEN ?? randomBytes(32).toString('base64url'),
+};
 
 const children = [
-  spawn('npm', ['--workspace', '@omb/gateway', 'run', 'dev'], { stdio: 'inherit' }),
-  spawn('npm', ['--workspace', '@omb/web', 'run', 'dev'], { stdio: 'inherit' }),
+  spawn('npm', ['--workspace', '@omb/gateway', 'run', 'dev'], { env: childEnvironment, stdio: 'inherit' }),
+  spawn('npm', ['--workspace', '@omb/web', 'run', 'dev'], { env: childEnvironment, stdio: 'inherit' }),
 ];
 
 let shuttingDown = false;

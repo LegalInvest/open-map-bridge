@@ -12,10 +12,15 @@ import { registerDeveloperRoutes } from './routes/developer.js';
 import { SourceReadinessService } from './automation/source-readiness.js';
 import { registerAutomationRoutes } from './routes/automation.js';
 import type { MapSourceDefinition } from '@omb/source-schema';
+import {
+  registerGatewayAccessControl,
+  type GatewayAccessConfig,
+} from './security/gateway-access.js';
 
-interface BuildAppOptions {
+export interface BuildAppOptions {
   dataPath: string | null;
   ovi?: { baseUrl: string; mapType: number; sourceId: string };
+  access: GatewayAccessConfig | null;
 }
 
 function bindImportedOviSource(
@@ -59,6 +64,7 @@ export async function buildApp(options: BuildAppOptions): Promise<FastifyInstanc
   }
 
   const app = Fastify({ logger: false });
+  if (options.access) registerGatewayAccessControl(app, options.access);
   app.get('/api/health', async () => ({ ok: true, persistence: options.dataPath === null ? 'memory' : 'atomic-json' }));
   app.get('/api/comparisons', async () => repository.listComparisons());
   registerAoiRoutes(app, repository);

@@ -1,5 +1,5 @@
 import { afterEach, expect, it } from 'vitest';
-import { buildApp } from '../app.js';
+import { buildTestApp as buildApp } from '../test-app.js';
 
 const apps: Array<Awaited<ReturnType<typeof buildApp>>> = [];
 afterEach(async () => Promise.all(apps.splice(0).map((app) => app.close())));
