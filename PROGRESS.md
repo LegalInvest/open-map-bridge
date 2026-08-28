@@ -54,3 +54,7 @@
 - 唯一最安全下一步：完成 FIX-BATCH-002 文档/交底同步和静态检查，提交 PR；CI 通过后再判断是否进入 main，绝不因此把 Ovi source 晋级 ready。
 - 2026-08-28 17:38：PR #3 首次 CI `33160137300` 红灯；113 个既有/新增用例中的 2 个合法图片断言因 fixture 是 Node `Buffer`、流式结果是 `Uint8Array` 的原型差异失败，图片解码本身已通过。改为逐字节断言后重跑；该失败不隐藏、不计为通过，批次仍是 `local-candidate`。
 - 2026-08-28 17:39：PR #3 第二次 CI `33160229102` 中单测已越过，随后 gateway 类型检查发现测试构造的 `Uint8Array<ArrayBufferLike>` 不满足严格 `BodyInit`。测试现显式复制为 `ArrayBuffer` 后再构造 `Response`；红灯继续保留，批次仍待重跑。
+- 2026-08-28 17:41：PR #3 第三次 CI `33160315934` 全绿：36 个 Vitest 文件/122 tests＋2 Node tests、8 workspace typecheck、生产构建、4 Chrome E2E。PR #3 随后 squash 合并为 main `de36012`。
+- 批次结果：`OMB-AUD-021` 达到 main；`OMB-AUD-002` 的图片解码前置达到 main，但真实最小探测、证据保存和 ready 晋级仍开放。无真实奥维请求、无部署、无用户业务验收；大包告警继续由 `OMB-AUD-033` 跟踪。
+- 当前文档分支：`codex/audit-p1-ovi-response-evidence`，只回写 main/CI 证据。17:43 根卷约 6.1 GiB，仍低于 8 GiB 门。
+- 唯一最安全下一步：先为 `FIX-BATCH-003` 冻结 `OMB-AUD-020` 的本地 gateway 信任边界（Host/Origin/本地令牌/CSRF/限流与 DNS rebinding 反例），再写代码；该门通过前继续禁止任何真实图源请求。
