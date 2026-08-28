@@ -10,9 +10,9 @@
 6. 用户真实历史二维码的 `at/ad/al` 和 72 字符不透明 `ul` 已安全识别但未保存；在本地凭证保险库或官方奥维回环桥接通过之前，无法从开放定义独立重建私有认证，也不得请求真实源或宣称出图。
 7. 导入配置目前可保存为 `confirmed`；零外联主机/端口/IP/云元数据/路径静态策略已进入 main，但请求时 DNS 解析后 IP、重绑定、最小探测、瓦片代理和投影修正尚未实现。当前策略通过不能视为网络可用。
 8. 开发者 V1 契约和合成适配器已贯通；真实 imported source UUID 现在可与 configured OviBridge 同 ID 绑定，但未完成 probe/ready，因此 SDK 中仍必须保持 `metadata-only`。不能用 configured 或合成源的 `ready` 能力替它晋级。
-9. 本机容量：2026-08-28 18:28 `/System/Volumes/Data` 约 5.3 GiB，低于 8 GiB 执行门。本机测试、构建、浏览器、下载、截图和影像生成暂停；不得通过删除用户数据规避；候选由隔离 GitHub CI 验证。
-10. 全量审计：`docs/问题账本.md` 记录 38 组问题。`FIX-BATCH-001/002/003` 已进入 main；001/003/005/020/021/023 达到 main，002 仅假绿和解码前置子项达到 main；FIX-BATCH-004/OMB-AUD-004 当前只是 `local-candidate`，其余不得因候选或前三批合并而标记解决。
-11. 真实 ready 晋级：configured 隐藏、空 probe 失败、图片解码/内容验证和本地 gateway 入站信任边界已进入 main。FIX-BATCH-004 候选删除虚构年度目录，但本地凭证保险库、上游请求时 DNS/IP/重绑定门、最小真实瓦片请求、探测证据/ready 编排和真实日期目录提供者仍缺；`OMB-AUD-002` 保持部分开放，004 待 CI 且真实目录仍 blocked；020/021 已达到 main，但不等于真实源验收。
+9. 本机容量：2026-08-28 18:32 `/System/Volumes/Data` 约 5.3 GiB，低于 8 GiB 执行门。本机测试、构建、浏览器、下载、截图和影像生成暂停；不得通过删除用户数据规避；后续候选由隔离 GitHub CI 验证。
+10. 全量审计：`docs/问题账本.md` 记录 38 组问题。`FIX-BATCH-001/002/003/004` 已进入 main；001/003/004/005/020/021/023 达到 main，002 仅假绿和解码前置子项达到 main；其余不得因四批合并而标记解决。
+11. 真实 ready 晋级：configured 隐藏、空 probe 失败、图片解码/内容验证、本地 gateway 入站信任边界和“不伪造日期目录”已进入 main。但本地凭证保险库、上游请求时 DNS/IP/重绑定门、最小真实瓦片请求、探测证据/ready 编排和真实日期目录提供者仍缺；`OMB-AUD-002` 保持部分开放，004 已修复的只是伪目录问题；020/021 已达到 main，但不等于真实源验收。
 
 ## 已解除的实施阻塞
 
@@ -24,6 +24,7 @@
 - 同 ID configured 绑定阻塞已解除：`5a7e9ad` 只按显式 persisted source UUID 绑定 OviBridge，相同 legacyId 不串绑；configured 不进入时序消费，CI `33159198541` 通过。真实 probe/ready 仍在当前阻塞中。
 - Ovi 响应安全阻塞已解除：`de36012` 对上游 body 流式限 5 MiB，只接受 200，隔离其他状态正文，并在返回前完整解码受限 PNG/JPEG；CI `33160315934` 通过。真实 probe、日期和 ready 仍在当前阻塞中。
 - 本地 gateway 入站信任阻塞已解除：`1d0ebc4` 在业务路由前校验 Host/Origin/Fetch-Site/Bearer/CSRF/app 权限/限流，并保持 Vite 原始来源；CI `33161851375` 通过。上游 DNS/IP、vault、真实 probe/ready 仍在当前阻塞中。
+- Ovi 日期伪造阻塞已解除：`5b6f06e` 删除年度请求目录生成器，无已验证目录明确失败，未登记与 `missing/failed` 日期 ID 零请求；CI `33163589956` 通过。真实目录提供者、probe/ready 和真实瓦片仍在当前阻塞中。
 
 官方奥维 10.6.0 已安装到独立应用路径并保留导入结果；这不授权复制客户端、解密私有认证或输出真实 host/key。未知日期和字段继续保持 unknown。
 
