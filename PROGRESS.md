@@ -45,3 +45,7 @@
 - 当前阶段：`local-candidate`，不是 `local-verified/main/deployed/accepted`。`/System/Volumes/Data` 17:12 约 5.8 GiB、17:22 最新约 7.2 GiB，仍低于 8 GiB 门；本机测试、构建、浏览器、下载和影像生成继续暂停。
 - 文档同步：`goal.md`、`research.md`、`PROGRESS.md`、`BLOCKED.md`、README、技术交底书和问题账本随本批更新；Leader 规格翻译用于绑定 issue→旅程/规则/验收→证据阶段。
 - 唯一最安全下一步：完成静态 diff/交底新鲜度检查后提交功能分支，推送 PR 并以 GitHub CI 验证 `FIX-BATCH-001`；CI 通过最多把该批晋级 main，不关闭真实探测和真实影像阻塞。
+- 2026-08-28 17:26：`FIX-BATCH-001` 已由 PR #1 squash 合并为 GitHub main `5a7e9ad`。源提交 `bc63661` 的 CI run `33159198541` 通过交底指纹、36 个 Vitest 文件/113 tests＋2 Node tests、8 workspace typecheck、生产构建和 4 Chrome E2E。
+- 批次结果：`OMB-AUD-001/003/005/023` 达到 main；`OMB-AUD-002` 只有“无真实瓦片却 probe ok”子项达到 main，真实最小探测/解码/ready 晋级仍开放。没有公网部署或真实奥维业务验收。
+- 当前文档分支：`codex/audit-p0-source-binding-evidence`，仅回写 main/CI 证据，不修改产品代码。问题账本仍有其余 P0/P1/P2 和公开 backlog，不能汇总为全部修复。
+- 唯一最安全下一步：合并本次证据回写后，以 `OMB-AUD-002/004/020/021` 为核心建立 `FIX-BATCH-002` 的安全真实探测契约；在 vault、请求时 DNS/IP/重绑定和流式解码门齐备前不发真实请求。
