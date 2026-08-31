@@ -21,6 +21,7 @@
 - 2026-09-01 01:15 本地/main/origin 为证据提交 `16e805d`，main CI `33417916800` 成功；FIX-BATCH-014A runtime source 为 `67ea901`。精确 `16e805d` 已在腾讯专用构建目录通过全门并安装为 current release `16e805d`；服务 active、4174/8080 双回环、health=`atomic-json/encrypted-local`、未鉴权 401、state/vault hash 不变。真实 ProbeResult 尚未产生。
 - 2026-09-01 02:48 容量恢复到 `10,332,424 KiB` 后启动 014B。`MapSourceDefinition` 新增 transport scheme 与逐字段 provenance，旧持久记录兼容加载但标记 `legacy-unknown`；QR/`.ovmap` 只保留瓦片变量或保守白名单内的非秘密常量 query，其余固定值继续脱敏；OMS 归一化不再丢失已声明的 protocol/projection/zoom/tile/format/hosts/attribution/license。通用静态策略对未知、未确认、旧版和 HTTP 请求计划 fail closed，准备度指纹纳入完整公开请求计划。PR #32 首轮 CI `33428136462` 在公开 QR E2E 保留红灯：相对 `ul` 的未知 scheme 使任务停在 network-policy，而旧断言期待 runtime-binding；改为短显式 HTTPS 夹具后，第二轮 CI `33428818544` 通过交底、252 Vitest＋3 Node、8 workspace typecheck、production build/smoke 与 4 条 Chrome 旅程。零真实 DNS/HTTP/二维码载荷，尚未 main/deployed/accepted。
 - 2026-09-01 03:18 PR #32 证据提交 CI `33429142239` 全绿并 squash 合并为 main `ccd3cd8`；main CI `33429336750` 复验同组全门。精确 main 本地 production build/smoke 后生成 gateway `273207cc…b826`、Web index `42368f3e…04ad`，腾讯安装 release `ccd3cd8` 并从 `16e805d` 原子切换 current。health=`atomic-json/encrypted-local`、直连 401、4174/8080 双回环、state `07648ee2…d6e2` 与 vault `89c8d70d…db42` 均不变。014B 达到 `deployed request-plan truth`，但通用 probe/瓦片入口仍未导入固定传输，零真实上游请求且非 accepted。
+- 2026-09-01 03:27 部署证据 PR #33 CI `33430320616` 全绿并合并为 docs-only main `601ac68`；main CI `33430487066` 再次通过完整门。运行源码和腾讯 release 继续是 `ccd3cd8`，docs-only 后代不触发重复发布；本地/main/origin 已同步，真实源阶段不变。
 
 ### 本轮回答
 
