@@ -38,8 +38,9 @@ The exact host, service account, nginx layout, Node path, and release SHA must b
 
 ## Verified Tencent release (2026-08-31)
 
-- GitHub main and deployed source tree: `33f7f06725cdce172c5c3bd070c7c91538cea646`;
-- release: `/opt/open-map-bridge/releases/33f7f06`;
+- GitHub main and deployed source tree: `62ab11494ae5e27b7bd8250fddf3e88d1c21c170`;
+- current release: `/opt/open-map-bridge/releases/62ab114`;
+- retained rollback release: `/opt/open-map-bridge/releases/33f7f06`;
 - project runtime: `/opt/open-map-bridge/runtime/node-v24.19.0`, `v24.19.0`;
 - active nginx include: `/www/server/panel/vhost/nginx/open-map-bridge.conf`;
 - gateway bundle SHA-256: `63e8ed6eb09ec747bb941a25beff872f0bb895d8544d3cee517af565b4abbfd6`;
@@ -49,7 +50,7 @@ The service is active as `openmapbridge`, with `NoNewPrivileges=yes`, `ProtectSy
 
 ## Rollback
 
-Keep the previous release directory and the persistent state file. To roll back, stop the service, copy `/var/lib/open-map-bridge/temporal-state.json` to a timestamped protected backup, repoint `current` to the previous verified release, start the service, and verify source/receipt counts and health. Never delete the state file or earlier release as part of rollback. The first deployment has no earlier OpenMapBridge release, so the rollback procedure is documented and the current symlink is atomic, but a release-to-release rollback rehearsal remains unavailable until the second release exists.
+Keep the previous release directory and the persistent state file. To roll back, stop the service, copy `/var/lib/open-map-bridge/temporal-state.json` to a timestamped protected backup, repoint `current` to the previous verified release, start the service, and verify source/receipt counts and health. Never delete the state file or earlier release as part of rollback. On 2026-08-31 the project exercised `62ab114 → 33f7f06 → 62ab114`; every switch used an atomic symlink replacement plus service restart, health stayed successful, and the persistent-state hash did not change.
 
 ## Acceptance boundary
 

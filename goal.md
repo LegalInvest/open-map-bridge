@@ -7,9 +7,9 @@
 - 状态：Approved / Implementing；用户于 2026-08-28 明确最终结果必须能基于已导入奥维图源进行二次开发
 - 产品裁决者：用户
 - 当前整合者：本 Codex 主线程
-- 更新时间：2026-08-31 15:53（Asia/Shanghai）
+- 更新时间：2026-08-31 16:00（Asia/Shanghai）
 - 适用目录：`/Users/assis/Documents/Codex/2026-08-27/open-map-bridge`
-- 当前切片：`FIX-BATCH-010 deployed evidence`。本地与 GitHub main 已一致为 `33f7f06`，main CI `33369816054` 全绿；同一制品已私有部署到腾讯机的 versioned release，并通过 loopback、鉴权、持久化、重启、日志和服务器 Web 四屏/播放浏览器验证。真实目录/provider/probe/ready、真实历史瓦片与用户业务签收仍未达到；本机 15:53 仅余约 5.4 GiB，已触发 8 GiB 止写门
+- 当前切片：`FIX-BATCH-010 deployed evidence`。本文件所在 GitHub 提交包含最终部署证据；运行源码自 `33f7f06` 后未变化，腾讯机 current 标签为 `62ab114`，制品哈希与 GitHub main 的运行输入一致，并完成 `62ab114 → 33f7f06 → 62ab114` 回滚/前滚演练。仅证据文档合并不触发无意义的服务重启或新 release。真实目录/provider/probe/ready、真实历史瓦片与用户业务签收仍未达到；本机低于 8 GiB，止写门保持触发
 - 上版：V0.4 奥维兼容双入口导入实施版
 
 <!-- GOAL_CAPSULE_START -->
@@ -795,7 +795,7 @@ V1 公共类型和错误语义通过契约测试冻结；新增可选能力不�
 - `local-candidate`：实现存在但任一冻结检查或真实旅程未通过。
 - `local-verified`：按切片独立晋级。SDK 薄切片需 AC-017/018 的单元、路由、类型和构建通过；导入主线仍需 AC-001，历史主线仍需 AC-011 且 AC-012/013 至少达到真实源 local 旅程，三者不得互相替代。
 - `main`：确切 commit 进入唯一 GitHub 主仓 `https://github.com/LegalInvest/open-map-bridge` 且真实 CI 通过；每个新提交必须独立取证，不继承旧 run 的成功。
-- `deployed`：同一制品进入指定环境，配置、健康、日志、数据和回滚核验；应用制品已在腾讯私有 loopback 环境达到该阶段，首次发布尚无上一版本可做 release-to-release 回滚演练。
+- `deployed`：同一制品进入指定环境，配置、健康、日志、数据和回滚核验；应用制品已在腾讯私有 loopback 环境达到该阶段，且 release-to-release 回滚/前滚演练通过。
 - `accepted`：目标用户从实际入口独立完成二维码或 `.ovmap` 主旅程并签收；容器健康、HTTP 200 或开发者演示不能替代。
 
 ## 实施切片与变更记录
@@ -850,3 +850,4 @@ V1 公共类型和错误语义通过契约测试冻结；新增可选能力不�
 - 2026-08-31：FIX-BATCH-008 已进入 main；启动 FIX-BATCH-009，将服务器交付前置条件冻结为独立 gateway/Web 制品、确定性 manifest、鉴权健康、原子持久化、结构化生命周期、SIGTERM 正常退出、loopback 反向代理和可恢复回滚。公网开放不在该契约内，不以服务健康替代真实源验收。
 - 2026-08-31：FIX-BATCH-009 已进入 main。首个服务器目标经只读比较选定腾讯机；采用 versioned release、项目专用 Node 24 runtime、systemd gateway、loopback nginx 和 SSH tunnel，保持公网开放为禁用状态。部署验收仍必须与真实奥维源业务验收分开。
 - 2026-08-31：FIX-BATCH-010 已部署 main `33f7f06` 到腾讯机 `/opt/open-map-bridge/releases/33f7f06`。首次把 nginx 配置放入未被宝塔主配置 include 的 `/etc/nginx/conf.d`，8080 未监听；经 `nginx -T` 发现并改用 `/www/server/panel/vhost/nginx/*.conf` 后，UI/API、401 边界、双回环监听、状态 600 权限、重启哈希和四屏/播放浏览器旅程通过。该证据只晋级应用部署，不晋级真实 Ovi 源和用户 accepted。
+- 2026-08-31：部署证据 PR #18 合并为 main `62ab114`，main CI `33370752935` 全绿。服务器复制未变化的运行制品为 release `62ab114`，完成 `62ab114 → 33f7f06 → 62ab114`，每次健康通过且状态哈希不变；后续证据提交只改变文档，不改变服务器运行内容。

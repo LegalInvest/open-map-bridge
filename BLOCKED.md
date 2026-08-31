@@ -13,7 +13,7 @@
 9. 本机容量：2026-08-31 15:53 根卷可用空间从约 9.1 GiB 突降到约 5.4 GiB，swap 约 6.9 GiB，低于 8 GiB 执行门；已停止浏览器、构建、测试、下载和影像生成，不通过删除用户数据或项目证据规避。
 10. 全量审计：`docs/问题账本.md` 当前记录 39 组问题。FIX-BATCH-001–009 已进入 main，15 组达到 main、24 组仍未闭合；其余问题不得因生产制品与服务器候选就绪而标记解决。
 11. 真实 ready 晋级：configured 隐藏、空 probe 失败、图片解码/内容验证、本地 gateway 入站信任边界和“不伪造日期目录”已进入 main。但本地凭证保险库、上游请求时 DNS/IP/重绑定门、最小真实瓦片请求、探测证据/ready 编排和真实日期目录提供者仍缺；`OMB-AUD-002` 保持部分开放，004 已修复的只是伪目录问题；020/021 已达到 main，但不等于真实源验收。
-12. 三端部署：本地与 GitHub main 已一致为 `33f7f06`，main CI `33369816054` 全绿；腾讯机 versioned release、项目 Node、systemd、宝塔 nginx include、双回环端口、隧道浏览器和重启证据已通过。首次发布没有上一 OpenMapBridge release，故 release-to-release 回滚演练仍需第二版本；真实 Ovi source 业务验收仍独立阻塞。
+12. 三端部署：GitHub main `62ab114` 的 CI `33370752935` 与部署证据 PR CI `33371002982` 全绿；腾讯 current `62ab114` 的运行源码/制品哈希与当前 GitHub 运行输入一致，versioned release、项目 Node、systemd、宝塔 nginx include、双回环端口、隧道浏览器，以及 `62ab114 → 33f7f06 → 62ab114` 回滚/前滚均通过。后续仅文档证据提交不需要伪造新 runtime release；技术部署阻塞已解除，真实 Ovi source 业务验收仍独立阻塞。
 13. QR 方言：公开样本新增观察到 `hs/mf/ml/ms/mt/pn/pt`。FIX-BATCH-008 只接受这些键并丢弃未知值；其业务语义、授权和服务器可用性仍未知，不能由“解析成功”晋级为 ready。
 
 ## 已解除的实施阻塞
