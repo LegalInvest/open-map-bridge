@@ -147,3 +147,6 @@
 - 唯一最安全下一步：由 Codex 提交并推送 FIX-BATCH-012＋OMB-AUD-040，完全依赖 GitHub PR CI 做最终分支复验；CI 全绿后合并，但在本机恢复至少 8 GiB 前不构建或部署该新运行制品。
 - 2026-08-31 19:21：PR #23 首次 CI `33386547512` 红灯。环境门先成功阻断前检查，随后静态契约准确发现 fixture acquisition 的 npm hook 拼成 `prefixures:acquire`，而 npm 约定应为 `prefixtures:acquire`；其余测试未运行。拼写已修正，失败证据保留并等待远端重跑；本机仍不运行重型门。
 - 2026-08-31 19:23：PR #23 第二次 CI `33386726268` 红灯。前置容量契约已通过，单元门发现 readiness 新分支把“凭证必需且 vault 已命中”也落入缺凭证阻塞，路由与纯函数两个正例准确失败；条件已收紧为仅在 `!credentialAvailable` 时阻塞，悬空引用独立分支保持 fail closed。类型、构建、smoke、Chrome 未运行，等待第三次远端验证。
+- 2026-08-31 19:30：PR #23 第三次 CI `33386874683` 全绿并 squash 合并为 main `3d1ddf2`；main CI `33387017311` 再次通过环境/交底、单测、8 workspace typecheck、production build/smoke 和 4 Chrome E2E。FIX-BATCH-012 与 OMB-AUD-040 达到 main；40 组问题中 16 组达到 main、24 组仍开放。
+- 当前三端阶段：本地/GitHub main=`3d1ddf2`；腾讯 runtime source/current=`94e42b1`，保留既有 active/health/双回环/state hash 证据；真实 source ready/rendered/accepted 未达到。19:30 本机可用约 7.14 GiB、swap 使用约 5.65 GiB，故未构建或部署新 vault 运行制品，也未生成 master key。
+- 唯一最安全下一步：由 Codex 等待本机恢复至少 8 GiB，然后从精确 main 构建 FIX-BATCH-012 versioned artifact，执行 production smoke 与 hash 门，并按既有 state/health/loopback/rollback 契约更新腾讯 current；在此之前保持 `94e42b1`，不请求真实图源。
