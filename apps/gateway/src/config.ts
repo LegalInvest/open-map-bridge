@@ -1,3 +1,4 @@
+import { isAbsolute } from 'node:path';
 import type { GatewayAccessConfig, GatewayPermission, GatewayPrincipal } from './security/gateway-access.js';
 import {
   parseTemporalDateEntry,
@@ -17,6 +18,11 @@ export interface OviBridgeConfig {
 export interface GatewayServerConfig {
   port: number;
   access: GatewayAccessConfig;
+}
+
+export interface CredentialVaultConfig {
+  path: string;
+  key: Buffer;
 }
 
 const developerPermissions = new Set<GatewayPermission>([
@@ -199,4 +205,22 @@ export function parseOviBridgeConfig(environment: NodeJS.ProcessEnv): OviBridgeC
     ...(verifiedDates ? { verifiedDates } : {}),
     ...(probeRequest ? { probeRequest } : {}),
   };
+}
+
+export function parseCredentialVaultConfig(environment: NodeJS.ProcessEnv): CredentialVaultConfig | undefined {
+  const path = environment.OMB_VAULT_PATH;
+  const encodedKey = environment.OMB_VAULT_KEY;
+  if (!path && !encodedKey) return undefined;
+  if (!path || !encodedKey) throw new Error('OMB_VAULT_PATH and OMB_VAULT_KEY must be configured together');
+  if (!isAbsolute(path) || path.length > 4096 || /[\u0000-\u001f\u007f]/.test(path)) {
+    throw new Error('OMB_VAULT_PATH must be a bounded absolute path');
+  }
+  if (!/^[A-Za-z0-9_-]{43}$/.test(encodedKey)) {
+    throw new Error('OMB_VAULT_KEY must be an unpadded base64url-encoded 32-byte key');
+  }
+  const key = Buffer.from(encodedKey, 'base64url');
+  if (key.byteLength !== 32 || key.toString('base64url') !== encodedKey) {
+    throw new Error('OMB_VAULT_KEY must be an unpadded base64url-encoded 32-byte key');
+  }
+  return { path, key };
 }

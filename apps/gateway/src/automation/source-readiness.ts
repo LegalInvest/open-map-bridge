@@ -3,10 +3,15 @@ import type { AutomationRun, AutomationStep, MapSourceDefinition } from '@omb/so
 import type { TemporalStateRepository } from '../storage/temporal-state.js';
 import type { TemporalSourceRecord, TemporalSourceRegistry } from '../temporal/registry.js';
 import { inspectSourceNetworkPolicy } from '../security/source-policy.js';
+import type { CredentialVault } from '../security/credential-vault.js';
 
 const readySourceStatuses = new Set(['confirmed', 'probed', 'rendered', 'saved']);
 
-function fingerprint(source: MapSourceDefinition, runtime: TemporalSourceRecord | null): string {
+function fingerprint(
+  source: MapSourceDefinition,
+  runtime: TemporalSourceRecord | null,
+  credentialVault: Pick<CredentialVault, 'has'> | null,
+): string {
   const evidence = {
     processId: 'source-readiness',
     evaluatorVersion: 1,
@@ -14,7 +19,7 @@ function fingerprint(source: MapSourceDefinition, runtime: TemporalSourceRecord 
     sourceId: source.id,
     status: source.status,
     updatedAt: source.updatedAt,
-    credentialConfigured: source.credentialRef !== null,
+    credentialConfigured: source.credentialRef !== null && credentialVault?.has(source.credentialRef) === true,
     hosts: source.hosts,
     pathTemplate: source.pathTemplate,
     compatibilityExtension: source.compatibilityExtension,
@@ -68,6 +73,7 @@ export function buildSourceReadinessRun(
   source: MapSourceDefinition,
   registry: TemporalSourceRegistry,
   at = new Date().toISOString(),
+  credentialVault: Pick<CredentialVault, 'has'> | null = null,
 ): AutomationRun {
   const runtime = runtimeFor(source, registry);
   const steps: AutomationStep[] = [
@@ -80,7 +86,7 @@ export function buildSourceReadinessRun(
     schemaVersion: 1 as const,
     id: randomUUID(),
     processId: 'source-readiness' as const,
-    inputFingerprint: fingerprint(source, runtime),
+    inputFingerprint: fingerprint(source, runtime, credentialVault),
     sourceId: source.id,
     sourceName: source.name,
     createdAt: at,
@@ -123,6 +129,7 @@ export function buildSourceReadinessRun(
 
   const needsOviBridge = source.compatibilityExtension.needsOviBridge === true;
   const credentialRequired = source.compatibilityExtension.credentialRequired;
+  const credentialAvailable = source.credentialRef !== null && credentialVault?.has(source.credentialRef) === true;
   if (needsOviBridge) {
     steps[2] = evaluated(
       'credential-readiness',
@@ -130,13 +137,30 @@ export function buildSourceReadinessRun(
       'skipped',
       '不透明奥维配置由受控本机桥处理；开放任务账本不保存或展示私有内容',
     );
-  } else if (credentialRequired === true && source.credentialRef === null) {
+  } else if (source.credentialRef !== null && !credentialAvailable) {
+    steps[2] = evaluated(
+      'credential-readiness',
+      at,
+      'blocked',
+      '图源的凭证引用在当前本地保险库中不存在或不可用',
+      '在本地图源页重新加密保存凭证，再运行检查',
+      'CREDENTIAL_VAULT_REQUIRED',
+    );
+    return {
+      ...base,
+      status: 'awaiting-intervention',
+      currentStep: 'credential-readiness',
+      steps,
+      nextAction: steps[2].nextAction,
+      intervention: { kind: 'credential-vault', message: steps[2].message },
+    };
+  } else if (credentialRequired === true && !credentialAvailable) {
     steps[2] = evaluated(
       'credential-readiness',
       at,
       'blocked',
       '导入时发现疑似凭证参数并已脱敏，但尚未配置本地凭证引用',
-      '先实现并配置本地凭证保险库，再重新运行检查',
+      '在本地图源页重新加密保存凭证，再运行检查',
       'CREDENTIAL_VAULT_REQUIRED',
     );
     return {
@@ -146,7 +170,7 @@ export function buildSourceReadinessRun(
       nextAction: steps[2].nextAction,
       intervention: { kind: 'credential-vault', message: steps[2].message },
     };
-  } else if (credentialRequired !== true && credentialRequired !== false && source.credentialRef === null) {
+  } else if (credentialRequired !== true && credentialRequired !== false && !credentialAvailable) {
     steps[2] = evaluated(
       'credential-readiness',
       at,
@@ -167,7 +191,7 @@ export function buildSourceReadinessRun(
       'credential-readiness',
       at,
       'succeeded',
-      source.credentialRef === null ? '导入证据未发现固定凭证需求' : '已配置凭证引用；任务账本不暴露引用内容',
+      credentialAvailable ? '已配置且当前保险库可解析凭证引用；任务账本不暴露引用内容' : '导入证据未发现固定凭证需求',
     );
   }
 
@@ -208,11 +232,12 @@ export class SourceReadinessService {
   constructor(
     private readonly repository: TemporalStateRepository,
     private readonly registry: TemporalSourceRegistry,
+    private readonly credentialVault: Pick<CredentialVault, 'has'> | null = null,
   ) {}
 
   async start(sourceId: string): Promise<{ run: AutomationRun; created: boolean }> {
     const source = this.repository.listImportSources().find((entry) => entry.id === sourceId);
     if (!source) throw new Error('source-not-found');
-    return this.repository.ensureAutomationRun(buildSourceReadinessRun(source, this.registry));
+    return this.repository.ensureAutomationRun(buildSourceReadinessRun(source, this.registry, new Date().toISOString(), this.credentialVault));
   }
 }

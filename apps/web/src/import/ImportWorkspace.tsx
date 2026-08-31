@@ -3,6 +3,7 @@ import {
   OVMAP_FILE_MAX_BYTES,
   QR_IMAGE_MAX_BYTES,
   QR_IMAGE_MAX_PIXELS,
+  type CredentialPlacement,
   type ImportPreview,
   type MapSourceDefinition,
 } from '@omb/source-schema';
@@ -20,6 +21,85 @@ type InputTab = 'qr-image' | 'camera' | 'ovmap';
 
 function shortHash(hash: string): string {
   return `${hash.slice(0, 10)}…${hash.slice(-6)}`;
+}
+
+function CredentialForm({
+  api,
+  source,
+  onUpdated,
+}: {
+  api: ImportApi;
+  source: MapSourceDefinition;
+  onUpdated(source: MapSourceDefinition): void;
+}) {
+  const [placement, setPlacement] = useState<CredentialPlacement>('query');
+  const [name, setName] = useState('');
+  const [value, setValue] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+
+  async function saveCredential() {
+    setSaving(true);
+    setMessage(null);
+    try {
+      const updated = await api.configureCredential(source.id, [{ placement, name, value }]);
+      setValue('');
+      onUpdated(updated);
+      setMessage('凭证已加密保存；尚未执行图源探测。');
+    } catch (cause) {
+      setMessage((cause as Error).message || '凭证保存失败');
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function removeCredential() {
+    setSaving(true);
+    setMessage(null);
+    try {
+      onUpdated(await api.removeCredential(source.id));
+      setMessage('凭证引用已移除。');
+    } catch (cause) {
+      setMessage((cause as Error).message || '凭证移除失败');
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  if (source.credentialRef !== null) {
+    return (
+      <div className="credential-form">
+        <span>本地凭证：已配置（不回显）</span>
+        <button type="button" onClick={() => void removeCredential()} disabled={saving}>移除凭证</button>
+        {message ? <small role="status">{message}</small> : null}
+      </div>
+    );
+  }
+  return (
+    <div className="credential-form">
+      <strong>配置本地凭证</strong>
+      <small>只发送到本机网关并加密保存；保存引用不等于图源已探测。</small>
+      <label>
+        放置位置
+        <select value={placement} onChange={(event) => setPlacement(event.target.value as CredentialPlacement)} disabled={saving}>
+          <option value="query">查询参数</option>
+          <option value="header">请求头</option>
+        </select>
+      </label>
+      <label>
+        参数或请求头名称
+        <input value={name} onChange={(event) => setName(event.target.value)} maxLength={128} autoComplete="off" disabled={saving} />
+      </label>
+      <label>
+        凭证值
+        <input type="password" value={value} onChange={(event) => setValue(event.target.value)} maxLength={4096} autoComplete="new-password" disabled={saving} />
+      </label>
+      <button type="button" onClick={() => void saveCredential()} disabled={saving || name.length === 0 || value.length === 0}>
+        {saving ? '正在保存…' : '加密保存凭证'}
+      </button>
+      {message ? <small role="status">{message}</small> : null}
+    </div>
+  );
 }
 
 export function ImportWorkspace({ api, qrReader = browserQrReader, onOpenAutomation }: ImportWorkspaceProps) {
@@ -262,6 +342,13 @@ export function ImportWorkspace({ api, qrReader = browserQrReader, onOpenAutomat
               <div><strong>{source.name}</strong><span className="source-status">{source.status}</span></div>
               <p>{source.hosts[0]} · {source.sourceKind} · {source.projection}</p>
               <small>{source.sourceProvenance.adapter} · {shortHash(source.sourceProvenance.inputSha256)}</small>
+              {source.compatibilityExtension.credentialRequired === true && source.compatibilityExtension.needsOviBridge !== true ? (
+                <CredentialForm
+                  api={api}
+                  source={source}
+                  onUpdated={(updated) => setSavedSources((current) => current.map((entry) => entry.id === updated.id ? updated : entry))}
+                />
+              ) : null}
             </article>
           ))}
         </aside>

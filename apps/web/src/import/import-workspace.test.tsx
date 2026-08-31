@@ -51,6 +51,8 @@ it('decodes a QR image, previews it, and gates confirmation on authorization', a
     inspectOvmap: vi.fn(),
     confirmImport: vi.fn().mockResolvedValue({ sources: [{ ...source, status: 'confirmed' }], receipt: {} as never }),
     listImportSources: vi.fn().mockResolvedValue([]),
+    configureCredential: vi.fn(),
+    removeCredential: vi.fn(),
   };
   const qrReader: QrReader = {
     decodeFile: vi.fn().mockResolvedValue('ovobj?fixture'),
@@ -66,4 +68,34 @@ it('decodes a QR image, previews it, and gates confirmation on authorization', a
   await user.click(confirm);
   expect(await screen.findByText('已保存配置（尚未探测）')).toBeVisible();
   expect(api.confirmImport).toHaveBeenCalledWith(preview.previewId, ['candidate-1'], true);
+});
+
+it('lets a saved source configure a secret without echoing it after vault storage', async () => {
+  const user = userEvent.setup();
+  const credentialSource: MapSourceDefinition = {
+    ...source,
+    status: 'confirmed',
+    compatibilityExtension: { credentialRequired: true },
+  };
+  const api: ImportApi = {
+    inspectQr: vi.fn(),
+    inspectOvmap: vi.fn(),
+    confirmImport: vi.fn(),
+    listImportSources: vi.fn().mockResolvedValue([credentialSource]),
+    configureCredential: vi.fn().mockResolvedValue({
+      ...credentialSource,
+      credentialRef: `vault://source/${credentialSource.id}`,
+    }),
+    removeCredential: vi.fn(),
+  };
+  render(<ImportWorkspace api={api} />);
+  expect(await screen.findByText('配置本地凭证')).toBeVisible();
+  await user.type(screen.getByLabelText('参数或请求头名称'), 'token');
+  await user.type(screen.getByLabelText('凭证值'), 'fixture-value-never-rendered');
+  await user.click(screen.getByRole('button', { name: '加密保存凭证' }));
+  expect(api.configureCredential).toHaveBeenCalledWith(credentialSource.id, [
+    { placement: 'query', name: 'token', value: 'fixture-value-never-rendered' },
+  ]);
+  expect(await screen.findByText('本地凭证：已配置（不回显）')).toBeVisible();
+  expect(screen.queryByText('fixture-value-never-rendered')).not.toBeInTheDocument();
 });

@@ -6,6 +6,7 @@ import {
   OVMAP_FILE_MAX_BYTES,
   OVMAP_INSPECT_BODY_MAX_BYTES,
   appError,
+  parseCredentialBundle,
   parseMapSourceDefinition,
   transitionSource,
   type ImportReceipt,
@@ -13,6 +14,7 @@ import {
 import type { ImportInspector } from '../import/inspector.js';
 import { ImportPreviewStore } from '../import/preview-store.js';
 import type { TemporalStateRepository } from '../storage/temporal-state.js';
+import type { CredentialVault } from '../security/credential-vault.js';
 
 function fail(reply: FastifyReply, status: number, code: Parameters<typeof appError>[0], message: string) {
   return reply.status(status).send({ error: appError(code, message) });
@@ -61,6 +63,7 @@ export function registerImportRoutes(
   inspector: ImportInspector,
   repository: TemporalStateRepository,
   previews = new ImportPreviewStore(),
+  vault: CredentialVault | null = null,
 ): void {
   app.post('/api/import/inspect/qr', async (request, reply) => {
     try {
@@ -148,4 +151,46 @@ export function registerImportRoutes(
 
   app.get('/api/import/sources', async () => repository.listImportSources());
   app.get('/api/import/receipts', async () => repository.listImportReceipts());
+
+  app.put('/api/import/sources/:sourceId/credential', async (request, reply) => {
+    if (!vault) {
+      return fail(reply, 503, 'CREDENTIAL_VAULT_UNAVAILABLE', '本地凭证保险库尚未由操作员启用');
+    }
+    const sourceId = (request.params as { sourceId?: unknown }).sourceId;
+    if (typeof sourceId !== 'string' || !repository.listImportSources().some((source) => source.id === sourceId)) {
+      return fail(reply, 404, 'INPUT_SOURCE_NOT_FOUND', '没有找到要配置凭证的图源');
+    }
+    let bundle;
+    try {
+      bundle = parseCredentialBundle(request.body);
+    } catch {
+      return fail(reply, 400, 'CREDENTIAL_INPUT_INVALID', '凭证字段、名称或大小不符合安全约束');
+    }
+    try {
+      const credentialRef = await vault.put(sourceId, bundle);
+      const source = await repository.setImportSourceCredentialRef(sourceId, credentialRef);
+      return { source, credential: { configured: true, fieldCount: bundle.fields.length } };
+    } catch {
+      return fail(reply, 500, 'STORAGE_CREDENTIAL_WRITE', '本地凭证保险库写入失败');
+    }
+  });
+
+  app.delete('/api/import/sources/:sourceId/credential', async (request, reply) => {
+    if (!vault) {
+      return fail(reply, 503, 'CREDENTIAL_VAULT_UNAVAILABLE', '本地凭证保险库尚未由操作员启用');
+    }
+    const sourceId = (request.params as { sourceId?: unknown }).sourceId;
+    const source = typeof sourceId === 'string'
+      ? repository.listImportSources().find((candidate) => candidate.id === sourceId)
+      : undefined;
+    if (!source) return fail(reply, 404, 'INPUT_SOURCE_NOT_FOUND', '没有找到要移除凭证的图源');
+    if (source.credentialRef === null) return { source, credential: { configured: false, fieldCount: 0 } };
+    try {
+      const updated = await repository.setImportSourceCredentialRef(source.id, null);
+      await vault.remove(source.credentialRef);
+      return { source: updated, credential: { configured: false, fieldCount: 0 } };
+    } catch {
+      return fail(reply, 500, 'STORAGE_CREDENTIAL_DELETE', '本地凭证保险库删除失败；图源保持不可使用');
+    }
+  });
 }

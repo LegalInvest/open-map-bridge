@@ -3,6 +3,7 @@ import { completeYearWindow, type TemporalDateEntry } from '@omb/temporal-source
 import {
   OVMAP_FILE_MAX_BYTES,
   type AutomationRun,
+  type CredentialField,
   type ImportPreview,
   type ImportReceipt,
   type MapSourceDefinition,
@@ -32,6 +33,8 @@ export interface ImportApi {
     receipt: ImportReceipt;
   }>;
   listImportSources(): Promise<MapSourceDefinition[]>;
+  configureCredential(sourceId: string, fields: CredentialField[]): Promise<MapSourceDefinition>;
+  removeCredential(sourceId: string): Promise<MapSourceDefinition>;
 }
 
 export interface AutomationApi {
@@ -124,6 +127,22 @@ export function createApiClient(baseUrl = '', currentYear = new Date().getUTCFul
     },
     async listImportSources() {
       return readJson<MapSourceDefinition[]>(await fetch(`${baseUrl}/api/import/sources`));
+    },
+    async configureCredential(sourceId, fields) {
+      const result = await readJson<{ source: MapSourceDefinition }>(
+        await fetch(`${baseUrl}/api/import/sources/${encodeURIComponent(sourceId)}/credential`, {
+          method: 'PUT',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ fields }),
+        }),
+      );
+      return result.source;
+    },
+    async removeCredential(sourceId) {
+      const result = await readJson<{ source: MapSourceDefinition }>(
+        await fetch(`${baseUrl}/api/import/sources/${encodeURIComponent(sourceId)}/credential`, { method: 'DELETE' }),
+      );
+      return result.source;
     },
     async listAutomationRuns() {
       return readJson<AutomationRun[]>(await fetch(`${baseUrl}/api/v1/jobs`));

@@ -1,4 +1,7 @@
 import { afterEach, expect, it, vi } from 'vitest';
+import { mkdtemp, readFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { buildSyntheticRecord37Ovmap } from '@omb/ovmap-codec/synthetic';
 import {
   OVMAP_BASE64_MAX_CHARS,
@@ -6,6 +9,7 @@ import {
   OVMAP_INSPECT_BODY_MAX_BYTES,
 } from '@omb/source-schema';
 import { buildTestApp as buildApp } from '../test-app.js';
+import { EncryptedCredentialVault } from '../security/credential-vault.js';
 
 const apps: Array<Awaited<ReturnType<typeof buildApp>>> = [];
 afterEach(async () => {
@@ -118,4 +122,74 @@ it('maps an oversized encoded JSON envelope to a stable HTTP body error', async 
   expect(response.json()).toMatchObject({
     error: { code: 'INPUT_BODY_LIMIT', detail: { maxBytes: OVMAP_INSPECT_BODY_MAX_BYTES } },
   });
+});
+
+async function confirmCredentialSource(app: Awaited<ReturnType<typeof buildApp>>) {
+  const inspect = await app.inject({
+    method: 'POST',
+    url: '/api/import/inspect/qr',
+    payload: {
+      payload:
+        'ovobj?t=1&id=402&na=Credential%20Fixture&po=1&he=18&oy=3&df=0&hn=tiles.example.invalid&ul=%2F%7B%24z%7D%2F%7B%24x%7D%2F%7B%24y%7D.png%3Ftoken%3Dredacted-fixture',
+    },
+  });
+  const preview = inspect.json();
+  const confirmed = await app.inject({
+    method: 'POST',
+    url: '/api/import/confirm',
+    payload: { previewId: preview.previewId, candidateIds: [preview.layers[0].candidateId], authorized: true },
+  });
+  expect(confirmed.statusCode).toBe(201);
+  return confirmed.json().sources[0] as { id: string; credentialRef: string | null };
+}
+
+it('stores credentials only in the encrypted vault and persists an opaque source reference', async () => {
+  const directory = await mkdtemp(join(tmpdir(), 'omb-credential-route-'));
+  const statePath = join(directory, 'state.json');
+  const vaultPath = join(directory, 'vault.json');
+  const vault = await EncryptedCredentialVault.open(vaultPath, Buffer.alloc(32, 4));
+  const app = await buildApp({ dataPath: statePath, credentialVault: vault });
+  apps.push(app);
+  const source = await confirmCredentialSource(app);
+  const response = await app.inject({
+    method: 'PUT',
+    url: `/api/import/sources/${source.id}/credential`,
+    payload: { fields: [{ placement: 'query', name: 'token', value: 'not-a-real-route-secret' }] },
+  });
+  expect(response.statusCode).toBe(200);
+  expect(response.json()).toMatchObject({
+    source: { id: source.id, credentialRef: `vault://source/${source.id}` },
+    credential: { configured: true, fieldCount: 1 },
+  });
+  expect(vault.resolve(`vault://source/${source.id}`)).toEqual({
+    fields: [{ placement: 'query', name: 'token', value: 'not-a-real-route-secret' }],
+  });
+  expect(await readFile(statePath, 'utf8')).not.toContain('not-a-real-route-secret');
+  expect(await readFile(vaultPath, 'utf8')).not.toContain('not-a-real-route-secret');
+
+  const readiness = await app.inject({
+    method: 'POST',
+    url: '/api/v1/processes/source-readiness/execution',
+    payload: { sourceId: source.id },
+  });
+  expect(readiness.statusCode).toBe(201);
+  expect(readiness.json().run.steps[2]).toMatchObject({ kind: 'credential-readiness', status: 'succeeded' });
+
+  const removed = await app.inject({ method: 'DELETE', url: `/api/import/sources/${source.id}/credential` });
+  expect(removed.statusCode).toBe(200);
+  expect(removed.json()).toMatchObject({ source: { credentialRef: null }, credential: { configured: false } });
+  expect(vault.has(`vault://source/${source.id}`)).toBe(false);
+});
+
+it('fails closed when a credential route is used without an operator-configured vault', async () => {
+  const app = await buildApp({ dataPath: null });
+  apps.push(app);
+  const source = await confirmCredentialSource(app);
+  const response = await app.inject({
+    method: 'PUT',
+    url: `/api/import/sources/${source.id}/credential`,
+    payload: { fields: [{ placement: 'query', name: 'token', value: 'fixture' }] },
+  });
+  expect(response.statusCode).toBe(503);
+  expect(response.json()).toMatchObject({ error: { code: 'CREDENTIAL_VAULT_UNAVAILABLE' } });
 });

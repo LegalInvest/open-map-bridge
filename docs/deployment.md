@@ -30,15 +30,15 @@ npm run test:production
 1. Copy the artifact into `/opt/open-map-bridge/releases/<git-sha>/` without overwriting earlier releases.
 2. Provision a dedicated Node 24–26 runtime under `/opt/open-map-bridge/runtime/<exact-version>/` and point `/opt/open-map-bridge/runtime/current` at it. Do not replace the server-wide `/usr/bin/node` or another project's runtime.
 3. Install `deploy/systemd/open-map-bridge.service` and `deploy/nginx/open-map-bridge.conf` from that release. The service always executes the project-scoped runtime symlink. Resolve the active nginx include directory from `nginx -T` before installation: distro nginx commonly reads `/etc/nginx/conf.d`, while the verified Tencent host uses the BaoTa include `/www/server/panel/vhost/nginx/*.conf`. A config copied into an unread include directory is not deployed even when `nginx -t` succeeds.
-4. Create `/etc/open-map-bridge/gateway.env` and `/etc/open-map-bridge/nginx-gateway-secret.conf` from the examples; use the same generated token in both files, keep both `0600`, and never paste the value into Git, issue text, or logs.
-5. Create `/var/lib/open-map-bridge` owned by the `openmapbridge` service account. Preserve it across releases.
+4. Create `/etc/open-map-bridge/gateway.env` and `/etc/open-map-bridge/nginx-gateway-secret.conf` from the examples; use the same generated gateway token in both files, keep both `0600`, and never paste any token or optional vault key into Git, issue text, command output, or logs. If the encrypted credential vault is enabled, generate its distinct 32-byte base64url key directly on the host without echoing it and configure both `OMB_VAULT_PATH` and `OMB_VAULT_KEY`.
+5. Create `/var/lib/open-map-bridge` owned by the `openmapbridge` service account. Preserve the main state and optional `credential-vault.json` across releases; both must remain `0600` and must never be copied into a Web artifact.
 6. Atomically point `/opt/open-map-bridge/current` at the new release, reload nginx, restart the service, and verify the tunneled UI plus authenticated `/api/health`.
 
 The exact host, service account, nginx layout, Node path, and release SHA must be read-only verified before installation. The templates are not authority to deploy to an arbitrary SSH alias. The first verified target is the Tencent host behind SSH alias `tencent-shuangying`; `/opt/open-map-bridge`, `/etc/open-map-bridge`, `/var/lib/open-map-bridge`, ports 4174/8080, and the `openmapbridge` account were absent before installation. Other project directories and system runtimes are out of scope.
 
 ## Verified Tencent release (2026-08-31)
 
-GitHub docs-only main `f21fefe` contains FIX-BATCH-011 runtime source `94e42b1`. On 2026-08-31 18:19 the workstation recovered to about 8.62 GiB, the artifact passed `npm run build && npm run test:production`, and the verified Tencent current release was atomically switched to `94e42b1`. Report `main=f21fefe`, `runtime source=94e42b1`, `deployed=94e42b1`; do not infer a real Ovi source is ready because no authorized real probe was run and no ProbeResult was persisted.
+Deployment evidence commit `a92ff8c` records FIX-BATCH-011 runtime source `94e42b1`; main CI `33382682547` passed. On 2026-08-31 18:19 the verified Tencent current release was atomically switched to `94e42b1`. Report `runtime source=94e42b1`, `deployed=94e42b1`; obtain the exact docs-only main tip from live Git because later evidence-only descendants do not change the runtime. Do not infer a real Ovi source is ready because no authorized real probe was run and no ProbeResult was persisted.
 
 - GitHub docs-only main: `f21fefe109b6d6faaba12871ca7d80c6910a304f`;
 - deployed runtime source tree: `94e42b1e270541399fc8ff70d6657255567b0195`;
@@ -50,6 +50,8 @@ GitHub docs-only main `f21fefe` contains FIX-BATCH-011 runtime source `94e42b1`.
 - Web index SHA-256: `82c87ad622055cbff03b7f5a4b3f23d790b2647b87c9e1312a265f78f1690572`.
 
 The service is active as `openmapbridge`, with `NoNewPrivileges=yes`, `ProtectSystem=strict`, and `ProtectHome=yes`. Nginx and the gateway listen only on `127.0.0.1:8080` and `127.0.0.1:4174`. The tunneled UI, `/api/health`, `/api/aois`, direct unauthenticated rejection, state-file ownership/mode, graceful restart, lifecycle logs, and state hash across restart were verified. The first attempted nginx install into `/etc/nginx/conf.d` did not create the 8080 listener because BaoTa nginx does not include that path; the active include was then discovered from `nginx -T`, installed, tested, and the unused project-created file removed. During the `94e42b1` restart, the first health request returned a transient 502; the bounded retry then returned `{"ok":true,"persistence":"atomic-json"}`, and the state SHA-256 was unchanged before and after restart.
+
+FIX-BATCH-012 credential-vault core was locally verified while the 8 GiB capacity gate was satisfied. After adding the OMB-AUD-040 automatic preflight guard, the final branch remains local-candidate and must be verified by GitHub CI because local capacity is about 7.15 GiB. The current Tencent `94e42b1` release does not contain it and no vault master key has been installed. Enable the vault only after the exact code commit reaches main, capacity recovers, its production artifact passes the approved gates, and the versioned release is switched with the same state/health/loopback gates.
 
 ## Rollback
 

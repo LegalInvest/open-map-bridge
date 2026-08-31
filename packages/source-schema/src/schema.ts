@@ -153,7 +153,7 @@ export const mapSourceDefinitionSchema = z
           }
         }
       }),
-    credentialRef: z.string().max(256).nullable(),
+    credentialRef: z.string().regex(/^vault:\/\/source\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/).nullable(),
     attribution: z.string().max(2048).nullable(),
     license: z.string().max(256).nullable(),
     sourceProvenance: z.object({
@@ -170,6 +170,9 @@ export const mapSourceDefinitionSchema = z
   .superRefine((value, context) => {
     if (value.minZoom > value.maxZoom) {
       context.addIssue({ code: 'custom', message: 'minZoom must not exceed maxZoom', path: ['minZoom'] });
+    }
+    if (value.credentialRef !== null && value.credentialRef !== `vault://source/${value.id.toLowerCase()}`) {
+      context.addIssue({ code: 'custom', message: 'credential reference must belong to the same source UUID', path: ['credentialRef'] });
     }
   });
 

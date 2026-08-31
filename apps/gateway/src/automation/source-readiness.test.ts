@@ -57,3 +57,37 @@ it('changes the deduplication fingerprint when runtime readiness changes', () =>
   expect(configured.status).toBe('blocked');
   expect(configured.inputFingerprint).not.toBe(ready.inputFingerprint);
 });
+
+it('requires the opaque reference to exist in the active credential vault', () => {
+  const credentialSource = parseMapSourceDefinition({
+    ...source,
+    credentialRef: `vault://source/${source.id}`,
+    compatibilityExtension: { credentialRequired: true },
+  });
+  const missing = buildSourceReadinessRun(credentialSource, registry('ready'), '2026-08-28T00:00:00.000Z');
+  expect(missing.status).toBe('awaiting-intervention');
+  expect(missing.currentStep).toBe('credential-readiness');
+  expect(missing.steps[2]?.errorCode).toBe('CREDENTIAL_VAULT_REQUIRED');
+
+  const available = buildSourceReadinessRun(
+    credentialSource,
+    registry('ready'),
+    '2026-08-28T00:00:00.000Z',
+    { has: (reference) => reference === credentialSource.credentialRef },
+  );
+  expect(available.status).toBe('completed');
+  expect(available.steps[2]?.message).toContain('当前保险库可解析');
+  expect(available.inputFingerprint).not.toBe(missing.inputFingerprint);
+});
+
+it('blocks a dangling credential reference even when import evidence did not require one', () => {
+  const optionalCredentialSource = parseMapSourceDefinition({
+    ...source,
+    credentialRef: `vault://source/${source.id}`,
+    compatibilityExtension: { credentialRequired: false },
+  });
+  const run = buildSourceReadinessRun(optionalCredentialSource, registry('ready'), '2026-08-28T00:00:00.000Z');
+  expect(run.status).toBe('awaiting-intervention');
+  expect(run.currentStep).toBe('credential-readiness');
+  expect(run.steps[2]?.message).toContain('不存在或不可用');
+});

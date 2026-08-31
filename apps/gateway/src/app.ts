@@ -17,11 +17,13 @@ import {
   registerGatewayAccessControl,
   type GatewayAccessConfig,
 } from './security/gateway-access.js';
+import type { CredentialVault } from './security/credential-vault.js';
 
 export interface BuildAppOptions {
   dataPath: string | null;
   ovi?: OviBridgeOptions & { sourceId: string };
   access: GatewayAccessConfig | null;
+  credentialVault?: CredentialVault;
 }
 
 async function bindImportedOviSource(
@@ -68,12 +70,20 @@ export async function buildApp(options: BuildAppOptions): Promise<FastifyInstanc
 
   const app = Fastify({ logger: false });
   if (options.access) registerGatewayAccessControl(app, options.access);
-  app.get('/api/health', async () => ({ ok: true, persistence: options.dataPath === null ? 'memory' : 'atomic-json' }));
+  app.get('/api/health', async () => ({
+    ok: true,
+    persistence: options.dataPath === null ? 'memory' : 'atomic-json',
+    credentialVault: options.credentialVault ? 'encrypted-local' : 'disabled',
+  }));
   app.get('/api/comparisons', async () => repository.listComparisons());
   registerAoiRoutes(app, repository);
   registerTemporalRoutes(app, registry);
-  registerImportRoutes(app, createImportInspector(), repository);
+  registerImportRoutes(app, createImportInspector(), repository, undefined, options.credentialVault ?? null);
   registerDeveloperRoutes(app, registry, repository);
-  registerAutomationRoutes(app, new SourceReadinessService(repository, registry), repository);
+  registerAutomationRoutes(
+    app,
+    new SourceReadinessService(repository, registry, options.credentialVault ?? null),
+    repository,
+  );
   return app;
 }

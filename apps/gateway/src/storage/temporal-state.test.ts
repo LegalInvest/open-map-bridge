@@ -69,6 +69,12 @@ it('atomically preserves confirmed import sources and receipts across reopen', a
   const reopened = await TemporalStateRepository.open(path, lakeAoiPresets);
   expect(reopened.listImportSources()).toEqual([source]);
   expect(reopened.listImportReceipts()).toHaveLength(1);
+
+  const credentialRef = `vault://source/${source.id}`;
+  await reopened.setImportSourceCredentialRef(source.id, credentialRef);
+  const reopenedAgain = await TemporalStateRepository.open(path, lakeAoiPresets);
+  expect(reopenedAgain.listImportSources()[0]?.credentialRef).toBe(credentialRef);
+  expect(await reopenedAgain.setImportSourceCredentialRef(source.id, null)).toMatchObject({ credentialRef: null });
 });
 
 it('persists an automation run once under concurrent duplicate starts', async () => {

@@ -1,7 +1,22 @@
 import { expect, it } from 'vitest';
-import { parseGatewayServerConfig, parseOviBridgeConfig } from './config.js';
+import { parseCredentialVaultConfig, parseGatewayServerConfig, parseOviBridgeConfig } from './config.js';
 
 const gatewayToken = 'g'.repeat(43);
+
+it('requires a paired absolute credential vault path and canonical 32-byte key', () => {
+  const key = Buffer.alloc(32, 9).toString('base64url');
+  expect(parseCredentialVaultConfig({})).toBeUndefined();
+  expect(() => parseCredentialVaultConfig({ OMB_VAULT_PATH: '/tmp/vault.json' })).toThrow(/configured together/);
+  expect(() => parseCredentialVaultConfig({ OMB_VAULT_KEY: key })).toThrow(/configured together/);
+  expect(() => parseCredentialVaultConfig({ OMB_VAULT_PATH: 'relative.json', OMB_VAULT_KEY: key })).toThrow(/absolute/);
+  expect(() => parseCredentialVaultConfig({ OMB_VAULT_PATH: '/tmp/vault.json', OMB_VAULT_KEY: 'not-a-key' })).toThrow(
+    /base64url/,
+  );
+  expect(parseCredentialVaultConfig({ OMB_VAULT_PATH: '/tmp/vault.json', OMB_VAULT_KEY: key })).toEqual({
+    path: '/tmp/vault.json',
+    key: Buffer.alloc(32, 9),
+  });
+});
 
 it('requires the Ovi port, map type, and imported source UUID together', () => {
   expect(() => parseOviBridgeConfig({ OMB_OVI_PORT: '19991' })).toThrow(/configured together/);

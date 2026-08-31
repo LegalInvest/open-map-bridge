@@ -1,5 +1,5 @@
 import { createHash, randomBytes } from 'node:crypto';
-import { cp, mkdtemp, readFile, rm } from 'node:fs/promises';
+import { cp, mkdtemp, readFile, rm, stat } from 'node:fs/promises';
 import { createServer } from 'node:net';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
@@ -10,6 +10,7 @@ const artifact = join(root, 'dist', 'open-map-bridge');
 const temporary = await mkdtemp(join(tmpdir(), 'open-map-bridge-production-smoke-'));
 const release = join(temporary, 'release');
 const token = randomBytes(32).toString('base64url');
+const vaultKey = randomBytes(32).toString('base64url');
 
 async function availablePort() {
   const server = createServer();
@@ -80,6 +81,8 @@ try {
       OMB_GATEWAY_TOKEN: token,
       OMB_WEB_ORIGIN: origin,
       OMB_DATA_PATH: join(temporary, 'state.json'),
+      OMB_VAULT_PATH: join(temporary, 'credential-vault.json'),
+      OMB_VAULT_KEY: vaultKey,
     },
     stdio: ['ignore', 'pipe', 'pipe'],
   });
@@ -89,7 +92,13 @@ try {
   const headers = { authorization: `Bearer ${token}`, origin };
   const health = await waitForHealth(`${baseUrl}/api/health`, headers, child);
   const body = await health.json();
-  if (body.ok !== true || body.persistence !== 'atomic-json') throw new Error('production health payload is invalid');
+  if (body.ok !== true || body.persistence !== 'atomic-json' || body.credentialVault !== 'encrypted-local') {
+    throw new Error('production health payload is invalid');
+  }
+  const vaultBytes = await readFile(join(temporary, 'credential-vault.json'), 'utf8');
+  if (!vaultBytes.includes('"schemaVersion": 1') || vaultBytes.includes(vaultKey) || (await stat(join(temporary, 'credential-vault.json'))).mode & 0o077) {
+    throw new Error('production credential vault boundary is invalid');
+  }
   const unauthenticated = await fetch(`${baseUrl}/api/health`);
   if (unauthenticated.status !== 401) throw new Error('production gateway admitted an unauthenticated request');
 
