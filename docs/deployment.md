@@ -38,6 +38,8 @@ The exact host, service account, nginx layout, Node path, and release SHA must b
 
 ## Verified Tencent release (2026-08-31)
 
+GitHub main `94e42b1` now contains FIX-BATCH-011 runtime changes, while the verified Tencent current release remains `62ab114`. The update is intentionally paused because the local workstation fell below the 8 GiB build/deploy gate. Until a new versioned artifact is built, verified, and switched, report `main=94e42b1`, `deployed=62ab114`; do not infer a deployed Ovi probe/ready path.
+
 - GitHub main and deployed source tree: `62ab11494ae5e27b7bd8250fddf3e88d1c21c170`;
 - current release: `/opt/open-map-bridge/releases/62ab114`;
 - retained rollback release: `/opt/open-map-bridge/releases/33f7f06`;

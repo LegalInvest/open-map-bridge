@@ -129,3 +129,6 @@
 - 当前批次：`FIX-BATCH-011 / OMB-AUD-002 partial local-verified`。Ovi 配置现在可接收严格、非秘密的已核验日期元数据和一个已登记 probe 坐标；启动时只有该回环瓦片返回 200 非空并通过既有 PNG/JPEG 完整解码和尺寸门，registry 才为同一 imported UUID 标 ready。无 probe、403、损坏图片均保持 configured；182 个 Vitest＋2 个 Node 测试和 8 workspace typecheck 通过。
 - 当前边界：本批未接触用户真实二维码载荷、凭证或瓦片，未持久化 ProbeResult，未实现真实日期 provider、vault 或通用源请求时 DNS/IP/重绑定门；因此不是 main/deployed/accepted，OMB-AUD-002 仍为 partial。
 - 唯一最安全下一步：提交 FIX-BATCH-011 并用 GitHub PR CI 跑完整 test/typecheck/build/production smoke/Chrome 门；全绿合并后再按运行制品变化更新腾讯 versioned release，不在服务器未配置 OviBridge 时伪造真实源 ready。
+- 2026-08-31 17:48：FIX-BATCH-011 由 PR #20 合并为 GitHub main/origin `94e42b1`；PR CI `33379147631` 与 main CI `33379302430` 全绿，包含 182 Vitest＋2 Node、8 workspace typecheck、build、production smoke 和 4 Chrome E2E。OMB-AUD-002 的最小 probe/ready 编排代码达到 main，但 ProbeResult 持久化和真实源验证仍开放。
+- 容量门重新触发：本机可用空间约 7.3 GiB、swap 约 6.4 GiB；已停止新的构建、测试、浏览器、下载和腾讯制品部署。腾讯 current 保持已核验健康的 `62ab114`，因此当前明确为 `main=94e42b1 / deployed=62ab114 / real-source accepted=未达到`。
+- 唯一最安全下一步：容量恢复到至少 8 GiB 后，由 Codex 从 GitHub main `94e42b1` 生成/核验 versioned artifact 并更新腾讯 current；部署前后保持双回环、health 和 state hash 门，不启用真实 Ovi 接口。
