@@ -184,3 +184,5 @@
 - 2026-09-01 03:01：PR #32 首轮 CI `33428136462` 红灯保留。交底、3 Node＋252 Vitest、8 typecheck、build/smoke 均通过，公开 E2E 3/4；唯一失败是 QR 夹具使用相对 `ul`，新策略正确返回“等待处理/网络策略”，旧断言仍期待“已阻塞/运行时绑定”。
 - 修正：E2E 夹具改用同 authority 的短显式 HTTPS 模板，不放宽未知 scheme 门。首次完整绝对瓦片路径让 800px 生成二维码过密而本地解码失败，进一步缩短为等价 `/{$z}.png` 后定向旅程 1/1、完整公开旅程 4/4 本地通过；没有真实网络请求。
 - 唯一最安全下一步：由 Codex 同步红灯证据、提交并推送修正，等待 PR #32 第二轮完整 CI；全绿前不合并、不部署。
+- 2026-09-01 03:09：PR #32 第二轮 CI `33428818544` 全绿，完整通过交底新鲜度、3 Node＋252 Vitest、8 workspace typecheck、production build/smoke 和 4 条 Chrome 旅程。分支达到 `PR CI verified / not main`，仍无真实外联。
+- 唯一最安全下一步：由 Codex 回写第二轮 CI 证据并等待证据提交复验；全绿后 squash 合并 PR #32、核验 main CI，再按运行制品变化决定腾讯 versioned release。

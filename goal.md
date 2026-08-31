@@ -9,7 +9,7 @@
 - 当前整合者：本 Codex 主线程
 - 更新时间：2026-09-01 02:51（Asia/Shanghai）
 - 适用目录：`/Users/assis/Documents/Codex/2026-08-27/open-map-bridge`
-- 当前切片：`FIX-BATCH-014A deployed / real probe blocked；014B local-verified / PR #32 red retained`。A 的腾讯 current 仍为证据 main/release `16e805d`，CI、制品、health、401、双回环和 state/vault hash 证据不变；官方客户端接口尚未获操作时开启，真实 ProbeResult、rendered/accepted 均未达到。B 已显式建模 transport scheme 与字段 provenance，保留保守白名单内的非秘密常量 query，脱敏未知固定值，完整保留 OMS 的协议/投影/缩放/格式/多主机/版权事实，并让未知、旧版、未确认或明文请求计划在通用外联前 fail closed；252 Vitest＋3 Node、8 workspace typecheck、production build/smoke、交底新鲜度与 4 条公开 E2E 本地通过。PR #32 首轮 CI `33428136462` 只有公开 QR E2E 红灯：旧相对 URL 现在正确进入未知协议人工门，但断言仍期待运行时绑定；夹具改成较短的显式 HTTPS 模板后完整公开旅程本地 4/4 通过。修复尚待第二轮 CI，候选未进入 main、腾讯 release 或真实源验收，也尚未把 vault/DNS 固定传输接到通用 probe。
+- 当前切片：`FIX-BATCH-014A deployed / real probe blocked；014B PR #32 verified / not main`。A 的腾讯 current 仍为证据 main/release `16e805d`，CI、制品、health、401、双回环和 state/vault hash 证据不变；官方客户端接口尚未获操作时开启，真实 ProbeResult、rendered/accepted 均未达到。B 已显式建模 transport scheme 与字段 provenance，保留保守白名单内的非秘密常量 query，脱敏未知固定值，完整保留 OMS 的协议/投影/缩放/格式/多主机/版权事实，并让未知、旧版、未确认或明文请求计划在通用外联前 fail closed。PR #32 首轮 CI `33428136462` 的公开 QR E2E 红灯已保留；修正夹具、不放宽策略后，第二轮 CI `33428818544` 通过 252 Vitest＋3 Node、8 workspace typecheck、production build/smoke、交底新鲜度与 4 条 Chrome 旅程。该候选仍未进入 main、腾讯 release 或真实源验收，也尚未把 vault/DNS 固定传输接到通用 probe。
 - 上版：V0.4 奥维兼容双入口导入实施版
 
 <!-- GOAL_CAPSULE_START -->
