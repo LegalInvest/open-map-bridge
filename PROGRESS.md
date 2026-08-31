@@ -196,3 +196,5 @@
 - 本地门：53 项定向测试、256 Vitest＋3 Node、8 workspace typecheck、production build/smoke 与 4 条 Chrome E2E 全绿。首次 gateway typecheck 仅发现测试 fixture 选中了 `createServer` 错误重载，改为显式 `IncomingMessage/ServerResponse` 后通过；生产逻辑未放宽。测试只使用本机回环合成上游，零用户二维码、零真实凭证、零真实 DNS/HTTP。
 - 当前阶段：014C=`local-verified / not main / not deployed / not accepted`；本地/GitHub main 仍为 docs-only `601ac68`，GitHub main CI `33430487066`，腾讯 runtime/current 仍为 `ccd3cd8`。真实 Ovi ProbeResult、真实通用源瓦片、rendered 和 accepted 均未达到。
 - 唯一最安全下一步：由 Codex 更新技术交底指纹并提交 014C PR，由 GitHub CI 复验；全绿合并 main 后才生成腾讯 versioned release，期间继续不请求任何真实第三方图源。
+- 2026-09-01 04:12：PR #35 首轮 CI `33434618444` 对功能提交 `d3118b8` 全绿，完整远端门通过。当前阶段为 `PR CI verified / not main / not deployed / not accepted`；本地/GitHub main 仍为 `601ac68`，腾讯 runtime/current 仍为 `ccd3cd8`，零真实源请求。
+- 唯一最安全下一步：由 Codex 回写 CI 证据并等待 PR #35 的证据提交复验；全绿后 squash 合并、核验 main CI，再仅因 014C 运行制品变化更新腾讯 versioned release。

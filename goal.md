@@ -7,9 +7,9 @@
 - 状态：Approved / Implementing；用户于 2026-08-28 明确最终结果必须能基于已导入奥维图源进行二次开发
 - 产品裁决者：用户
 - 当前整合者：本 Codex 主线程
-- 更新时间：2026-09-01 03:57（Asia/Shanghai）
+- 更新时间：2026-09-01 04:12（Asia/Shanghai）
 - 适用目录：`/Users/assis/Documents/Codex/2026-08-27/open-map-bridge`
-- 当前切片：`FIX-BATCH-014A/B deployed；014C generic probe local-verified / not main`。部署基线仍是 docs-only main `601ac68`（CI `33430487066`）与腾讯 runtime/current `ccd3cd8`。014C 分支新增显式 `POST /api/import/sources/:sourceId/probe`：只接受已确认的同一 source UUID 和一个瓦片坐标，不接受客户端 URL；按同 UUID 解引用 vault 并用 keyed HMAC 形成不泄密的凭证修订指纹，复核 014B 静态请求计划，逐请求执行 FIX-BATCH-013 DNS/IP/peer 固定传输，注入 query/header 凭证，通过 PNG/JPEG 完整解码门后才持久化脱敏 ProbeResult 并把 confirmed 晋级 probed。同一输入在并发/重启后复用结果，不重复请求。只用本机合成回环上游完成 53 项定向、256 Vitest＋3 Node、8 workspace typecheck、production build/smoke 与 4 条 Chrome E2E；没有使用用户二维码、真实凭证或真实第三方源。该批尚未进入 GitHub main 或腾讯 release，官方 Ovi 真实 ProbeResult、通用真实源 rendered/accepted 均未达到。
+- 当前切片：`FIX-BATCH-014A/B deployed；014C PR-CI-verified / not main`。部署基线仍是 docs-only main `601ac68`（CI `33430487066`）与腾讯 runtime/current `ccd3cd8`。014C 分支新增显式 `POST /api/import/sources/:sourceId/probe`：只接受已确认的同一 source UUID 和一个瓦片坐标，不接受客户端 URL；按同 UUID 解引用 vault 并用 keyed HMAC 形成不泄密的凭证修订指纹，复核 014B 静态请求计划，逐请求执行 FIX-BATCH-013 DNS/IP/peer 固定传输，注入 query/header 凭证，通过 PNG/JPEG 完整解码门后才持久化脱敏 ProbeResult 并把 confirmed 晋级 probed。同一输入在并发/重启后复用结果，不重复请求。只用本机合成回环上游完成 53 项定向、256 Vitest＋3 Node、8 workspace typecheck、production build/smoke 与 4 条 Chrome E2E；PR #35 首轮 CI `33434618444` 亦全绿。没有使用用户二维码、真实凭证或真实第三方源。该批尚未进入 GitHub main 或腾讯 release，官方 Ovi 真实 ProbeResult、通用真实源 rendered/accepted 均未达到。
 - 上版：V0.4 奥维兼容双入口导入实施版
 
 <!-- GOAL_CAPSULE_START -->
@@ -871,3 +871,5 @@ V1 公共类型和错误语义通过契约测试冻结；新增可选能力不�
 - 2026-09-01：FIX-BATCH-014B 请求计划真值经 PR #32/main CI 进入 runtime source `ccd3cd8`，并部署为腾讯 current；docs-only 证据 main 为 `601ac68`。scheme、字段 provenance、保守公开 query 和完整 OMS 事实已部署，真实源仍零请求。
 - 2026-09-01：03:57 FIX-BATCH-014C 达到 `local-verified / not main / not deployed / not accepted`。显式 source UUID probe 已把同 UUID vault HMAC 修订、014B 请求计划、FIX-BATCH-013 请求时固定传输、query/header 注入、完整 PNG/JPEG 门、脱敏 ProbeResult、并发/重启复用和 success 后 confirmed→probed 状态变更贯通。验证只使用本机合成回环上游：53 项定向、256 Vitest＋3 Node、8 workspace typecheck、production build/smoke 与 4 Chrome 全绿，零真实外联。
 - 唯一最安全下一步：由 Codex 更新技术交底指纹并提交 014C PR，由 GitHub CI 复验；全绿合并 main 后才生成腾讯 versioned release。真实 Ovi 与真实通用图源继续零请求。
+- 2026-09-01：04:12 PR #35 首轮 CI `33434618444` 对功能提交 `d3118b8` 全绿；014C 达到 `PR CI verified / not main / not deployed / not accepted`，真实源阶段不变。
+- 唯一最安全下一步：由 Codex 回写该 CI 证据并等待证据提交复验；再次全绿后 squash 合并 PR #35、核验 main CI，再仅因运行制品变化更新腾讯 versioned release。

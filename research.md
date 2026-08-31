@@ -23,6 +23,7 @@
 - 2026-09-01 03:18 PR #32 证据提交 CI `33429142239` 全绿并 squash 合并为 main `ccd3cd8`；main CI `33429336750` 复验同组全门。精确 main 本地 production build/smoke 后生成 gateway `273207cc…b826`、Web index `42368f3e…04ad`，腾讯安装 release `ccd3cd8` 并从 `16e805d` 原子切换 current。health=`atomic-json/encrypted-local`、直连 401、4174/8080 双回环、state `07648ee2…d6e2` 与 vault `89c8d70d…db42` 均不变。014B 达到 `deployed request-plan truth`，但通用 probe/瓦片入口仍未导入固定传输，零真实上游请求且非 accepted。
 - 2026-09-01 03:27 部署证据 PR #33 CI `33430320616` 全绿并合并为 docs-only main `601ac68`；main CI `33430487066` 再次通过完整门。运行源码和腾讯 release 继续是 `ccd3cd8`，docs-only 后代不触发重复发布；本地/main/origin 已同步，真实源阶段不变。
 - 2026-09-01 03:57 FIX-BATCH-014C 达到 `local-verified`：网关新增只接受 source UUID＋单瓦片坐标的显式 probe；从同 UUID vault 解密后用 keyed HMAC 形成凭证修订而不暴露值，复核静态请求计划并逐请求执行 DNS/IP/peer 固定传输，完成 query/header 注入、5 MiB 上限、PNG/JPEG 完整解码、脱敏 ProbeResult、同指纹并发/重启复用和 confirmed→probed。只用本机回环合成上游验证，53 项定向、256 Vitest＋3 Node、8 workspace typecheck、production build/smoke、4 Chrome 全绿；默认生产策略会在 DNS 前阻止 HTTP、私网和未知凭证需求。当前 main/CI/腾讯仍分别是 `601ac68`/`33430487066`/`ccd3cd8`，没有真实第三方请求、真实 Ovi ProbeResult、rendered 或 accepted。
+- 2026-09-01 04:12 PR #35 首轮 CI `33434618444` 对 `d3118b8` 完整通过，014C 晋级 `PR CI verified / not main`。GitHub main 与腾讯 current 仍分别为 `601ac68`/`ccd3cd8`；CI 绿不替代真实源 ProbeResult、rendered 或 accepted。
 
 ### 本轮回答
 
