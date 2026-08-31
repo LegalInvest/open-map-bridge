@@ -103,3 +103,8 @@
 - 批次结果：`OMB-AUD-018` 达到 main；预览缓存具备主动 TTL/64 条/4 MiB LRU，二维码图片在 object URL、ZXing、放大 canvas 前受 8 MiB/16 MiPx/格式头/倍率门约束。未读取用户图片、未上传原图、未外联、未部署或用户验收；相机视频帧不在本问题完成定义内。
 - 当前证据分支：`codex/audit-p1-import-resource-bounds-evidence`，只回写 main/CI 证据。本机仍低于 8 GiB 门。
 - 唯一最安全下一步：合并 FIX-BATCH-007 证据回写后，为 FIX-BATCH-008 冻结 OMB-AUD-019 的“验证完成后消费/幂等重试”和输入、冲突、容量、存储错误分层；不得继续把所有异常压成预览失效 400。
+- 2026-08-31 15:17：本地 main 与 GitHub main 已核验一致为 `f7fc2c7`，工作树起始干净，根卷约 11 GiB；服务器目标仍未在项目内形成部署契约。全量复扫校正为原账本 28 项未闭合，并新增 `OMB-AUD-039`，当前共 29 项待修复。
+- 当前批次：`FIX-BATCH-008 / OMB-AUD-039 local-candidate`。适配器接受公开样本已观察到的 `hs/mf/ml/ms/mt/pn/pt`，但只保留键名，不返回或解释未知值；重复字段和仍未知键继续 fail closed，未发网络请求。
+- 唯一最安全下一步：运行 QR 定向测试、全量测试、类型、构建和公开浏览器门；全部通过后提交 PR 并以 GitHub CI 晋级 main，再进入真实 probe/ready 批次。
+- 2026-08-31 15:21：FIX-BATCH-008 达到 `local-verified`。178 Vitest＋2 Node、8 workspace typecheck、生产构建和 4 条 Chrome E2E 全绿；公开仓库 34 张 QR 以浏览器内存逐张回放，29 张被二维码引擎解出且 29/29 通过新适配器、0 个格式拒绝，5 张停在图像解码失败。没有确认保存、没有输出载荷、没有访问图源服务器。
+- 唯一最安全下一步：提交并推送 FIX-BATCH-008，创建 PR，等待 GitHub CI 全门通过后合并；在 main 证据产生前不把 OMB-AUD-039 标记为 main。

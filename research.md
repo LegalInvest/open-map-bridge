@@ -398,3 +398,11 @@ fixtures/synthetic/temporal  无外网的 20 年彩色/带标签时序瓦片
 `EV-CAND-005 | 2026-08-28 | 既有 main CI 全绿但全量静态审计仍发现 imported UUID 断链、configured 冒充历史可用、空 probe 假绿和 35 组其他问题 | 161 个 tracked files、运行时 registry/API/UI/测试/CI/文档和 GitHub 设置交叉核对 | 根因是测试冻结了局部实现行为，却没有以同一真实 source ID 的完整旅程和反事实真值作为跨层门 | 建立 docs/问题账本.md；FIX-BATCH-001 修复 OMB-AUD-001/002假绿子项/003/005/023 并进入 main `5a7e9ad` | CI `33159198541` 已验证；真实源复验仍待 | 项目级首次全量审计 | 暂不修改全局 Skill；Leader 已要求完整旅程和 evidence ladder | 先观察两轮修复后是否出现可泛化规则 | proposed`
 
 本轮新增一个项目级候选但尚不修改全局 Skill。Leader 对本批的直接影响是：把代码缺陷翻译成稳定 issue ID、受影响旅程/规则/验收和证据阶段，并要求每批修复同时更新 `goal.md`、`research.md`、`PROGRESS.md`、`BLOCKED.md` 与问题账本。
+
+## 2026-08-31 全量复扫与 QR 方言证据
+
+- 本地与 GitHub main 当前一致为 `f7fc2c7`；原 38 项中 10 项达到 main、28 项仍未闭合。
+- 公开样本只读内存检查下界为 34 张 QR、22 个 `.ovmap`；29 张 QR 可被二维码引擎解出，旧适配器仅 1 张通过，28 张因未允许结构键失败；5 张保持“二维码解码失败/未知”，不归咎业务解析器。
+- 新增 `OMB-AUD-039`：已观察但未解释的键为 `hs/mf/ml/ms/mt/pn/pt`。FIX-BATCH-008 只保存键名作为 `observedOpaqueFields`，未知值不得进入预览、持久层、日志或开放 SDK。
+- 服务器尚无项目级部署契约；SSH 别名只是候选访问线索，不是部署授权目标或当前运行证据。
+- FIX-BATCH-008 本地复验：34 张公开 QR 在浏览器内存逐张处理，29 张产生二维码载荷且 29/29 通过适配器、0 个格式拒绝；5 张保持二维码图像解码失败。此证据只证明已观察格式兼容，不证明源权利、凭证、服务器可达或瓦片有效。

@@ -156,6 +156,9 @@ export function normalizeQrCandidate(
     createdAt,
     compatibilityExtension: {
       credentialRequired: candidate.containsSensitiveQuery,
+      ...(candidate.opaqueFieldNames.length > 0
+        ? { observedOpaqueFields: candidate.opaqueFieldNames }
+        : {}),
       ...(candidate.opaqueTemplate ? { opaqueTemplate: true, needsOviBridge: true } : {}),
     },
   });
