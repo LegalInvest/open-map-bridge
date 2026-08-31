@@ -204,3 +204,9 @@
 - 唯一最安全下一步：由 Codex 实现 FIX-BATCH-014D，把当前同指纹成功 ProbeResult 绑定到最小通用 tile runtime，并复用同一请求构造、vault 与逐请求固定传输；先只用本机合成上游验证，继续零真实第三方请求。
 - 2026-09-01 04:29：部署证据 PR #36 CI `33436046174` 全绿并合并为 docs-only main/origin `84f103f`；main CI `33436199094` 复验完整门。本地 clean；腾讯 runtime/current 仍为 `7da03c3`，health/401/双回环/artifact/state/vault 只读复核无漂移，不为 docs-only 后代重复发布。
 - 唯一最安全下一步：由 Codex 实现 FIX-BATCH-014D，把当前同指纹成功 ProbeResult 绑定到最小通用 tile runtime，并复用同一请求构造、vault 与逐请求固定传输；先只用本机合成上游验证，继续零真实第三方请求。
+- 2026-09-01 04:52：FIX-BATCH-014D 达到 `local-verified`。新增脱敏 `GenericRuntimeBinding`、独立 `map-tiles` 开发者能力、直接/V1 通用瓦片路由和 SDK `mapTileUrl/fetchMapTile`；只有同 UUID、同当前请求计划/凭据修订且指向 success ProbeResult 的绑定可用。失败 probe 不绑定；凭据轮换立即撤销；重启恢复；请求只接受 sourceId＋严格坐标且拒绝任意 query，每次继续执行静态策略、DNS/IP/peer 固定、5 MiB 与完整 PNG/JPEG 解码。
+- 本地门：3 Node＋257 Vitest、8 workspace typecheck、production build/smoke、4 Chrome E2E 全绿；只用本机回环合成上游，零用户二维码、零真实凭证、零真实 DNS/HTTP。容量约 9.8 GiB，高于 8 GiB 门。
+- 阶段：014D=`local-verified / not main / not deployed / not real-probed / not rendered / not accepted`；本地/GitHub main 基线 `a98d096`，腾讯 runtime/current 仍为 `7da03c3`。普通源没有日期目录时只获 `map-tiles`，不获 `temporal-catalog/tiles`；服务端图片成功不冒充浏览器画布 rendered。
+- 唯一最安全下一步：由 Codex 更新技术交底指纹并提交 014D PR；GitHub PR/main CI 全绿后才部署新的腾讯 versioned release，期间继续不请求任何真实第三方图源。
+- 2026-09-01 05:03：PR #38 CI `33439198444` 对功能提交 `72a054b` 全绿，完整复验交底、3 Node＋257 Vitest、8 typecheck、build/smoke 和 4 Chrome。阶段=`PR CI verified / not main / not deployed / not real-probed / not rendered / not accepted`。
+- 唯一最安全下一步：由 Codex 回写 PR CI 证据并等待证据提交复验；全绿后 squash 合并、核验 main CI，再仅因运行制品变化更新腾讯 versioned release。

@@ -1,10 +1,11 @@
 import { z } from 'zod';
 
-export const developerCapabilitySchema = z.enum(['metadata', 'temporal-catalog', 'tiles']);
+export const developerCapabilitySchema = z.enum(['metadata', 'map-tiles', 'temporal-catalog', 'tiles']);
 export type DeveloperCapability = z.infer<typeof developerCapabilitySchema>;
 
 export const developerPermissionSchema = z.enum([
   'read-source-metadata',
+  'read-map-tiles',
   'read-temporal-catalog',
   'read-tiles',
 ]);
@@ -44,7 +45,7 @@ export const developerSourceDescriptorSchema = z
       'ready',
     ]),
     accessStatus: z.enum(['metadata-only', 'ready']),
-    capabilities: z.array(developerCapabilitySchema).min(1).max(3),
+    capabilities: z.array(developerCapabilitySchema).min(1).max(4),
     datePrecision: z.enum(['capture-date', 'request-date-only']).nullable(),
     attribution: z.string().max(2048).nullable(),
     license: z.string().max(256).nullable(),
@@ -52,6 +53,7 @@ export const developerSourceDescriptorSchema = z
       .object({
         self: localDeveloperPath,
         dates: localDeveloperPath.optional(),
+        mapTileTemplate: localDeveloperPath.optional(),
         tileTemplate: localDeveloperPath.optional(),
       })
       .strict(),
@@ -76,12 +78,16 @@ export const developerSourceDescriptorSchema = z
     if (capabilities.has('tiles') !== (value.links.tileTemplate !== undefined)) {
       context.addIssue({ code: 'custom', path: ['links', 'tileTemplate'], message: 'tile capability contract is inconsistent' });
     }
+    if (capabilities.has('map-tiles') !== (value.links.mapTileTemplate !== undefined)) {
+      context.addIssue({ code: 'custom', path: ['links', 'mapTileTemplate'], message: 'map tile capability contract is inconsistent' });
+    }
   });
 
 export type DeveloperSourceDescriptor = z.infer<typeof developerSourceDescriptorSchema>;
 
 const requiredPermission: Record<DeveloperCapability, DeveloperPermission> = {
   metadata: 'read-source-metadata',
+  'map-tiles': 'read-map-tiles',
   'temporal-catalog': 'read-temporal-catalog',
   tiles: 'read-tiles',
 };
@@ -92,8 +98,8 @@ export const developerAppManifestSchema = z
     id: z.string().min(3).max(128).regex(/^[a-z0-9][a-z0-9.-]*$/),
     name: z.string().trim().min(1).max(128),
     apiVersion: z.literal('v1'),
-    requiredCapabilities: z.array(developerCapabilitySchema).min(1).max(3),
-    permissions: z.array(developerPermissionSchema).min(1).max(3),
+    requiredCapabilities: z.array(developerCapabilitySchema).min(1).max(4),
+    permissions: z.array(developerPermissionSchema).min(1).max(4),
   })
   .strict()
   .superRefine((value, context) => {

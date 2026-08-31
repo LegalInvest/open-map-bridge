@@ -64,6 +64,17 @@ interface ProbeObservation {
   errorCode: string | null;
 }
 
+export interface GenericTileExecution {
+  body: Uint8Array;
+  contentType: 'image/png' | 'image/jpeg';
+  width: number;
+  height: number;
+}
+
+interface TileFetchResult extends GenericTileExecution {
+  status: number;
+}
+
 function precondition(code: string): never {
   throw new GenericProbePreconditionError(code);
 }
@@ -171,13 +182,9 @@ function prepareRequest(
   return { url, headers, credentialFingerprint: credentials.fingerprint };
 }
 
-function requestFingerprint(
-  source: MapSourceDefinition,
-  coordinate: GenericProbeCoordinate,
-  prepared: PreparedRequest,
-): string {
+function requestPlanFingerprint(source: MapSourceDefinition, prepared: PreparedRequest): string {
   const evidence = {
-    probeVersion: 1,
+    runtimeVersion: 1,
     sourceId: source.id,
     inputSha256: source.sourceProvenance.inputSha256,
     protocol: source.protocol,
@@ -187,9 +194,21 @@ function requestFingerprint(
     pathTemplate: source.pathTemplate,
     queryParameters: source.queryParameters,
     requestPlanProvenance: source.requestPlanProvenance,
-    coordinate,
     selectedAuthority: prepared.url.origin,
     credentialFingerprint: prepared.credentialFingerprint,
+  };
+  return createHash('sha256').update(JSON.stringify(evidence)).digest('hex');
+}
+
+function requestFingerprint(
+  source: MapSourceDefinition,
+  coordinate: GenericProbeCoordinate,
+  prepared: PreparedRequest,
+): string {
+  const evidence = {
+    probeVersion: 1,
+    requestPlanFingerprint: requestPlanFingerprint(source, prepared),
+    coordinate,
   };
   return createHash('sha256').update(JSON.stringify(evidence)).digest('hex');
 }
@@ -279,6 +298,52 @@ async function readCappedBody(response: IncomingMessage): Promise<Uint8Array> {
   return Buffer.concat(chunks, total);
 }
 
+async function fetchPreparedTile(
+  source: MapSourceDefinition,
+  prepared: PreparedRequest,
+  dependencies: GenericSourceProbeDependencies,
+  onAuthorized?: () => void,
+): Promise<TileFetchResult> {
+  const url = prepared.url;
+  const port = url.port ? Number(url.port) : url.protocol === 'https:' ? 443 : 80;
+  const target = await authorizeUpstreamRequest(
+    url,
+    {
+      protocol: url.protocol as 'http:' | 'https:',
+      hostname: url.hostname,
+      port,
+      allowedNonPublicAddresses: dependencies.allowedNonPublicAddresses?.(source.id, url.hostname) ?? [],
+    },
+    dependencies.resolver,
+  );
+  onAuthorized?.();
+  const response = await requestPinnedUpstream(url, target, { headers: prepared.headers, timeoutMs: 10_000 });
+  const status = response.statusCode ?? 502;
+  if (status !== 200) {
+    response.destroy();
+    return { status, body: new Uint8Array(), contentType: 'image/png', width: 0, height: 0 };
+  }
+  const mime = contentType(response);
+  if (!['image/png', 'image/jpeg'].includes(mime)) {
+    response.destroy();
+    throw new GenericProbeContentError('unsupported image content type');
+  }
+  const body = await readCappedBody(response);
+  let image;
+  try {
+    image = validateDecodedTile(body, mime);
+  } catch {
+    throw new GenericProbeContentError('image validation failed');
+  }
+  return {
+    status,
+    body,
+    contentType: mime as 'image/png' | 'image/jpeg',
+    width: image.width,
+    height: image.height,
+  };
+}
+
 export class GenericSourceProbeService {
   private readonly inFlight = new Map<string, Promise<GenericProbeExecution>>();
   private readonly inspectPolicy: (source: MapSourceDefinition) => SourcePolicyResult;
@@ -306,7 +371,10 @@ export class GenericSourceProbeService {
     const fingerprint = requestFingerprint(source, coordinate, prepared);
     const existing = this.repository.findProbeResult(source.id, fingerprint);
     if (existing) {
-      if (existing.category === 'success') await this.repository.markImportSourceProbed(source.id, existing.endedAt);
+      if (existing.category === 'success') {
+        await this.repository.markImportSourceProbed(source.id, existing.endedAt);
+        await this.bindRuntime(source, prepared, existing);
+      }
       return { result: existing, created: false, externalRequest: false };
     }
 
@@ -334,43 +402,18 @@ export class GenericSourceProbeService {
     let observation: ProbeObservation;
     let externalRequest = false;
     try {
-      const url = prepared.url;
-      const port = url.port ? Number(url.port) : url.protocol === 'https:' ? 443 : 80;
-      const target = await authorizeUpstreamRequest(
-        url,
-        {
-          protocol: url.protocol as 'http:' | 'https:',
-          hostname: url.hostname,
-          port,
-          allowedNonPublicAddresses: this.dependencies.allowedNonPublicAddresses?.(source.id, url.hostname) ?? [],
-        },
-        this.dependencies.resolver,
-      );
-      externalRequest = true;
-      const response = await requestPinnedUpstream(url, target, { headers: prepared.headers, timeoutMs: 10_000 });
-      const status = response.statusCode ?? 502;
-      if (status !== 200) {
-        response.destroy();
-        observation = statusObservation(status);
+      const tile = await fetchPreparedTile(source, prepared, this.dependencies, () => {
+        externalRequest = true;
+      });
+      if (tile.status !== 200) {
+        observation = statusObservation(tile.status);
       } else {
-        const mime = contentType(response);
-        if (!['image/png', 'image/jpeg'].includes(mime)) {
-          response.destroy();
-          throw new GenericProbeContentError('unsupported image content type');
-        }
-        const body = await readCappedBody(response);
-        let image;
-        try {
-          image = validateDecodedTile(body, mime);
-        } catch {
-          throw new GenericProbeContentError('image validation failed');
-        }
         observation = {
           category: 'success',
           httpStatus: 200,
-          contentType: mime,
-          width: image.width,
-          height: image.height,
+          contentType: tile.contentType,
+          width: tile.width,
+          height: tile.height,
           errorCode: null,
         };
       }
@@ -388,7 +431,105 @@ export class GenericSourceProbeService {
     const persisted = await this.repository.ensureProbeResult(result);
     if (persisted.result.category === 'success') {
       await this.repository.markImportSourceProbed(source.id, persisted.result.endedAt);
+      await this.bindRuntime(source, prepared, persisted.result);
     }
     return { result: persisted.result, created: persisted.created, externalRequest };
+  }
+
+  private async bindRuntime(
+    source: MapSourceDefinition,
+    prepared: PreparedRequest,
+    result: ProbeResult,
+  ): Promise<void> {
+    await this.repository.setGenericRuntimeBinding({
+      schemaVersion: 1,
+      sourceId: source.id,
+      requestPlanFingerprint: requestPlanFingerprint(source, prepared),
+      probeInputFingerprint: result.inputFingerprint,
+      verifiedAt: result.endedAt,
+    });
+  }
+}
+
+export class GenericTileRuntimeError extends Error {
+  constructor(readonly code: string, readonly statusCode: number) {
+    super(code);
+    this.name = 'GenericTileRuntimeError';
+  }
+}
+
+export class GenericSourceTileService {
+  private readonly inspectPolicy: (source: MapSourceDefinition) => SourcePolicyResult;
+
+  constructor(
+    private readonly repository: TemporalStateRepository,
+    private readonly vault: CredentialVault | null,
+    private readonly dependencies: GenericSourceProbeDependencies = {},
+  ) {
+    this.inspectPolicy = dependencies.inspectPolicy ?? inspectSourceNetworkPolicy;
+  }
+
+  isReady(sourceId: string): boolean {
+    try {
+      const { source, prepared } = this.prepare(sourceId, { z: 0, x: 0, y: 0 });
+      return this.bindingMatches(source, prepared);
+    } catch {
+      return false;
+    }
+  }
+
+  async tile(sourceId: string, input: GenericProbeCoordinate): Promise<GenericTileExecution> {
+    const coordinate = parseCoordinate(input);
+    const { source, prepared } = this.prepare(sourceId, coordinate);
+    if (!this.bindingMatches(source, prepared)) {
+      throw new GenericTileRuntimeError('TILE_RUNTIME_NOT_READY', 409);
+    }
+    try {
+      const result = await fetchPreparedTile(source, prepared, this.dependencies);
+      if (result.status !== 200) {
+        throw new GenericTileRuntimeError(`TILE_UPSTREAM_HTTP_${result.status}`, 502);
+      }
+      return result;
+    } catch (error) {
+      if (error instanceof GenericTileRuntimeError) throw error;
+      const observation = failureObservation(error);
+      throw new GenericTileRuntimeError(
+        observation.errorCode === 'PROBE_INVALID_CONTENT' ? 'TILE_INVALID_CONTENT' : 'TILE_UPSTREAM_UNAVAILABLE',
+        502,
+      );
+    }
+  }
+
+  private prepare(sourceId: string, coordinate: GenericProbeCoordinate): {
+    source: MapSourceDefinition;
+    prepared: PreparedRequest;
+  } {
+    const source = this.repository.listImportSources().find((candidate) => candidate.id === sourceId);
+    if (!source) throw new GenericTileRuntimeError('TILE_SOURCE_NOT_FOUND', 404);
+    if (!['probed', 'rendered', 'saved'].includes(source.status)) {
+      throw new GenericTileRuntimeError('TILE_RUNTIME_NOT_READY', 409);
+    }
+    if (source.compatibilityExtension.needsOviBridge === true) {
+      throw new GenericTileRuntimeError('TILE_OVI_BRIDGE_REQUIRED', 409);
+    }
+    const policy = this.inspectPolicy(source);
+    if (policy.decision !== 'allowed') {
+      throw new GenericTileRuntimeError(policy.code ?? 'TILE_NETWORK_POLICY', 409);
+    }
+    try {
+      return { source, prepared: prepareRequest(source, coordinate, this.vault) };
+    } catch (error) {
+      if (error instanceof GenericProbePreconditionError) {
+        throw new GenericTileRuntimeError(error.code.replace(/^PROBE_/, 'TILE_'), 409);
+      }
+      throw error;
+    }
+  }
+
+  private bindingMatches(source: MapSourceDefinition, prepared: PreparedRequest): boolean {
+    const binding = this.repository.findGenericRuntimeBinding(source.id);
+    if (!binding || binding.requestPlanFingerprint !== requestPlanFingerprint(source, prepared)) return false;
+    const probe = this.repository.findProbeResult(source.id, binding.probeInputFingerprint);
+    return probe?.category === 'success';
   }
 }

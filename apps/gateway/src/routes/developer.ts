@@ -4,13 +4,15 @@ import type { TemporalSourceRegistry } from '../temporal/registry.js';
 import type { TemporalStateRepository } from '../storage/temporal-state.js';
 import { listDeveloperSources } from '../developer/descriptors.js';
 import { parseDateWindowQuery, parseTilePath } from './temporal-input.js';
+import type { GenericSourceTileService } from '../probe/generic-source-probe.js';
 
 export function registerDeveloperRoutes(
   app: FastifyInstance,
   registry: TemporalSourceRegistry,
   repository: TemporalStateRepository,
+  genericTiles: GenericSourceTileService,
 ): void {
-  const descriptors = () => listDeveloperSources(registry, repository);
+  const descriptors = () => listDeveloperSources(registry, repository, genericTiles);
 
   app.get('/api/v1/developer/sources', async () => descriptors());
 

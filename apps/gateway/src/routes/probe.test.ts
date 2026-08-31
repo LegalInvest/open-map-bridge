@@ -80,6 +80,8 @@ function fixtureDependencies() {
 it('runs one explicit same-UUID vault and pinned-transport probe, persists only redacted evidence, and reuses it', async () => {
   const fixtureQueryValue = 'fixture-query-value-not-a-secret';
   const fixtureHeaderValue = 'Bearer fixture-header-value-not-a-secret';
+  let expectedQueryValue = fixtureQueryValue;
+  let expectedHeaderValue = fixtureHeaderValue;
   let requestCount = 0;
   const png = validPng();
   const { port } = await listen((request, response) => {
@@ -87,8 +89,8 @@ it('runs one explicit same-UUID vault and pinned-transport probe, persists only 
     const url = new URL(request.url ?? '/', `http://${request.headers.host}`);
     expect(url.pathname).toBe('/tiles/2/1/2.png');
     expect(url.searchParams.get('style')).toBe('satellite');
-    expect(url.searchParams.get('api_key')).toBe(fixtureQueryValue);
-    expect(request.headers.authorization).toBe(fixtureHeaderValue);
+    expect(url.searchParams.get('api_key')).toBe(expectedQueryValue);
+    expect(request.headers.authorization).toBe(expectedHeaderValue);
     response.writeHead(200, { 'content-type': 'image/png', 'content-length': png.byteLength });
     response.end(png);
   });
@@ -175,13 +177,49 @@ it('runs one explicit same-UUID vault and pinned-transport probe, persists only 
   expect(requestCount).toBe(1);
   expect(dependencies.resolver).toHaveBeenCalledOnce();
 
+  const descriptor = await app.inject({ method: 'GET', url: `/api/v1/developer/sources/${sourceId}` });
+  expect(descriptor.json()).toMatchObject({
+    lifecycle: 'probed',
+    accessStatus: 'ready',
+    capabilities: ['metadata', 'map-tiles'],
+    links: { mapTileTemplate: `/api/v1/developer/sources/${sourceId}/map-tiles/{z}/{x}/{y}` },
+  });
+  const tile = await app.inject({ method: 'GET', url: `/api/tiles/${sourceId}/2/1/2` });
+  expect(tile.statusCode).toBe(200);
+  expect(tile.headers['content-type']).toContain('image/png');
+  expect(tile.rawPayload).toEqual(Buffer.from(png));
+  expect(requestCount).toBe(2);
+  expect(dependencies.resolver).toHaveBeenCalledTimes(2);
+
+  for (const url of [
+    `/api/tiles/${sourceId}/2/1/2?url=https://evil.invalid`,
+    `/api/tiles/${sourceId}/31/0/0`,
+    `/api/tiles/${sourceId}/2/4/0`,
+  ]) {
+    expect((await app.inject({ method: 'GET', url })).statusCode).toBe(400);
+  }
+  expect(requestCount).toBe(2);
+
   const sources = (await app.inject({ method: 'GET', url: '/api/import/sources' })).json<Array<Record<string, unknown>>>();
   expect(sources.find((source) => source.id === sourceId)).toMatchObject({ status: 'probed' });
   const stateText = await readFile(dataPath, 'utf8');
   expect(stateText).not.toContain(fixtureQueryValue);
   expect(stateText).not.toContain(fixtureHeaderValue);
-  const state = JSON.parse(stateText) as { probeResults: Array<Record<string, unknown>> };
+  const state = JSON.parse(stateText) as {
+    probeResults: Array<Record<string, unknown>>;
+    genericRuntimeBindings: Array<Record<string, unknown>>;
+  };
   expect(state.probeResults).toHaveLength(1);
+  expect(state.genericRuntimeBindings).toEqual([
+    expect.objectContaining({ schemaVersion: 1, sourceId, probeInputFingerprint: state.probeResults[0]?.inputFingerprint }),
+  ]);
+  expect(Object.keys(state.genericRuntimeBindings[0] ?? {}).sort()).toEqual([
+    'probeInputFingerprint',
+    'requestPlanFingerprint',
+    'schemaVersion',
+    'sourceId',
+    'verifiedAt',
+  ]);
   expect(Object.keys(state.probeResults[0] ?? {}).sort()).toEqual([
     'category',
     'contentType',
@@ -195,6 +233,40 @@ it('runs one explicit same-UUID vault and pinned-transport probe, persists only 
     'startedAt',
     'width',
   ]);
+
+  const rotatedQueryValue = 'rotated-query-value-not-a-secret';
+  const rotatedHeaderValue = 'Bearer rotated-header-value-not-a-secret';
+  const rotated = await app.inject({
+    method: 'PUT',
+    url: `/api/import/sources/${sourceId}/credential`,
+    payload: {
+      fields: [
+        { placement: 'query', name: 'api_key', value: rotatedQueryValue },
+        { placement: 'header', name: 'Authorization', value: rotatedHeaderValue },
+      ],
+    },
+  });
+  expect(rotated.statusCode).toBe(200);
+  expect(
+    (await app.inject({ method: 'GET', url: `/api/v1/developer/sources/${sourceId}` })).json(),
+  ).toMatchObject({ accessStatus: 'metadata-only', capabilities: ['metadata'] });
+  const staleTile = await app.inject({ method: 'GET', url: `/api/tiles/${sourceId}/2/1/2` });
+  expect(staleTile.statusCode).toBe(409);
+  expect(staleTile.json()).toEqual({ error: 'TILE_RUNTIME_NOT_READY' });
+  expect(requestCount).toBe(2);
+
+  expectedQueryValue = rotatedQueryValue;
+  expectedHeaderValue = rotatedHeaderValue;
+  const reprobe = await app.inject({
+    method: 'POST',
+    url: `/api/import/sources/${sourceId}/probe`,
+    payload: { authorized: true, z: 2, x: 1, y: 2 },
+  });
+  expect(reprobe.statusCode).toBe(201);
+  expect(reprobe.json()).toMatchObject({ created: true, externalRequest: true, result: { category: 'success' } });
+  expect(requestCount).toBe(3);
+  expect((await app.inject({ method: 'GET', url: `/api/tiles/${sourceId}/2/1/2` })).statusCode).toBe(200);
+  expect(requestCount).toBe(4);
 
   await app.close();
   apps.splice(apps.indexOf(app), 1);
@@ -213,7 +285,15 @@ it('runs one explicit same-UUID vault and pinned-transport probe, persists only 
   expect(afterRestart.statusCode).toBe(200);
   expect(afterRestart.json()).toMatchObject({ created: false, externalRequest: false });
   expect(restartedDependencies.resolver).not.toHaveBeenCalled();
-  expect(requestCount).toBe(1);
+  expect(requestCount).toBe(4);
+  const restartedTile = await restarted.inject({
+    method: 'GET',
+    url: `/api/v1/developer/sources/${sourceId}/map-tiles/2/1/2`,
+  });
+  expect(restartedTile.statusCode).toBe(200);
+  expect(restartedTile.rawPayload).toEqual(Buffer.from(png));
+  expect(restartedDependencies.resolver).toHaveBeenCalledOnce();
+  expect(requestCount).toBe(5);
 });
 
 it('persists a stable category for a denied upstream response and does not retry the same fingerprint', async () => {
@@ -249,6 +329,10 @@ it('persists a stable category for a denied upstream response and does not retry
   });
   expect(repeated.statusCode).toBe(200);
   expect(repeated.json()).toMatchObject({ created: false, externalRequest: false });
+  expect(requestCount).toBe(1);
+  const tile = await app.inject({ method: 'GET', url: `/api/tiles/${sourceId}/2/1/2` });
+  expect(tile.statusCode).toBe(409);
+  expect(tile.json()).toEqual({ error: 'TILE_RUNTIME_NOT_READY' });
   expect(requestCount).toBe(1);
   expect((await readFile(dataPath, 'utf8'))).not.toContain('denial body');
 });

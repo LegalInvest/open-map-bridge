@@ -5,19 +5,23 @@ import {
 import type { MapSourceDefinition } from '@omb/source-schema';
 import type { TemporalSourceRecord, TemporalSourceRegistry } from '../temporal/registry.js';
 import type { TemporalStateRepository } from '../storage/temporal-state.js';
+import type { GenericSourceTileService } from '../probe/generic-source-probe.js';
 
-function links(id: string, ready: boolean) {
+function links(id: string, ready: boolean, mapTiles = false) {
   const sourcePath = `/api/v1/developer/sources/${encodeURIComponent(id)}`;
-  return ready
-    ? {
-        self: sourcePath,
-        dates: `${sourcePath}/dates`,
-        tileTemplate: `${sourcePath}/tiles/{dateId}/{z}/{x}/{y}`,
-      }
-    : { self: sourcePath };
+  return {
+    self: sourcePath,
+    ...(ready
+      ? {
+          dates: `${sourcePath}/dates`,
+          tileTemplate: `${sourcePath}/tiles/{dateId}/{z}/{x}/{y}`,
+        }
+      : {}),
+    ...(mapTiles ? { mapTileTemplate: `${sourcePath}/map-tiles/{z}/{x}/{y}` } : {}),
+  };
 }
 
-export function describeImportedSource(source: MapSourceDefinition): DeveloperSourceDescriptor {
+export function describeImportedSource(source: MapSourceDefinition, mapTiles = false): DeveloperSourceDescriptor {
   return parseDeveloperSourceDescriptor({
     apiVersion: 'v1',
     id: source.id,
@@ -26,12 +30,12 @@ export function describeImportedSource(source: MapSourceDefinition): DeveloperSo
     protocol: source.protocol,
     projection: source.projection,
     lifecycle: source.status,
-    accessStatus: 'metadata-only',
-    capabilities: ['metadata'],
+    accessStatus: mapTiles ? 'ready' : 'metadata-only',
+    capabilities: mapTiles ? ['metadata', 'map-tiles'] : ['metadata'],
     datePrecision: null,
     attribution: source.attribution,
     license: source.license,
-    links: links(source.id, false),
+    links: links(source.id, false, mapTiles),
   });
 }
 
@@ -60,6 +64,7 @@ export function describeRuntimeSource(
 export function listDeveloperSources(
   registry: TemporalSourceRegistry,
   repository: TemporalStateRepository,
+  genericTiles: GenericSourceTileService,
 ): DeveloperSourceDescriptor[] {
   const imported = new Map(repository.listImportSources().map((source) => [source.id, source]));
   const descriptors = registry.list().map((record) => {
@@ -67,6 +72,6 @@ export function listDeveloperSources(
     imported.delete(record.id);
     return describeRuntimeSource(record, source);
   });
-  descriptors.push(...[...imported.values()].map(describeImportedSource));
+  descriptors.push(...[...imported.values()].map((source) => describeImportedSource(source, genericTiles.isReady(source.id))));
   return descriptors;
 }

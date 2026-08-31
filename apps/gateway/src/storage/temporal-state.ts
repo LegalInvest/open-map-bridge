@@ -29,6 +29,14 @@ export interface ComparisonReceipt {
   frames: FrameReceipt[];
 }
 
+export interface GenericRuntimeBinding {
+  schemaVersion: 1;
+  sourceId: string;
+  requestPlanFingerprint: string;
+  probeInputFingerprint: string;
+  verifiedAt: string;
+}
+
 interface TemporalState {
   aois: AreaOfInterest[];
   comparisons: ComparisonReceipt[];
@@ -36,6 +44,23 @@ interface TemporalState {
   importReceipts: ImportReceipt[];
   automationRuns: AutomationRun[];
   probeResults: ProbeResult[];
+  genericRuntimeBindings: GenericRuntimeBinding[];
+}
+
+function parseGenericRuntimeBinding(value: unknown): GenericRuntimeBinding {
+  if (typeof value !== 'object' || value === null) throw new Error('runtime binding must be an object');
+  const raw = value as Record<string, unknown>;
+  if (
+    raw.schemaVersion !== 1 ||
+    typeof raw.sourceId !== 'string' ||
+    !/^[a-f0-9]{64}$/.test(String(raw.requestPlanFingerprint)) ||
+    !/^[a-f0-9]{64}$/.test(String(raw.probeInputFingerprint)) ||
+    typeof raw.verifiedAt !== 'string' ||
+    Number.isNaN(Date.parse(raw.verifiedAt))
+  ) {
+    throw new Error('invalid runtime binding');
+  }
+  return structuredClone(value) as GenericRuntimeBinding;
 }
 
 function parseImportReceipt(value: unknown): ImportReceipt {
@@ -92,6 +117,7 @@ export class TemporalStateRepository {
         importReceipts: [],
         automationRuns: [],
         probeResults: [],
+        genericRuntimeBindings: [],
       });
     }
     try {
@@ -102,6 +128,7 @@ export class TemporalStateRepository {
         importReceipts?: unknown;
         automationRuns?: unknown;
         probeResults?: unknown;
+        genericRuntimeBindings?: unknown;
       };
       if (!Array.isArray(parsed.aois) || !Array.isArray(parsed.comparisons)) throw new Error('invalid temporal state');
       return new TemporalStateRepository(path, {
@@ -111,6 +138,9 @@ export class TemporalStateRepository {
         importReceipts: Array.isArray(parsed.importReceipts) ? parsed.importReceipts.map(parseImportReceipt) : [],
         automationRuns: Array.isArray(parsed.automationRuns) ? parsed.automationRuns.map(parseAutomationRun) : [],
         probeResults: Array.isArray(parsed.probeResults) ? parsed.probeResults.map(parseProbeResult) : [],
+        genericRuntimeBindings: Array.isArray(parsed.genericRuntimeBindings)
+          ? parsed.genericRuntimeBindings.map(parseGenericRuntimeBinding)
+          : [],
       });
     } catch (error) {
       if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
@@ -121,6 +151,7 @@ export class TemporalStateRepository {
         importReceipts: [],
         automationRuns: [],
         probeResults: [],
+        genericRuntimeBindings: [],
       });
       await repository.persist();
       return repository;
@@ -156,6 +187,11 @@ export class TemporalStateRepository {
       (entry) => entry.sourceId === sourceId && entry.inputFingerprint === inputFingerprint,
     );
     return result ? structuredClone(result) : null;
+  }
+
+  findGenericRuntimeBinding(sourceId: string): GenericRuntimeBinding | null {
+    const binding = this.state.genericRuntimeBindings.find((entry) => entry.sourceId === sourceId);
+    return binding ? structuredClone(binding) : null;
   }
 
   getAutomationRun(id: string): AutomationRun | null {
@@ -279,6 +315,22 @@ export class TemporalStateRepository {
       return { ...state, probeResults: [...state.probeResults, parsed] };
     });
     return result;
+  }
+
+  async setGenericRuntimeBinding(input: GenericRuntimeBinding): Promise<GenericRuntimeBinding> {
+    const parsed = parseGenericRuntimeBinding(input);
+    await this.mutate((state) => {
+      const probe = state.probeResults.find(
+        (entry) =>
+          entry.sourceId === parsed.sourceId &&
+          entry.inputFingerprint === parsed.probeInputFingerprint &&
+          entry.category === 'success',
+      );
+      if (!probe) throw new Error('successful-probe-required');
+      const other = state.genericRuntimeBindings.filter((entry) => entry.sourceId !== parsed.sourceId);
+      return { ...state, genericRuntimeBindings: [...other, parsed] };
+    });
+    return structuredClone(parsed);
   }
 
   private async mutate(update: (state: TemporalState) => TemporalState): Promise<void> {
