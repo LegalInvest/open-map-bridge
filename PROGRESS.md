@@ -210,3 +210,6 @@
 - 唯一最安全下一步：由 Codex 更新技术交底指纹并提交 014D PR；GitHub PR/main CI 全绿后才部署新的腾讯 versioned release，期间继续不请求任何真实第三方图源。
 - 2026-09-01 05:03：PR #38 CI `33439198444` 对功能提交 `72a054b` 全绿，完整复验交底、3 Node＋257 Vitest、8 typecheck、build/smoke 和 4 Chrome。阶段=`PR CI verified / not main / not deployed / not real-probed / not rendered / not accepted`。
 - 唯一最安全下一步：由 Codex 回写 PR CI 证据并等待证据提交复验；全绿后 squash 合并、核验 main CI，再仅因运行制品变化更新腾讯 versioned release。
+- 2026-09-01 05:10：PR #38 证据提交 CI `33439507170` 全绿并 squash 合并为 main/origin `d350ac3`；main CI `33439685686` 复验完整门。精确 main 本地 build/smoke 后安装腾讯 immutable release `d350ac3`，current 从 `7da03c3` 原子切换；gateway/Web hash 与 manifest/远端一致，首次 nginx health 短暂 502 后恢复，401、双回环、service、state/vault hash 和 0600 权限通过，旧 release 保留。
+- 阶段：014D=`main + deployed-code / no real ProbeResult or binding / not rendered / not accepted`。本轮没有真实图源、凭证或外联，部署健康不替代业务验收。
+- 唯一最安全下一步：由 Codex 提交部署证据 docs-only PR并等待 PR/main CI；全绿后三端收口，下一业务动作仍是经单独授权获得第一条真实 ProbeResult，而不是扩大抓取。
