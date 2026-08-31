@@ -29,10 +29,11 @@
 - 证据提交 CI `33447704065` 全绿；PR #41 squash 合并为 main/origin `67a6a0e`，main CI `33447839812` 全绿。
 - 精确 main production build/smoke 通过；腾讯 immutable release/current=`67a6a0e`。gateway/Web index SHA-256=`73808e31…4eb8d`/`3dd8d87d…d799`，首次 health 短暂 502 后恢复；health/401/双回环/state-vault hash/0600 均通过，旧 `d350ac3` 保留。
 - 服务器浏览器经临时 SSH 隧道显示四个合成面板均为“完整加载（成功 6/6，失败 0）”，无 error/warning；页面与隧道已关闭。此结果只验证部署 UI，不是用户真实图源 rendered。
+- 部署证据 PR #42 CI `33448263589` 全绿并合并为 docs-only main `f506a12`；main CI `33448403058` 全绿。运行源码/current 保持 `67a6a0e`，不为证据提交重复发布。
 
 ## 未达到
 
 - ComparisonReceipt 创建与持久化仍未实现；没有真实浏览器画布回执。
 - 合成测试、瓦片 HTTP 成功和计数状态均不构成真实源 `rendered` 或用户 `accepted`。
 
-唯一最安全下一动作：提交部署证据 docs-only PR；三端证据收口后实现 OMB-AUD-015 的 ComparisonReceipt 创建/持久化。
+唯一最安全下一动作：提交最终三端证据 docs-only PR；通过后实现 OMB-AUD-015 的 ComparisonReceipt 创建/持久化。
