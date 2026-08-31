@@ -38,3 +38,9 @@ The artifact was installed without overwriting earlier releases at `/opt/open-ma
 - Synthetic imagery proves the deployed product shell, four-panel synchronization, and playback only.
 - Real-source acceptance still requires the same imported source UUID to pass vault, request-time DNS/IP/rebinding policy, minimal decoded probe, ready promotion, real date catalog, real tile rendering, refresh recovery, and user sign-off.
 - The prior release and current release are both preserved; the rollback/forward rehearsal passed without changing persistent state.
+
+## FIX-BATCH-012 main advance without deployment
+
+At 2026-08-31 19:30 Asia/Shanghai, PR #23 had merged the encrypted credential vault and automatic 8 GiB root-command preflight into main `3d1ddf2`. The first two PR runs `33386547512` and `33386726268` failed on a hook spelling error and an incorrect credential-ready branch; both failures remain part of the audit trail. The third PR run `33386874683` and main run `33387017311` passed unit tests, all workspace type checks, production build/smoke, and four Chrome journeys.
+
+This is `main`, not `deployed`: the workstation had about 7.14 GiB free, so no new local artifact, Tencent release, or vault master key was created. Tencent current therefore remains the verified FIX-BATCH-011 release `94e42b1`; all real-source acceptance boundaries above remain unchanged.

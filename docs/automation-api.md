@@ -36,7 +36,7 @@ run 状态可为 `blocked`、`awaiting-intervention` 或 `completed`；schema �
 
 ## 明确未实现
 
-- 请求时凭证注入、key 轮换/备份和人工门决策回执；本地 AES-GCM vault 与配置/移除接口的核心曾在容量门满足时 local-verified，加入 OMB-AUD-040 容量守卫后的 FIX-BATCH-012 最终分支仍是 local-candidate，尚未 main/deployed；
+- 请求时凭证注入、key 轮换/备份和人工门决策回执；本地 AES-GCM vault、配置/移除接口和 OMB-AUD-040 容量守卫已由 FIX-BATCH-012 main `3d1ddf2` 验证，尚未 deployed；
 - 请求时 DNS 解析后 IP、DNS 重绑定和 HTTP 最小探测；
 - 步骤级 resume/retry/cancel、events 和 results；
 - AOI、日期目录、四期选择、瓦片质量和比较回执。
