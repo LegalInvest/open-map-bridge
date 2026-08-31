@@ -160,3 +160,5 @@
 - FIX-BATCH-014 只读设计审查发现原下一步必须拆分：真实 Ovi QR 由官方回环桥持有私有认证，不能塞入通用 vault；普通 imported source 又因 OMB-AUD-007/008 尚未保存 scheme、并丢弃常量 query，当前无法形成不猜测的完整 URL。阶段 A 先为同 UUID OviBridge 建立带安全输入指纹、成功/失败均持久化且重启不无条件重复外联的脱敏 ProbeResult；阶段 B 先补请求计划真值，再接 vault＋FIX-BATCH-013。
 - 当前阶段：`FIX-BATCH-014 discovered / contract only`；不是 local-candidate、main、deployed 或 accepted，且没有真实外联。
 - 唯一最安全下一步：由 Codex 在本机可用空间具有明确安全余量后，先实现 FIX-BATCH-014A 的 OviBridge ProbeResult schema、原子持久化、输入指纹去重和本地成功/失败 fixture；不启用用户真实 Ovi 接口。
+- 2026-08-31 23:47：FIX-BATCH-014 契约经 PR #27 合并为 main `568fc80`；PR CI `33410108596` 与 main CI `33410273091` 均通过环境/交底、单元与契约、8 workspace typecheck、production build/smoke 和公开 Chrome 旅程。阶段仅为 `contract main / implementation pending`，不改变腾讯可达运行制品，因此 current 保持 `3bbcbfa`；真实 ProbeResult、ready/rendered/accepted 均未晋级。
+- 唯一最安全下一步：由 Codex 在本机可用空间具有明确安全余量后，先实现 FIX-BATCH-014A 的 OviBridge ProbeResult schema、原子持久化、输入指纹去重和本地成功/失败 fixture；不启用用户真实 Ovi 接口。

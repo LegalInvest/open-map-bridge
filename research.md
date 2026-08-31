@@ -36,7 +36,7 @@
 - `FIX-BATCH-007` 已由 PR #13 合并为 main `873705b`：预览 store 主动 TTL 清理并以访问顺序实施 64 条/4 MiB LRU；QR 图片在 object URL/ZXing 前限制声明/实际 8 MiB，解析 PNG/JPEG/WebP 头并限制 16,777,216 像素，浏览器尺寸须一致，2×/3× 受缩放像素预算约束。首次 CI `33166210759` 红灯保留；`33166313733` 全绿。
 - `FIX-BATCH-012` 已进入 main 并部署到腾讯 current `3bbcbfa`：严格凭证 bundle、AES-256-GCM 独立私有 vault、同 source UUID 引用、原子写入/失败关闭、配置/移除 API、Web 密码输入、readiness 命中校验与 `OMB-AUD-040` 8 GiB 自动门均生效。服务器只生成未回显独立 key 和空 0600 vault；未写入真实凭证、未发上游请求。
 - `FIX-BATCH-013` 已由 PR #25 合并为 main `32cb36d`：`apps/gateway/src/security/upstream-network.ts` 在每次请求前解析并检查全部 DNS 地址，永久拒绝 metadata，默认拒绝私网/回环/链路本地/保留/转换地址，只允许按 authority＋精确地址显式批准企业私网；授权快照由 WeakSet 防结构伪造，传输禁自动重定向、固定单地址 lookup、连接后核对 remote peer，并阻止 Host/代理/跳级头覆盖。37 个专项断言含本机回环真实连接，PR/main CI `33406940553`/`33407144250` 全门通过且零外部 DNS/HTTP；模块尚未接入 source probe/tile 路由。
-- `FIX-BATCH-014` 当前仅达到 `discovered / contract`。阶段 A 将 OviBridge 的一次受控回环请求改为带安全输入指纹、可持久化且可幂等恢复的脱敏 ProbeResult，不使用通用 vault 重建 Ovi 私有认证；阶段 B 先关闭 OMB-AUD-007/008 的 scheme/常量参数事实缺口，再把普通 imported source 接入同 UUID vault 与 FIX-BATCH-013 传输。当前没有源码候选、测试或外联，不得写成 local-candidate。
+- `FIX-BATCH-014` 契约已由 PR #27 合并为 main `568fc80`，PR/main CI `33410108596`/`33410273091` 全绿；这只证明文档契约进入主线，不是实现候选。阶段 A 将 OviBridge 的一次受控回环请求改为带安全输入指纹、可持久化且可幂等恢复的脱敏 ProbeResult，不使用通用 vault 重建 Ovi 私有认证；阶段 B 先关闭 OMB-AUD-007/008 的 scheme/常量参数事实缺口，再把普通 imported source 接入同 UUID vault 与 FIX-BATCH-013 传输。当前没有源码候选、测试或外联，不得写成 local-candidate。
 
 ### 搜索与核验边界
 

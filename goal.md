@@ -7,9 +7,9 @@
 - 状态：Approved / Implementing；用户于 2026-08-28 明确最终结果必须能基于已导入奥维图源进行二次开发
 - 产品裁决者：用户
 - 当前整合者：本 Codex 主线程
-- 更新时间：2026-08-31 23:39（Asia/Shanghai）
+- 更新时间：2026-08-31 23:47（Asia/Shanghai）
 - 适用目录：`/Users/assis/Documents/Codex/2026-08-27/open-map-bridge`
-- 当前切片：`FIX-BATCH-014 probe truth contract discovered / not implemented`。本地、`origin/main` 与 GitHub main 为 docs-only `4252e92`，CI `33408261136` 全绿；腾讯 current 仍为已验证 `3bbcbfa` vault 运行态。只读代码审查确认不能把 FIX-BATCH-013 直接接到任意 imported source：当前开放模型尚未保存 transport scheme，且归一化器会丢弃无法证明为非秘密的常量 query；猜测 `http/https` 或补回 query 会违反事实门。FIX-BATCH-014 因此拆为：先让官方回环 OviBridge 以同一 source UUID 产生可幂等恢复的脱敏 ProbeResult；再先完成 OMB-AUD-007/008 的请求计划真值，之后才允许通用源使用 vault＋DNS pinning。真实 ProbeResult、ready/rendered/accepted 均未达到
+- 当前切片：`FIX-BATCH-014 probe truth contract main / implementation pending`。契约由 PR #27 合并为 main `568fc80`，PR/main CI `33410108596`/`33410273091` 全绿；腾讯 current 仍为已验证 `3bbcbfa` vault 运行态，因为本批只有文档和设计裁决、没有可达运行代码变化。只读代码审查确认不能把 FIX-BATCH-013 直接接到任意 imported source：当前开放模型尚未保存 transport scheme，且归一化器会丢弃无法证明为非秘密的常量 query；猜测 `http/https` 或补回 query 会违反事实门。FIX-BATCH-014 因此拆为：先让官方回环 OviBridge 以同一 source UUID 产生可幂等恢复的脱敏 ProbeResult；再先完成 OMB-AUD-007/008 的请求计划真值，之后才允许通用源使用 vault＋DNS pinning。真实 ProbeResult、ready/rendered/accepted 均未达到
 - 上版：V0.4 奥维兼容双入口导入实施版
 
 <!-- GOAL_CAPSULE_START -->
