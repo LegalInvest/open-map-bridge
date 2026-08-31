@@ -24,6 +24,7 @@
 - 容量：执行前后根卷约 9.8 GiB 可用，高于 8 GiB 硬门。
 - GitHub：PR #38 功能提交 `72a054b` 的 CI `33439198444` 完整全绿。
 - GitHub：证据提交 CI `33439507170`、squash main `d350ac3` 与 main CI `33439685686` 全绿。
+- GitHub：部署证据 PR #39 CI `33440530796`、docs-only main `c4f0dcf` 与 main CI `33440688435` 全绿。
 - 腾讯：current=`d350ac3`；gateway/Web hash=`73808e31…4eb8d`/`42368f3e…04ad`，health/401/双回环/systemd/state/vault/0600 门通过；首次重启 health 短暂 502 后恢复。
 
 ## 阶段边界
