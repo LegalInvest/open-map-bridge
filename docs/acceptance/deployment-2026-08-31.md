@@ -52,3 +52,7 @@ After workstation capacity recovered above the 8 GiB gate, exact docs-only main 
 The artifact was copied to the new immutable release `/opt/open-map-bridge/releases/3bbcbfa`, template and artifact hashes matched locally, and `current` was atomically switched. A distinct vault key was generated only in the root-owned `0600` server environment without being printed or persisted elsewhere; the service created an empty `0600` `/var/lib/open-map-bridge/credential-vault.json`. Health returned `{"ok":true,"persistence":"atomic-json","credentialVault":"encrypted-local"}`, direct unauthenticated gateway access remained 401, listeners remained `127.0.0.1:4174` and `127.0.0.1:8080`, and the persistent state SHA-256 stayed `07648ee28f9e50bdc581ae99a9c08d83b5a4b22bfd9e4fe8f1acd542b0c6d6e2`.
 
 This advances FIX-BATCH-012 to `deployed` only. The vault contains no real credential, no real Ovi or third-party request was sent, no ProbeResult was persisted, and real-source `ready/rendered/accepted` remains unmet.
+
+## FIX-BATCH-013 main advance without a new release
+
+PR #25 CI `33406940553` and main CI `33407144250` fully verified request-time DNS/IP authorization and pinned-connection transport at main `32cb36d`. The new module is not imported by the server, probe, or tile production entry graph, so it does not change reachable runtime behavior and no new Tencent release was created. Tencent current remains the verified `3bbcbfa` vault release. This is `main / not wired / not deployed`, and no real upstream request or real-source acceptance occurred.
