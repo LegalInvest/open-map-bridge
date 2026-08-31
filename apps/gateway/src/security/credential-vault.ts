@@ -1,4 +1,4 @@
-import { createCipheriv, createDecipheriv, randomBytes } from 'node:crypto';
+import { createCipheriv, createDecipheriv, createHmac, randomBytes } from 'node:crypto';
 import { mkdir, open, readFile, rename, stat, unlink } from 'node:fs/promises';
 import { dirname } from 'node:path';
 import { parseCredentialBundle, type CredentialBundle } from '@omb/source-schema';
@@ -25,6 +25,7 @@ export interface CredentialVault {
   put(sourceId: string, bundle: CredentialBundle): Promise<string>;
   has(reference: string): boolean;
   resolve(reference: string): CredentialBundle;
+  fingerprint(reference: string): string;
   remove(reference: string): Promise<void>;
 }
 
@@ -140,6 +141,22 @@ export class EncryptedCredentialVault implements CredentialVault {
     } catch {
       throw new Error('credential vault could not decrypt an entry');
     }
+  }
+
+  fingerprint(reference: string): string {
+    const sourceId = sourceIdFromReference(reference);
+    const bundle = this.resolve(reference);
+    const fields = bundle.fields
+      .map((field) => ({
+        placement: field.placement,
+        name: field.placement === 'header' ? field.name.toLowerCase() : field.name,
+        value: field.value,
+      }))
+      .sort((left, right) => `${left.placement}:${left.name}`.localeCompare(`${right.placement}:${right.name}`));
+    return createHmac('sha256', this.key)
+      .update(`omb-credential-fingerprint-v1:${sourceId}:`, 'utf8')
+      .update(JSON.stringify(fields), 'utf8')
+      .digest('hex');
   }
 
   async put(sourceId: string, input: CredentialBundle): Promise<string> {

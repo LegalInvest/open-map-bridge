@@ -18,12 +18,15 @@ import {
   type GatewayAccessConfig,
 } from './security/gateway-access.js';
 import type { CredentialVault } from './security/credential-vault.js';
+import { GenericSourceProbeService, type GenericSourceProbeDependencies } from './probe/generic-source-probe.js';
+import { registerProbeRoutes } from './routes/probe.js';
 
 export interface BuildAppOptions {
   dataPath: string | null;
   ovi?: OviBridgeOptions & { sourceId: string };
   access: GatewayAccessConfig | null;
   credentialVault?: CredentialVault;
+  genericProbeDependencies?: GenericSourceProbeDependencies;
 }
 
 async function bindImportedOviSource(
@@ -92,6 +95,14 @@ export async function buildApp(options: BuildAppOptions): Promise<FastifyInstanc
   registerAoiRoutes(app, repository);
   registerTemporalRoutes(app, registry);
   registerImportRoutes(app, createImportInspector(), repository, undefined, options.credentialVault ?? null);
+  registerProbeRoutes(
+    app,
+    new GenericSourceProbeService(
+      repository,
+      options.credentialVault ?? null,
+      options.genericProbeDependencies,
+    ),
+  );
   registerDeveloperRoutes(app, registry, repository);
   registerAutomationRoutes(
     app,
