@@ -136,7 +136,8 @@ it('grants Ovi temporal capabilities only after an authorized tile probe decodes
     provenance: 'authorized test fixture',
   };
   const fetchImpl = vi.fn(async () =>
-    new Response(responseBody(validPng()), { status: 200, headers: { 'content-type': 'image/png' } });
+    new Response(responseBody(validPng()), { status: 200, headers: { 'content-type': 'image/png' } }),
+  );
   const app = await buildApp({
     dataPath,
     ovi: {

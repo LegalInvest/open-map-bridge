@@ -452,3 +452,4 @@ fixtures/synthetic/temporal  无外网的 20 年彩色/带标签时序瓦片
 - 腾讯只读核验仍为 `/opt/open-map-bridge/releases/3bbcbfa`，systemd active/running，4174/8080 仅监听 127.0.0.1，根卷约 351 GiB 可用，state hash `07648ee2…d6e2`，vault 为 42 字节 0600 空文件；鉴权 health 200 且未鉴权 401。首次无超时参数的健康命令等待 30 秒且无输出，随后用 3 秒连接／8 秒总时限复核成功；不把首次静默当健康证据。
 - 候选不保存请求 URL、host、日期、地图编号、响应正文或错误消息；持久对象只含 source UUID、输入指纹、时间、稳定类别/错误码、HTTP 状态、MIME 和成功图片尺寸。失败结果与成功结果都按 source UUID＋fingerprint 原子去重，重开同输入不再次调用 fixture fetch。
 - 00:43 本机可用 `8,468,576 KiB`，只高于 8 GiB 门 `79,968 KiB`，swap 使用约 7.39 GiB。只执行了只读检查、`apply_patch`、`git diff --check` 与小型文档更新；未运行 test/typecheck/build/browser/download/image，最终验证交给 GitHub PR CI。
+- PR #29 首次 CI `33416353555` 通过环境门和 3 个 Node 契约；Vitest 已执行 234 项全过，但新增 developer route 测试文件因 `vi.fn` 少右括号在收集阶段失败，后续 typecheck/build/smoke/Chrome 未运行。修复只补配对括号，红灯保留且不计为局部验证完成。

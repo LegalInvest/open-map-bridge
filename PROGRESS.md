@@ -166,3 +166,5 @@
 - `FIX-BATCH-014A` 已形成 `local-candidate`：严格 ProbeResult schema；同 imported source UUID 和安全配置输入的 SHA-256 指纹；成功/失败原子持久化；同指纹重启复用且不重复 fetch；只有持久成功图片结果才恢复 ready。新增 schema、repository、adapter 和 gateway 重开正反 fixture，零真实外联、零真实秘密。
 - 容量门：本机仅 `8,468,576 KiB` 可用，比 8 GiB 硬门多约 78 MiB，swap 使用约 7.39 GiB；未执行本地 test/typecheck/build/browser/download/image，候选验证交给 GitHub PR CI。当前不是 local-verified/main/deployed/accepted，腾讯不更新 release。
 - 唯一最安全下一步：由 Codex 更新交底指纹并提交 `codex/fix-batch-014a-probe-result` PR；GitHub CI 全门通过后才合并 main，再在本机容量具有明确安全余量时构建和部署新的 versioned release。
+- 2026-09-01 00:52：PR #29 首次 CI `33416353555` 红灯保留。环境门与 3 个 Node 契约通过，Vitest 已执行的 234 项全部通过，但 `apps/gateway/src/routes/developer.test.ts` 在收集阶段因新增 `vi.fn` 少一个右括号而语法失败；typecheck/build/smoke/Chrome 未运行。单点语法已修正，批次仍为 `local-candidate`。
+- 唯一最安全下一步：由 Codex 更新交底指纹并推送语法修复，等待 PR #29 第二轮完整 CI；全绿前不合并、不部署。
