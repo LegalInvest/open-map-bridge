@@ -3,13 +3,13 @@
 ## 文档控制
 
 - 项目：OpenMapBridge（工作代号，正式品牌不得使用奥维商标或造成官方关联误解）
-- 版本：V0.6.1 奥维图源二次开发平台＋审计修复实施版
+- 版本：V0.6.2 奥维图源二次开发平台＋审计修复实施版
 - 状态：Approved / Implementing；用户于 2026-08-28 明确最终结果必须能基于已导入奥维图源进行二次开发
 - 产品裁决者：用户
 - 当前整合者：本 Codex 主线程
-- 更新时间：2026-09-01 05:10（Asia/Shanghai）
+- 更新时间：2026-09-01 07:18（Asia/Shanghai）
 - 适用目录：`/Users/assis/Documents/Codex/2026-08-27/open-map-bridge`
-- 当前切片：`FIX-BATCH-014D main + deployed-code / real probe blocked`。PR #38 功能/证据 CI `33439198444`/`33439507170`、runtime main `d350ac3` 与 CI `33439685686` 全绿；部署证据 PR #39 CI `33440530796` 已合并为 docs-only main `c4f0dcf`，main CI `33440688435` 全绿。腾讯 immutable release/current 保持 runtime source `d350ac3`，不为文档后代重复发布。gateway/Web hash `73808e31…4eb8d`/`42368f3e…04ad` 一致，重启窗口首次 health 短暂 502 后恢复，直连 401、双回环、systemd、state/vault hash 与 0600 门均通过，旧 `7da03c3` 保留。014D 把同 UUID、同请求计划/凭据修订的成功 ProbeResult 绑定为独立非时序 `map-tiles`，并逐请求复用固定传输和完整图片门；但本轮没有真实第三方请求、真实 ProbeResult/绑定或浏览器真实地图画布回执，因此仍非 real-probed/rendered/accepted。
+- 当前切片：`FIX-BATCH-016 / OMB-AUD-014/015/016 comparison receipts PR CI verified`。本地、GitHub main/origin 基线为 FIX-BATCH-015 最终证据 `7f38543`，CI `33448733929` 全绿；腾讯 runtime/current 保持 `67a6a0e`。016 在确认生产 `comparisons=0` 后冻结严格 V1：四个互异日期、四个顺序一致且全部结算的帧、expected/loaded/failed 数量守恒、精确 confirmed AOI 版本、ready source 和服务端身份/时间；Web 可保存并在刷新后回访。本地全门与 PR #44 首轮 CI `33450167879` 全绿。阶段仍是 `PR CI verified / not main / not deployed / not real-rendered / not accepted`；Observation 保存、真实 Ovi 日期/影像和用户验收继续开放。
 - 上版：V0.4 奥维兼容双入口导入实施版
 
 <!-- GOAL_CAPSULE_START -->
@@ -21,7 +21,7 @@
 
 硬约束：clean-room 独立实现；不得复制奥维专有代码、商标或绕过会员/设备绑定；不得内置、记录或传播第三方 token；解析前不联网，确认前不请求图源；未知版本、解压异常、内网目标或不安全 URL 必须 fail closed；“文件已解析”“探测成功”“成功出图”是不同事实；任何成功都要有导入回执和可复现实证。
 
-当前只允许修改本项目目录和用户已批准的腾讯 OpenMapBridge 专用路径；禁止清理用户文件、改动其他服务器项目、开放公网、批量抓取图源或离线下载 20 年整域瓦片。不得把真实秘密写入 fixture、日志、回执、普通 JSON 或前端。可用空间低于 8 GiB 立即停止本机构建、测试、截图和新增缓存；2026-09-01 04:52 本机实测约 9.8 GiB，容量门恢复但仍保持轻量。014D 已执行全量单测、类型、构建、冒烟与公开浏览器门；继续禁止真实图源外联、影像下载和大文件写入，并在每个重型门前复核容量。发现越界需求写入 `BLOCKED.md`。
+当前只允许修改本项目目录和用户已批准的腾讯 OpenMapBridge 专用路径；禁止清理用户文件、改动其他服务器项目、开放公网、批量抓取图源或离线下载 20 年整域瓦片。不得把真实秘密写入 fixture、日志、回执、普通 JSON 或前端。可用空间低于 8 GiB 立即停止本机构建、测试、截图和新增缓存；2026-09-01 07:18 本机实测约 8.57 GiB，容量门通过但余量有限。016 已执行全量单测、类型、构建、冒烟与隔离浏览器门；继续禁止真实图源外联、影像下载和大文件写入，并在每个重型门前复核容量。发现越界需求写入 `BLOCKED.md`。
 
 `FIX-BATCH-001` 至 `FIX-BATCH-009` 已进入 GitHub main；`FIX-BATCH-010` 的项目 runtime、release、systemd、BaoTa nginx include、SSH tunnel 和重启证据已达到 `deployed`，证据回写正在进入 GitHub。技术部署不读取用户图源、不改变 source lifecycle，也不授予真实 Ovi 源 ready。
 
@@ -39,6 +39,8 @@
 `FIX-BATCH-007` 关联 `OMB-AUD-018`，保护 JRN-001/002、BR-004/005、FR-001/002/004 和 NFR-004/006。完成候选必须满足：预览主动 TTL 清理、最多 64 条且总估算 4 MiB 的 LRU；单预览超预算稳定失败；QR 图片声明/实际字节≤8 MiB；在 object URL/ZXing 前从 PNG/JPEG/WebP 头验证尺寸与≤16,777,216 像素；浏览器尺寸与头一致；2×/3× 只在缩放后像素预算内运行；拒绝路径不调用解码器。
 
 `FIX-BATCH-014` 关联 `OMB-AUD-002/007/008`，保护 JRN-001/007/011/012、BR-004/006/015/017/020、FR-005/009/015/017 和 AC-001/004/011/017/019/021。阶段 A 只处理官方回环 OviBridge：同一 source UUID、已登记 probe 请求和安全输入指纹必须产生脱敏 ProbeResult；成功和失败均追加证据，重启不得无条件重复外联，只有完整图片门通过才可 ready。阶段 B 处理普通 imported source 的请求计划真值：source schema 明确保留 transport scheme、非秘密常量 query 与推断来源，未知/旧版/HTTP 继续 fail closed。阶段 C 是显式用户触发的最小通用 probe：服务端仅从同 UUID source/vault 构造一个坐标请求，静态策略与每次 DNS/IP/peer 固定传输都通过后才发送；凭证 HMAC、请求指纹和 ProbeResult 不得含明文秘密、URL、host、响应正文或异常文本；只有完整图片门成功才可把 source 从 confirmed 晋级 probed。同一指纹应在并发和重启后复用。阶段 D 仅为普通非时序源绑定 `map-tiles`：必须存在与当前请求计划/凭据修订完全一致且指向成功 ProbeResult 的脱敏绑定；每个 tile 仍逐请求复核策略与固定传输，凭据轮换立即撤销能力。D 不生成日期目录、不授予 `temporal-catalog`，且服务端成功返回图片仍不等于浏览器 `rendered` 或用户 `accepted`。
+
+`FIX-BATCH-016` 关联 `OMB-AUD-014/015/016`。ComparisonReceipt V1 只能在四个日期互异、帧顺序与日期一致、每个非 missing 帧全部结算且数量守恒时创建；`loading/waiting` 不得持久化。服务端生成回执 ID 和 UTC 时间，只接受当前 ready source、精确存在且 confirmed 的 AOI 版本、当前 20 年目录内日期，并核对 missing 元数据。存储入口与重开加载复用同一严格 schema，且再次校验 AOI 引用。Web 在日期/AOI 变化后清空旧状态，只有共享视角和四帧终态完整时允许保存，刷新后显示同 source/AOI/version 的已有条数。该回执是瓦片事件审计，不等于真实画布像素或用户确认；Observation 保存仍是独立未完成项。
 
 ## 一页产品定义
 
@@ -883,3 +885,6 @@ V1 公共类型和错误语义通过契约测试冻结；新增可选能力不�
 - 2026-09-01 06:45：PR #41 首轮 CI `33447491953` 全绿，015 晋级 `PR CI verified / not main`；持久质量回执与真实源 rendered/accepted 仍未达到。
 - 2026-09-01 06:51：PR #41 两轮 CI 与 main CI 全绿，FIX-BATCH-015 squash main/腾讯 current=`67a6a0e`；服务器合成四屏均显示完整 6/6。当前是 `deployed-code`，但 ComparisonReceipt 持久化与真实源 rendered/accepted 仍未达到。
 - 2026-09-01 06:57：部署证据已进入 docs-only main `f506a12`，CI `33448403058` 全绿；运行 current 保持 `67a6a0e`。下一主线为持久 ComparisonReceipt，不改变真实源阻塞边界。
+- 2026-09-01 07:00：FIX-BATCH-015 最终证据进入 docs-only main `7f38543`，CI `33448733929` 全绿；运行 current 保持 `67a6a0e`。
+- 2026-09-01 07:10：FIX-BATCH-016 达到 `local-verified`。生产权威 state 在变更前确认 `comparisons=0`；严格 ComparisonReceipt V1、创建/读取 API、精确 AOI/source/date 引用、Web 保存/计数/刷新回访和隔离 E2E 已贯通。全门为 3 Node＋271 Vitest、8 typecheck、production build/smoke、4 Chrome。唯一最安全下一步：由 Codex 更新技术交底指纹、提交 PR 并等待 GitHub CI；全绿前不合并或部署，真实源继续零请求。用户行动：无。
+- 2026-09-01 07:22：PR #44 首轮 CI `33450167879` 对 `5d3adac` 全绿；016 晋级 `PR CI verified / not main / not deployed`。唯一最安全下一步：由 Codex回写 CI 证据并等待证据提交复验；再次全绿后才 squash merge。用户行动：无。

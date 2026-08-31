@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import '@testing-library/jest-dom/vitest';
 import { useEffect, type ComponentType } from 'react';
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { lakeAoiPresets } from '@omb/aois';
@@ -33,6 +33,12 @@ const api: HistoryApi = {
   ],
   listAois: async () => structuredClone(lakeAoiPresets),
   listDates: async () => dates,
+  listComparisons: async () => [],
+  createComparison: async (input) => ({
+    ...input,
+    id: 'comparison-test',
+    createdAt: '2026-09-01T00:00:00.000Z',
+  }),
   createAoi: async ({ name, geometry }) => ({
     id: 'area-test',
     version: 1,
@@ -46,8 +52,16 @@ const api: HistoryApi = {
   confirmAoi: async (aoi) => ({ ...aoi, version: aoi.version + 1, status: 'confirmed', confirmedAt: '2026-08-27T12:00:00.000Z' }),
 };
 
-const TestMapPane: ComponentType<MapPaneProps> = ({ panelIndex, onStatus }) => {
+const TestMapPane: ComponentType<MapPaneProps> = ({ panelIndex, onStatus, viewSync }) => {
   useEffect(() => {
+    if (panelIndex === 0) {
+      viewSync.publish('test-pane-0', {
+        center: [13_270_000, 3_890_000],
+        zoom: 9,
+        rotation: 0,
+        projection: 'EPSG:3857',
+      });
+    }
     onStatus(
       panelIndex === 1
         ? { state: 'partial', expected: 2, loaded: 1, failed: 1 }
@@ -55,7 +69,7 @@ const TestMapPane: ComponentType<MapPaneProps> = ({ panelIndex, onStatus }) => {
           ? { state: 'failed', expected: 1, loaded: 0, failed: 1 }
           : { state: 'loaded', expected: 2, loaded: 2, failed: 0 },
     );
-  }, [onStatus, panelIndex]);
+  }, [onStatus, panelIndex, viewSync]);
   return <div aria-label={`测试地图 ${panelIndex + 1}`} />;
 };
 
@@ -85,6 +99,30 @@ describe('HistoryWorkspace', () => {
     await screen.findAllByLabelText('面板日期');
     await user.click(screen.getByRole('button', { name: '确认当前范围' }));
     expect(await screen.findByText('已确认 v2')).toBeVisible();
+  });
+
+  it('persists terminal frame counts and exposes the receipt after save', async () => {
+    const user = userEvent.setup();
+    const createComparison = vi.fn(api.createComparison);
+    render(<HistoryWorkspace api={{ ...api, createComparison }} MapPaneComponent={TestMapPane} />);
+    await screen.findAllByLabelText('面板日期');
+    expect(screen.getByRole('button', { name: '保存四期比较回执' })).toBeDisabled();
+    await user.click(screen.getByRole('button', { name: '确认当前范围' }));
+    await waitFor(() => expect(screen.getByRole('button', { name: '保存四期比较回执' })).toBeEnabled());
+    await user.click(screen.getByRole('button', { name: '保存四期比较回执' }));
+    expect(await screen.findByRole('status')).toHaveTextContent('comparison-test');
+    expect(screen.getByText('当前范围已保存 1 条')).toBeVisible();
+    expect(createComparison).toHaveBeenCalledWith(expect.objectContaining({
+      schemaVersion: 1,
+      aoiVersion: 2,
+      dateIds: ['scene-2006', 'scene-2011', 'scene-2019', 'scene-2025'],
+      frames: [
+        expect.objectContaining({ status: 'loaded', expectedTileCount: 2, loadedTileCount: 2, failedTileCount: 0 }),
+        expect.objectContaining({ status: 'partial', expectedTileCount: 2, loadedTileCount: 1, failedTileCount: 1 }),
+        expect.objectContaining({ status: 'failed', expectedTileCount: 1, loadedTileCount: 0, failedTileCount: 1 }),
+        expect.objectContaining({ status: 'loaded', expectedTileCount: 2, loadedTileCount: 2, failedTileCount: 0 }),
+      ],
+    }));
   });
 
   it('creates and selects a non-preset area before automatically showing four dates', async () => {

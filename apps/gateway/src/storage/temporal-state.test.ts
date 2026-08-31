@@ -11,18 +11,47 @@ it('atomically preserves AOI versions and comparison receipts across reopen', as
   const path = join(directory, 'state.json');
   const first = await TemporalStateRepository.open(path, lakeAoiPresets);
   await first.appendComparison({
+    schemaVersion: 1,
     id: 'comparison-1',
     sourceId: 'synthetic-lakes',
     aoiId: 'baoying-lake',
     aoiVersion: 1,
     dateIds: ['scene-2006', 'scene-2012', 'scene-2018', 'scene-2025'],
     viewState: { center: [13_270_000, 3_890_000], zoom: 9, rotation: 0, projection: 'EPSG:3857' },
-    frames: [],
+    frames: ['scene-2006', 'scene-2012', 'scene-2018', 'scene-2025'].map((dateId) => ({
+      dateId,
+      status: 'loaded' as const,
+      expectedTileCount: 6,
+      loadedTileCount: 6,
+      failedTileCount: 0,
+    })),
+    createdAt: '2026-09-01T00:00:00.000Z',
   });
   const reopened = await TemporalStateRepository.open(path, lakeAoiPresets);
   expect(reopened.listComparisons()).toHaveLength(1);
   expect(reopened.listComparisons()[0]?.aoiVersion).toBe(1);
   expect((await readFile(path, 'utf8')).includes('host')).toBe(false);
+});
+
+it('rejects a comparison whose immutable AOI version is absent', async () => {
+  const repository = await TemporalStateRepository.open(null, lakeAoiPresets);
+  await expect(repository.appendComparison({
+    schemaVersion: 1,
+    id: 'comparison-unknown-aoi',
+    sourceId: 'synthetic-lakes',
+    aoiId: 'unknown-area',
+    aoiVersion: 1,
+    dateIds: ['scene-2006', 'scene-2011', 'scene-2019', 'scene-2025'],
+    viewState: { center: [13_270_000, 3_890_000], zoom: 9, rotation: 0, projection: 'EPSG:3857' },
+    frames: ['scene-2006', 'scene-2011', 'scene-2019', 'scene-2025'].map((dateId) => ({
+      dateId,
+      status: 'loaded' as const,
+      expectedTileCount: 1,
+      loadedTileCount: 1,
+      failedTileCount: 0,
+    })),
+    createdAt: '2026-09-01T00:00:00.000Z',
+  })).rejects.toThrow('AOI version not found');
 });
 
 it('atomically preserves confirmed import sources and receipts across reopen', async () => {

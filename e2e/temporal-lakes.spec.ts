@@ -41,6 +41,21 @@ test('draws an arbitrary non-preset area and automatically creates a four-frame 
     await expect(page.getByText(completePaneStatus(index))).toBeVisible();
   }
   await expect(page.getByLabel(/历史影像地图/)).toHaveCount(4);
+
+  const saveResponse = page.waitForResponse((response) =>
+    response.url().endsWith('/api/comparisons') && response.request().method() === 'POST' && response.status() === 201,
+  );
+  await page.getByRole('button', { name: '保存四期比较回执' }).click();
+  const receipt = await (await saveResponse).json() as { id: string; aoiId: string; frames: unknown[] };
+  expect(receipt).toMatchObject({ aoiId: created.id, frames: expect.arrayContaining([expect.any(Object)]) });
+  expect(receipt.frames).toHaveLength(4);
+  await expect(page.getByRole('status')).toContainText(receipt.id);
+  await expect(page.getByText('当前范围已保存 1 条')).toBeVisible();
+
+  await page.reload();
+  await page.getByRole('button', { name: '历史影像四期' }).click();
+  await page.getByLabel('区域').selectOption(created.id);
+  await expect(page.getByText('当前范围已保存 1 条')).toBeVisible();
 });
 
 test('compares both lake presets with aligned views, isolated failures, and an explicit missing year', async ({ page }) => {

@@ -29,6 +29,35 @@ describe('history API client', () => {
     expect(request?.[1]?.method).toBe('POST');
     expect(JSON.parse(String(request?.[1]?.body))).toEqual({ name: '实验区域', geometry });
   });
+
+  it('creates a comparison without client-controlled identity or timestamp', async () => {
+    const input = {
+      schemaVersion: 1 as const,
+      sourceId: 'synthetic-lakes',
+      aoiId: 'area-1',
+      aoiVersion: 1,
+      dateIds: ['scene-2006', 'scene-2011', 'scene-2019', 'scene-2025'],
+      viewState: { center: [1, 2] as [number, number], zoom: 9, rotation: 0, projection: 'EPSG:3857' as const },
+      frames: ['scene-2006', 'scene-2011', 'scene-2019', 'scene-2025'].map((dateId) => ({
+        dateId,
+        status: 'loaded' as const,
+        expectedTileCount: 1,
+        loadedTileCount: 1,
+        failedTileCount: 0,
+      })),
+    };
+    const response = { ...input, id: 'comparison-1', createdAt: '2026-09-01T00:00:00.000Z' };
+    const fetchSpy = vi.fn<typeof fetch>().mockResolvedValue(
+      new Response(JSON.stringify(response), { status: 201, headers: { 'content-type': 'application/json' } }),
+    );
+    vi.stubGlobal('fetch', fetchSpy);
+    await createApiClient('', 2026).createComparison(input);
+    const request = fetchSpy.mock.calls[0];
+    expect(request?.[0]).toBe('/api/comparisons');
+    expect(request?.[1]?.method).toBe('POST');
+    expect(JSON.parse(String(request?.[1]?.body))).toEqual(input);
+    expect(String(request?.[1]?.body)).not.toContain('createdAt');
+  });
 });
 
 it('starts source readiness with only the selected source id', async () => {

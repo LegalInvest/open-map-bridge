@@ -111,16 +111,22 @@ export interface AreaOfInterest {
 }
 
 export interface ComparisonFrameReceipt {
-  frameId: string;
+  dateId: string;
+  status: 'loaded' | 'partial' | 'missing' | 'failed';
+  expectedTileCount: number;
+  loadedTileCount: number;
+  failedTileCount: number;
+}
+
+export interface ComparisonReceipt {
+  schemaVersion: 1;
+  id: string;
   sourceId: string;
   aoiId: string;
   aoiVersion: number;
-  requestDate: string;
-  captureDate: string | null;
+  dateIds: [string, string, string, string];
   viewState: { center: [number, number]; zoom: number; rotation: number; projection: string };
-  status: 'loading' | 'loaded' | 'partial' | 'missing' | 'failed';
-  loadedTileCount: number;
-  failedTileCount: number;
+  frames: [ComparisonFrameReceipt, ComparisonFrameReceipt, ComparisonFrameReceipt, ComparisonFrameReceipt];
   createdAt: string;
 }
 ```
@@ -133,8 +139,10 @@ export interface ComparisonFrameReceipt {
 - `GET /api/temporal/tiles/:sourceId/:dateId/:z/:x/:y`：只允许已注册源和已知日期 ID；不接受任意 URL/host/token。
 - `GET /api/aois`：返回 AOI 版本和确认状态。
 - `PUT /api/aois/:id`：保存用户编辑后的 GeoJSON，新建版本，不覆盖旧版本。
-- `POST /api/comparisons`：冻结源、AOI 版本、日期和共享 ViewState。
-- `POST /api/comparisons/:id/frame-events`：记录各屏真实瓦片加载/失败事实。
+- `GET /api/comparisons`：回访已持久化的严格比较回执。
+- `POST /api/comparisons`：原子冻结 ready source、confirmed AOI 精确版本、四个互异日期、共享 ViewState 和四屏全部结算的 expected/loaded/failed 事实；ID/时间由服务端生成。
+
+2026-09-01 实现裁决：首版采用一次性终态 POST，不开放可伪造或未结算的逐帧事件追加接口。后续若需要流式事件，必须先有幂等序号、归属和封口协议。
 
 ## 7. Web 页面
 

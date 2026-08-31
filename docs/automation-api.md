@@ -36,9 +36,8 @@ run 状态可为 `blocked`、`awaiting-intervention` 或 `completed`；schema �
 
 ## 明确未实现
 
-- 请求时凭证注入、key 轮换/备份和人工门决策回执；本地 AES-GCM vault、配置/移除接口和 OMB-AUD-040 已随腾讯 current `3bbcbfa` deployed；
-- 请求时 DNS 解析后 IP、DNS 重绑定和 HTTP 最小探测；FIX-BATCH-013 固定连接传输已进入 main `32cb36d`，但尚未接入本任务；
+- key 轮换/备份和人工门决策回执；本地 AES-GCM vault、配置/移除接口、请求时凭证注入、DNS/IP/peer 固定传输、最小 probe、脱敏 ProbeResult 与非时序 map-tiles 已包含在腾讯 current `67a6a0e`，但尚未编排进本任务；
 - 步骤级 resume/retry/cancel、events 和 results；
-- AOI、日期目录、四期选择、瓦片质量和比较回执。
+- AOI、日期目录、四期选择和瓦片质量尚未编排进任务；严格比较回执已在 FIX-BATCH-016 形成 local-verified 独立 API/UI 候选，但尚未 main/deployed。
 
 上述能力必须各自增加负面测试和真实证据，不能由当前静态任务状态推断。
