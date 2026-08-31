@@ -415,3 +415,10 @@ fixtures/synthetic/temporal  无外网的 20 年彩色/带标签时序瓦片
 - 两次连续构建 gateway SHA-256 相同为 `63e8ed6eb09ec747bb941a25beff872f0bb895d8544d3cee517af565b4abbfd6`；production smoke 从临时复制的 release 启动，证明不依赖仓库 TypeScript 源码。
 - 服务器首版采用 gateway `127.0.0.1:4174`、nginx `127.0.0.1:8080`、SSH tunnel 的私有模型；nginx 从服务器 `0600` include 注入 gateway token，真实秘密不进 Web bundle。候选 SSH 别名仍需只读核验后选择，不能由名称推断部署目标。
 - CI 安装前门现直接检查 Node 24–26、npm 11 和 8 GiB；技术交底指纹扩展到发布、安全、锁文件、CI、部署和验收控制面。本批因此同时推进 OMB-AUD-031/035，不把它们藏在 OMB-AUD-006 的实现细节中。
+
+## 2026-08-31 服务器选择证据
+
+- 腾讯候选：根卷 1000 GiB、可用 369 GiB；nginx 1.26.3、systemd 255、Docker 29.4、Tailscale 1.102.3；4174/8080 空闲；OpenMapBridge 的 `/opt`、`/etc`、`/var/lib` 目录与账号均不存在。
+- 阿里候选：根卷仅余 14 GiB，8083–8121 等端口密集运行；虽无 OpenMapBridge 目录，但不作为首选。
+- 腾讯系统 `/usr/bin/node` 是 18，默认 shell Node 是 20，但 root NVM 中已有 Node 24.19。裁决为复制完整 Node 24.19 runtime 到 OpenMapBridge 专用只读目录并由 systemd 精确引用，不改变系统或其他项目 Node。
+- 腾讯 Docker Hub manifest 查询超时；为减少外部依赖和部署不确定性，首版不依赖现场拉镜像。制品已由 Ubuntu CI 验证，服务器只需项目 runtime、artifact、nginx 和 systemd。

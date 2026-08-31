@@ -848,3 +848,4 @@ V1 公共类型和错误语义通过契约测试冻结；新增可选能力不�
 - 2026-08-28：PR #13 第二轮 CI `33166313733` 通过 39 个 Vitest 文件/175 tests＋2 Node、8 workspace typecheck、生产构建、4 Chrome E2E 和交底新鲜度，随后合并为 main `873705b`。OMB-AUD-018 达到 main；相机帧、真实图源、部署和用户验收不随之晋级。
 - 2026-08-31：用户授权 Codex 自主推进，直到本机、GitHub、服务器均为最新可验收状态。主线仍是 `QR/.ovmap → 安全预览 → 确认 → 探测/ready → 真实渲染 → 四期消费 → SDK`，不以解析成功、CI 绿或服务器 HTTP 200 替代真实源验收。当前启动 `FIX-BATCH-008 / OMB-AUD-039`，先收敛已观察 QR 方言兼容且不保存未知值。
 - 2026-08-31：FIX-BATCH-008 已进入 main；启动 FIX-BATCH-009，将服务器交付前置条件冻结为独立 gateway/Web 制品、确定性 manifest、鉴权健康、原子持久化、结构化生命周期、SIGTERM 正常退出、loopback 反向代理和可恢复回滚。公网开放不在该契约内，不以服务健康替代真实源验收。
+- 2026-08-31：FIX-BATCH-009 已进入 main。首个服务器目标经只读比较选定腾讯机；采用 versioned release、项目专用 Node 24 runtime、systemd gateway、loopback nginx 和 SSH tunnel，保持公网开放为禁用状态。部署验收仍必须与真实奥维源业务验收分开。

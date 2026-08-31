@@ -115,3 +115,7 @@
 - FIX-BATCH-009 同步收敛 OMB-AUD-031/035：CI 在安装依赖前验证 Node/npm/磁盘；技术交底指纹覆盖 CI、README、安全、部署、runbook、验收、锁文件、测试配置和问题账本，避免生产交付变化绕过文档门。
 - 2026-08-31 15:35：FIX-BATCH-009 本地全门完成：178 Vitest＋2 Node、8 workspace typecheck、生产 build、隔离 release production smoke、4 Chrome E2E、npm audit 0、169 文件交底新鲜度通过。当前阶段仍是 local-verified，不是 main/deployed/accepted。
 - 唯一最安全下一步：提交并推送 FIX-BATCH-009，创建 PR，等待 GitHub CI 同时验证安装前环境门、生产制品冒烟和公开浏览器旅程后再合并。
+- 2026-08-31 15:38：FIX-BATCH-009 由 PR #16 合并为 main `b40ed0d`；PR CI `33369111954` 与 main CI `33369227321` 全绿，OMB-AUD-006/027/031/035 达到 main。39 个问题中 15 个达到 main，24 个仍未闭合。
+- 2026-08-31 15:43：服务器只读盘点完成。腾讯机根卷可用 369 GiB、已有 Node 24.19/Tailscale/nginx/systemd，4174/8080 空闲，三个目标目录和服务账号均不存在；阿里机只有 14 GiB 可用且业务端口密集，不选。Docker Hub 在腾讯机超时，不以拉取镜像作为部署依赖。
+- 当前批次：FIX-BATCH-010。把 systemd 改为项目专用 `/opt/open-map-bridge/runtime/current/bin/node`，计划从服务器已存在的 Node 24.19 复制，不替换系统 Node 或其他项目 runtime；部署仍只监听回环并经 SSH tunnel 访问。
+- 唯一最安全下一步：更新交底指纹、运行模板/构建/production smoke，全门绿后用 PR 进入 main，再按 versioned release 契约安装腾讯机。
