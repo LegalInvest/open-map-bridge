@@ -38,6 +38,15 @@ npm run build
 npm run test:e2e
 ```
 
+Build and smoke-test the standalone production artifact:
+
+```bash
+npm run build
+npm run test:production
+```
+
+The output is `dist/open-map-bridge/`; it runs without repository TypeScript sources. The supported deployment is loopback-only behind the supplied nginx token-injection boundary. See [`docs/deployment.md`](docs/deployment.md) before installing it on a server.
+
 The authorized QR gate is local-only and requires a user-controlled image path:
 
 ```bash

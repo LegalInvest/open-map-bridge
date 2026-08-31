@@ -1,0 +1,25 @@
+[Unit]
+Description=OpenMapBridge loopback gateway
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=openmapbridge
+Group=openmapbridge
+WorkingDirectory=/opt/open-map-bridge/current
+Environment=NODE_ENV=production
+EnvironmentFile=/etc/open-map-bridge/gateway.env
+ExecStart=/usr/bin/node /opt/open-map-bridge/current/server.mjs
+Restart=on-failure
+RestartSec=3
+TimeoutStopSec=15
+KillSignal=SIGTERM
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/open-map-bridge
+
+[Install]
+WantedBy=multi-user.target

@@ -108,3 +108,10 @@
 - 唯一最安全下一步：运行 QR 定向测试、全量测试、类型、构建和公开浏览器门；全部通过后提交 PR 并以 GitHub CI 晋级 main，再进入真实 probe/ready 批次。
 - 2026-08-31 15:21：FIX-BATCH-008 达到 `local-verified`。178 Vitest＋2 Node、8 workspace typecheck、生产构建和 4 条 Chrome E2E 全绿；公开仓库 34 张 QR 以浏览器内存逐张回放，29 张被二维码引擎解出且 29/29 通过新适配器、0 个格式拒绝，5 张停在图像解码失败。没有确认保存、没有输出载荷、没有访问图源服务器。
 - 唯一最安全下一步：提交并推送 FIX-BATCH-008，创建 PR，等待 GitHub CI 全门通过后合并；在 main 证据产生前不把 OMB-AUD-039 标记为 main。
+- 2026-08-31 15:24：FIX-BATCH-008 由 PR #15 合并为 main `382e0e6`；PR CI `33368112824` 与 main CI `33368228496` 全绿，OMB-AUD-039 达到 main。待修复问题从 29 降到 28；真实图源、部署和用户验收不随格式兼容晋级。
+- 2026-08-31 15:32：启动并本地验证 FIX-BATCH-009 / OMB-AUD-006/027。`dist/open-map-bridge` 现包含独立 gateway bundle、Web、确定性 manifest、许可证和 loopback systemd/nginx 模板；两次构建 gateway SHA-256 一致。冒烟把制品复制到独立 release，验证鉴权健康、未鉴权拒绝、原子状态和 SIGTERM 退出码 0。
+- 失败证据：首个 ESM bundle 因 Fastify 动态 require 启动失败；改 CJS 后暴露 `import.meta`；回到带 createRequire banner 的 ESM 后，独立目录继续暴露图片解码器外部依赖。最终用静态 `pngjs/jpeg-js` import 纳入 bundle，未放宽冒烟。
+- 唯一最安全下一步：运行公开 Chrome E2E、交底新鲜度和依赖审计；全门绿后提交 FIX-BATCH-009 PR，由 GitHub CI 再验证生产制品。
+- FIX-BATCH-009 同步收敛 OMB-AUD-031/035：CI 在安装依赖前验证 Node/npm/磁盘；技术交底指纹覆盖 CI、README、安全、部署、runbook、验收、锁文件、测试配置和问题账本，避免生产交付变化绕过文档门。
+- 2026-08-31 15:35：FIX-BATCH-009 本地全门完成：178 Vitest＋2 Node、8 workspace typecheck、生产 build、隔离 release production smoke、4 Chrome E2E、npm audit 0、169 文件交底新鲜度通过。当前阶段仍是 local-verified，不是 main/deployed/accepted。
+- 唯一最安全下一步：提交并推送 FIX-BATCH-009，创建 PR，等待 GitHub CI 同时验证安装前环境门、生产制品冒烟和公开浏览器旅程后再合并。

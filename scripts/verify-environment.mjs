@@ -1,9 +1,10 @@
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
-export function evaluateEnvironment({ nodeMajor, freeBytes }) {
+export function evaluateEnvironment({ nodeMajor, npmMajor, freeBytes }) {
   const errors = [];
   if (nodeMajor < 24 || nodeMajor > 26) errors.push(`unsupported Node ${nodeMajor}`);
+  if (npmMajor !== 11) errors.push(`unsupported npm ${npmMajor}`);
   if (freeBytes < 8n * 1024n ** 3n) errors.push('at least 8 GiB free disk is required');
   return { ok: errors.length === 0, errors };
 }
@@ -18,6 +19,7 @@ function currentFreeBytes() {
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const result = evaluateEnvironment({
     nodeMajor: Number(process.versions.node.split('.')[0]),
+    npmMajor: Number(execFileSync('npm', ['--version'], { encoding: 'utf8' }).trim().split('.')[0]),
     freeBytes: currentFreeBytes(),
   });
   if (!result.ok) {

@@ -27,6 +27,9 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
 
+      - name: Verify Node, npm, and disk before install
+        run: node scripts/verify-environment.mjs
+
       - name: Install dependencies
         run: npm ci
 
@@ -41,6 +44,9 @@ jobs:
 
       - name: Build production assets
         run: npm run build
+
+      - name: Smoke-test production artifact
+        run: npm run test:production
 
       - name: Install Chrome for browser acceptance
         run: npx playwright install --with-deps chrome
