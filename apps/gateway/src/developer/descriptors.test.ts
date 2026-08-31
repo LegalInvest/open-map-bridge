@@ -17,7 +17,7 @@ const imported = parseMapSourceDefinition({
   hosts: ['upstream-secret.example.invalid'],
   pathTemplate: '/private/{$z}/{$x}/{$y}.png',
   queryParameters: { harmless: 'internal-only' },
-  credentialRef: 'vault://credential-reference',
+  credentialRef: 'vault://source/018f4d39-32f1-7a31-9f60-81c6b453b886',
   attribution: 'Fixture attribution',
   license: null,
   sourceProvenance: { inputSha256: 'a'.repeat(64), adapter: 'test-adapter' },
@@ -35,7 +35,7 @@ it('serializes imported sources by whitelist instead of copying the internal def
     'upstream-secret.example.invalid',
     '/private/',
     'internal-only',
-    'credential-reference',
+    'vault://source/',
     'a'.repeat(64),
     'privateCode',
   ]) {

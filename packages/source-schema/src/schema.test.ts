@@ -36,6 +36,19 @@ describe('MapSourceDefinition', () => {
     expect(() => parseMapSourceDefinition({ ...validSource, queryParameters: { [key]: 'secret' } })).toThrow(/secret/i);
   });
 
+  it('accepts only a vault reference owned by the same source UUID', () => {
+    expect(() => parseMapSourceDefinition({ ...validSource, credentialRef: 'vault://credential-reference' })).toThrow();
+    expect(() =>
+      parseMapSourceDefinition({
+        ...validSource,
+        credentialRef: 'vault://source/018f4d39-32f1-7a31-9f60-81c6b453b887',
+      }),
+    ).toThrow(/same source/i);
+    expect(
+      parseMapSourceDefinition({ ...validSource, credentialRef: `vault://source/${validSource.id}` }).credentialRef,
+    ).toBe(`vault://source/${validSource.id}`);
+  });
+
   it('rejects invalid zoom ordering and non-host input', () => {
     expect(() => parseMapSourceDefinition({ ...validSource, minZoom: 19 })).toThrow();
     expect(() => parseMapSourceDefinition({ ...validSource, hosts: ['https://tiles.example.invalid/path'] })).toThrow();

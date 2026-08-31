@@ -186,6 +186,27 @@ export class TemporalStateRepository {
     });
   }
 
+  async setImportSourceCredentialRef(sourceId: string, credentialRef: string | null): Promise<MapSourceDefinition> {
+    let result: MapSourceDefinition | null = null;
+    await this.mutate((state) => {
+      const index = state.importSources.findIndex((source) => source.id === sourceId);
+      if (index < 0) throw new Error('source-not-found');
+      const current = state.importSources[index];
+      if (!current) throw new Error('source-not-found');
+      const updated = parseMapSourceDefinition({
+        ...current,
+        credentialRef,
+        updatedAt: new Date().toISOString(),
+      });
+      const importSources = [...state.importSources];
+      importSources[index] = updated;
+      result = structuredClone(updated);
+      return { ...state, importSources };
+    });
+    if (!result) throw new Error('source-not-found');
+    return result;
+  }
+
   async ensureAutomationRun(input: AutomationRun): Promise<{ run: AutomationRun; created: boolean }> {
     const parsed = parseAutomationRun(input);
     let result: { run: AutomationRun; created: boolean } = { run: structuredClone(parsed), created: true };

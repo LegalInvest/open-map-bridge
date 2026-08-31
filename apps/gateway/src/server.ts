@@ -1,15 +1,21 @@
 import { resolve } from 'node:path';
 import { buildApp } from './app.js';
-import { parseGatewayServerConfig, parseOviBridgeConfig } from './config.js';
+import { parseCredentialVaultConfig, parseGatewayServerConfig, parseOviBridgeConfig } from './config.js';
+import { EncryptedCredentialVault } from './security/credential-vault.js';
 
 async function main(): Promise<void> {
   const gateway = parseGatewayServerConfig(process.env);
   const dataPath = process.env.OMB_DATA_PATH ?? resolve('data/temporal-state.json');
   const ovi = parseOviBridgeConfig(process.env);
+  const vaultConfig = parseCredentialVaultConfig(process.env);
+  const credentialVault = vaultConfig
+    ? await EncryptedCredentialVault.open(vaultConfig.path, vaultConfig.key)
+    : undefined;
   const app = await buildApp({
     dataPath,
     access: gateway.access,
     ...(ovi ? { ovi } : {}),
+    ...(credentialVault ? { credentialVault } : {}),
   });
 
   let closing = false;

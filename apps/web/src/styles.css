@@ -118,6 +118,9 @@ footer { padding: 9px 18px; color: #789492; text-align: right; font-size: 11px; 
 .layer-preview em { color: #ffc17a; font-size: 11px; font-style: normal; }
 .authorization-check { display: flex; align-items: center; gap: 9px; padding: 12px; background: rgba(21,77,68,.3); border-radius: 9px; color: #cae5df; }
 .authorization-check input { accent-color: #1aa68d; }
+.credential-form { display: grid; gap: 8px; margin-top: 12px; padding: 10px; border: 1px solid rgba(129, 206, 191, .25); border-radius: 8px; }
+.credential-form label { display: grid; gap: 4px; font-size: .82rem; color: #b7d7d0; }
+.credential-form input, .credential-form select { min-width: 0; padding: 8px; border-radius: 6px; border: 1px solid rgba(183, 215, 208, .3); background: #102b2a; color: #ecfffa; }
 .preview-actions { display: flex; justify-content: flex-end; gap: 8px; }
 .result-mark { width: 64px; height: 64px; display: grid; place-items: center; border-radius: 50%; color: #042017; background: #53d2af; font-size: 34px; font-weight: 900; }
 .result-step h2 { margin: 4px 0 0; }

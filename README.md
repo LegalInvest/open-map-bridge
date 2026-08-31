@@ -9,13 +9,14 @@ OpenMapBridge is an open-source, clean-room map-source bridge. It imports legall
 - Browser QR image upload and camera scanning.
 - Bounded parsing for the verified `ovobj` query family and `OviO + record37-zlib` `.ovmap` family.
 - Secret-safe previews, explicit authorization, confirmed-source persistence, and import receipts.
+- An optional AES-256-GCM local credential vault: the main state stores only a same-source opaque reference, while the Web UI can add or remove bounded query/header credentials without echoing values.
 - A persisted, deduplicated, zero-network source-readiness job with a four-step operator dashboard and explicit blockers.
 - A source-agnostic temporal adapter, arbitrary AOI drawing, aligned 1/2/4-panel comparison, swipe mode, and playback.
 - A V1 developer API and TypeScript SDK with server-enforced app tokens/permissions, strict manifests, capability negotiation, and authenticated local tile fetches.
 
 Current truth matters: a parsed or confirmed source is not automatically reachable or rendered. Imported sources remain `metadata-only` until URL/IP policy, credentials, probing, and a runtime adapter have all passed.
 
-The current readiness job performs static checks only. It records confirmation, host/path policy, credential metadata, and runtime binding without DNS or HTTP requests; a completed static job still does not prove that upstream tiles work.
+The current readiness job performs static checks only. When the vault is enabled, its credential step verifies that the referenced encrypted entry actually exists; it never reads a non-empty reference as proof by itself. The job still makes no DNS or HTTP request, so a completed static job does not prove that upstream tiles work.
 
 ## Quick start
 
@@ -28,6 +29,8 @@ npm run dev
 ```
 
 Open [http://127.0.0.1:5173](http://127.0.0.1:5173). The local gateway listens on `127.0.0.1:4174`. `npm run dev` generates an ephemeral process token when none is supplied and shares it only with the gateway and the local Vite proxy; it is not bundled into browser JavaScript. Set `OMB_GATEWAY_TOKEN` explicitly before startup only when direct CLI access is required.
+
+The credential vault is disabled unless both `OMB_VAULT_PATH` and an unpadded base64url 32-byte `OMB_VAULT_KEY` are configured. Keep the key outside Git and ordinary state files; losing it intentionally makes existing encrypted entries unreadable. See [`docs/runbook.md`](docs/runbook.md) for the local setup and recovery boundary.
 
 ## Verification
 

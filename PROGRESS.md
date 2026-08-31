@@ -136,3 +136,12 @@
 - 腾讯已新增只读 versioned release `/opt/open-map-bridge/releases/94e42b1` 并原子切换 current。active service、health=`atomic-json`、4174/8080 双回环、服务器 artifact hash 均通过；状态 hash 从 `07648ee2…d6e2` 到 `07648ee2…d6e2` 不变。首次 health 请求在重启窗口返回 502，自动重试后恢复 200，该瞬态证据保留。
 - 阶段更新：`main=f21fefe`（docs-only descendant）、`runtime source=94e42b1`、`deployed=94e42b1`、`real-source accepted=未达到`。未启用官方 Ovi 接口、未请求用户真实图源、未新增凭证或 ProbeResult。
 - 唯一最安全下一步：由 Codex 实现本地 vault 引用与通用上游请求时 DNS/IP/连接固定/重绑定安全门，并先以合成恶意/重绑定反例验证；在该门和 ProbeResult 持久化完成前不请求真实第三方图源。
+- 2026-08-31 18:32：FIX-BATCH-011 部署证据 PR #22 合并为 main commit `a92ff8c`；main CI `33382682547` 完成 test/typecheck/build/production smoke/4 Chrome E2E 并全绿。该 docs-only 证据不改变腾讯 runtime/current `94e42b1`，也不晋级真实源。
+- 2026-08-31 18:51：`FIX-BATCH-012 encrypted credential vault` 达到 local-verified。新增严格 query/header 凭证 bundle、AES-256-GCM 认证加密、独立 0600 原子 vault、同 source UUID 引用、重开/错 key 失败关闭、配置/移除 API、Web 密码表单和 readiness 实际引用命中门；普通状态文件、UI 和 API 回执不含凭证值。
+- 本地门：196 个 Vitest＋2 Node tests、8 workspace typecheck、production build/smoke 和 4 条 Chrome E2E 全绿；E2E 启动窗口保留一次 Vite→gateway `ECONNREFUSED`，随后四旅程通过。测试只使用明确 fixture secret，未使用用户真实凭证、二维码载荷或真实上游。
+- 当前阶段：vault `local-verified`，不是 main/deployed；腾讯 current 仍为 `94e42b1`，真实 source ready/rendered/accepted 未达到。本机约 8.55 GiB，高于 8 GiB 但余量小。
+- 唯一最安全下一步：提交 FIX-BATCH-012 PR，用 GitHub CI 复验并合并；随后仅在运行制品变化时更新腾讯 versioned release并生成未回显的 vault master key。之后进入请求时 DNS/IP/连接固定/重绑定门，仍不请求真实第三方图源。
+- 2026-08-31 19:08：容量复核为约 7.15 GiB，低于 8 GiB；swap 约 5.70 GiB。此前一条组合命令只打印 `df` 而未按阈值退出，随后错误地启动了 build/smoke；输出虽通过但不计作符合容量门的最终分支验证。已立即停止所有本机构建、测试、浏览器、下载、影像和新制品部署，未删除用户文件、项目证据或真实运行数据。
+- 新增 `OMB-AUD-040`：root `test/typecheck/build/dev/production smoke/compat/E2E/fixture acquisition` 统一通过 npm `pre*` 自动运行 `env:check`，并以静态 Node 测试冻结映射，避免操作者忘记把容量读数写进 shell 条件。vault 核心仍保留先前的 `local-verified` 证据；加入守卫后的最终工作区整体为 `local-candidate`，等待 GitHub CI。
+- 当前阶段：`main=a92ff8c`、`runtime source/deployed=94e42b1`、`FIX-BATCH-012 final branch=local-candidate`、`real-source accepted=未达到`。
+- 唯一最安全下一步：由 Codex 提交并推送 FIX-BATCH-012＋OMB-AUD-040，完全依赖 GitHub PR CI 做最终分支复验；CI 全绿后合并，但在本机恢复至少 8 GiB 前不构建或部署该新运行制品。
