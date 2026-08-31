@@ -15,7 +15,7 @@ function access(maxRequests = 100): GatewayAccessConfig {
       {
         id: 'omb.local.web',
         token: uiToken,
-        permissions: ['gateway:ui', 'read-source-metadata', 'read-temporal-catalog', 'read-tiles'],
+        permissions: ['gateway:ui', 'read-source-metadata', 'read-map-tiles', 'read-temporal-catalog', 'read-tiles'],
       },
       { id: 'org.example.metadata', token: developerToken, permissions: ['read-source-metadata'] },
     ],
@@ -100,6 +100,14 @@ it('enforces developer app identity and server-side route permissions', async ()
   });
   expect(dates.statusCode).toBe(403);
   expect(dates.json()).toEqual({ error: 'permission-denied' });
+
+  const mapTile = await app.inject({
+    method: 'GET',
+    url: '/api/v1/developer/sources/source-1/map-tiles/0/0/0',
+    headers,
+  });
+  expect(mapTile.statusCode).toBe(403);
+  expect(mapTile.json()).toEqual({ error: 'permission-denied' });
 
   const uiRoute = await app.inject({ method: 'GET', url: '/api/aois', headers });
   expect(uiRoute.statusCode).toBe(403);

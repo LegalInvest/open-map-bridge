@@ -10,6 +10,14 @@ const manifest: DeveloperAppManifest = {
   permissions: ['read-source-metadata', 'read-temporal-catalog', 'read-tiles'],
 };
 const gatewayToken = 'd'.repeat(43);
+const mapManifest: DeveloperAppManifest = {
+  schemaVersion: 1,
+  id: 'org.example.map',
+  name: 'Map consumer',
+  apiVersion: 'v1',
+  requiredCapabilities: ['metadata', 'map-tiles'],
+  permissions: ['read-source-metadata', 'read-map-tiles'],
+};
 
 const metadataOnly: DeveloperSourceDescriptor = {
   apiVersion: 'v1',
@@ -40,6 +48,18 @@ const ready = {
     self: '/api/v1/developer/sources/synthetic-lakes',
     dates: '/api/v1/developer/sources/synthetic-lakes/dates',
     tileTemplate: '/api/v1/developer/sources/synthetic-lakes/tiles/{dateId}/{z}/{x}/{y}',
+  },
+} satisfies DeveloperSourceDescriptor;
+
+const readyMap = {
+  ...metadataOnly,
+  lifecycle: 'probed',
+  accessStatus: 'ready',
+  capabilities: ['metadata', 'map-tiles'],
+  links: {
+    self: metadataOnly.links.self,
+    mapTileTemplate:
+      '/api/v1/developer/sources/018f4d39-32f1-7a31-9f60-81c6b453b886/map-tiles/{z}/{x}/{y}',
   },
 } satisfies DeveloperSourceDescriptor;
 
@@ -121,6 +141,24 @@ it('rejects invalid temporal inputs before fetch', async () => {
     }
   }
   expect(fetcher).not.toHaveBeenCalled();
+});
+
+it('builds and fetches a non-temporal map tile only with the explicit map capability', async () => {
+  const fetcher = vi.fn<typeof fetch>().mockResolvedValue(
+    new Response(new ArrayBuffer(4), { status: 200, headers: { 'content-type': 'image/jpeg' } }),
+  );
+  const client = new OpenMapBridgeClient({ manifest: mapManifest, fetcher });
+  expect(client.mapTileUrl(readyMap, { z: 8, x: 212, y: 102 })).toBe(
+    '/api/v1/developer/sources/018f4d39-32f1-7a31-9f60-81c6b453b886/map-tiles/8/212/102',
+  );
+  await expect(client.fetchMapTile(readyMap, { z: 8, x: 212, y: 102 })).resolves.toMatchObject({
+    contentType: 'image/jpeg',
+    body: new Uint8Array(4),
+  });
+  expect(() => client.mapTileUrl(metadataOnly, { z: 8, x: 212, y: 102 })).toThrow(
+    /capability-not-available/,
+  );
+  expect(() => client.mapTileUrl(readyMap, { z: 31, x: 0, y: 0 })).toThrow(/invalid-coordinate/);
 });
 
 it('requires a separate gateway token for direct loopback access', () => {

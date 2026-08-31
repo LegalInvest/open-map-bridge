@@ -18,8 +18,13 @@ import {
   type GatewayAccessConfig,
 } from './security/gateway-access.js';
 import type { CredentialVault } from './security/credential-vault.js';
-import { GenericSourceProbeService, type GenericSourceProbeDependencies } from './probe/generic-source-probe.js';
+import {
+  GenericSourceProbeService,
+  GenericSourceTileService,
+  type GenericSourceProbeDependencies,
+} from './probe/generic-source-probe.js';
 import { registerProbeRoutes } from './routes/probe.js';
+import { registerGenericTileRoutes } from './routes/generic-tiles.js';
 
 export interface BuildAppOptions {
   dataPath: string | null;
@@ -95,15 +100,17 @@ export async function buildApp(options: BuildAppOptions): Promise<FastifyInstanc
   registerAoiRoutes(app, repository);
   registerTemporalRoutes(app, registry);
   registerImportRoutes(app, createImportInspector(), repository, undefined, options.credentialVault ?? null);
+  const genericTiles = new GenericSourceTileService(
+    repository,
+    options.credentialVault ?? null,
+    options.genericProbeDependencies,
+  );
   registerProbeRoutes(
     app,
-    new GenericSourceProbeService(
-      repository,
-      options.credentialVault ?? null,
-      options.genericProbeDependencies,
-    ),
+    new GenericSourceProbeService(repository, options.credentialVault ?? null, options.genericProbeDependencies),
   );
-  registerDeveloperRoutes(app, registry, repository);
+  registerGenericTileRoutes(app, genericTiles);
+  registerDeveloperRoutes(app, registry, repository, genericTiles);
   registerAutomationRoutes(
     app,
     new SourceReadinessService(repository, registry, options.credentialVault ?? null),

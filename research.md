@@ -26,6 +26,7 @@
 - 2026-09-01 04:12 PR #35 首轮 CI `33434618444` 对 `d3118b8` 完整通过，014C 晋级 `PR CI verified / not main`。GitHub main 与腾讯 current 仍分别为 `601ac68`/`ccd3cd8`；CI 绿不替代真实源 ProbeResult、rendered 或 accepted。
 - 2026-09-01 04:19 PR #35 证据提交 CI `33434979533` 全绿并 squash 合并为 main `7da03c3`；main CI `33435153343` 再次通过交底、256 Vitest＋3 Node、8 typecheck、build/smoke 与 4 Chrome。精确 main 本地 build/smoke 后，腾讯安装 release `7da03c3` 并原子切换 current；gateway/Web SHA-256 为 `a3d69a0e…56a1d`/`42368f3e…04ad`，health 200、直连 401、4174/8080 双回环、state `07648ee2…d6e2` 与 vault `89c8d70d…db42` 未变且均为 0600。重启窗口首次 nginx health 为 502，重试即恢复。014C 达到 `deployed-code`，但没有真实源请求、真实 ProbeResult、通用 runtime ready、rendered 或 accepted。
 - 2026-09-01 04:29 部署证据 PR #36 CI `33436046174` 全绿并合并为 docs-only main `84f103f`；main CI `33436199094` 再次通过完整门。本地/main/origin clean；腾讯 runtime/current 正确保留 `7da03c3`，只读复核 health/401/双回环/artifact/state/vault 均通过。docs-only main 与 runtime source 分开记录，不制造第二个 release。
+- 2026-09-01 04:52 以 docs-only main `a98d096` 为基线完成 FIX-BATCH-014D 本地验证。普通 imported source 只有在同 UUID 的成功 ProbeResult 与当前请求计划/凭据 HMAC 修订完全匹配时才获得独立 `map-tiles`；服务端持久绑定仅含两个 SHA-256 指纹和时间。直接/V1 路由只接受 sourceId＋z/x/y，拒绝任意 query；每次 tile 都重新执行静态策略、DNS/IP/peer 固定、5 MiB、MIME 和完整 PNG/JPEG 解码。凭据轮换立即使旧绑定失效，失败 probe 不绑定，重启只复用脱敏证据。3 Node＋257 Vitest、8 workspace typecheck、production build/smoke 和 4 Chrome E2E 全绿，仅使用本机回环合成上游；当前为 `local-verified / not main / not deployed / not real-probed / not rendered / not accepted`。
 
 ### 本轮回答
 
@@ -47,6 +48,7 @@
 - `FIX-BATCH-014A` 已由 PR #29 合并为 runtime source `67ea901`；分支/main CI `33416581636`/`33417146165` 与证据 main CI `33417916800` 均全绿。OviBridge 现在提供 `schemaVersion=1` 的严格 ProbeResult、只由同 source UUID／导入 SHA／回环 origin／mapType／排序日期目录／已登记 probe 坐标组成的 SHA-256 输入指纹，以及原子 `ensureProbeResult`；启动先复用同指纹结果，成功才 ready，失败保持 configured。腾讯 current `ccd3cd8` 已包含该代码，但尚无真实 Ovi ProbeResult。
 - `FIX-BATCH-014B` 的请求计划真值以 `http/https/unknown` 和 `parsed/inferred/user-corrected/not-provided/redacted/legacy-unknown` 表达传输与字段来源；旧 JSON 可读取但不会因默认值进入外联。二维码绝对 URL 只有与 `hn` 同 authority 且无 userinfo/hash 时才提取 scheme，`.ovmap` host 可安全拆出显式 scheme，公开 query 只接受瓦片变量或 `style/layers/format/time` 等保守常量键，重复键和未知固定值脱敏。OMS 使用完整开放定义重新编号和去凭证引用，保留协议、投影、缩放、瓦片尺寸、格式、多主机、版权/许可与扩展事实；路径或公开参数仍重新执行无秘密门。静态准备度对未知 scheme、未证 provenance 和 HTTP 进入人工门，Ovi 不透明配置仍只走受控本机桥；指纹版本升为 2 并纳入 scheme/query/provenance。该层已随腾讯 current `ccd3cd8` deployed。
 - `FIX-BATCH-014C` 已随 main/Tencent `7da03c3` 达到 `deployed-code`：API 不接收 URL 或任意 header，严格按同 UUID source/vault 构造一个坐标请求；无 credentialRef 时必须显式声明不需凭证，未知则失败关闭；凭证修订进入 HMAC 和请求指纹但不进入状态/API；每次请求重新授权 DNS/IP 并固定 peer，不跟随重定向；只有完整图片解码成功才持久 success 并把源标为 probed，403/策略/传输/内容失败也只持久稳定脱敏类别。没有真实 source ProbeResult，通用 tile/temporal runtime 尚未绑定，runtime ready、rendered、accepted 均未达到。
+- `FIX-BATCH-014D` 不把普通 XYZ/TMS 图源塞进时序适配器，也不为其伪造日期。成功 probe 后只追加 source UUID、当前公开请求计划＋凭据修订指纹、成功 ProbeResult 指纹和 verifiedAt；每次瓦片请求前重新解析当前 source/vault 并比对，所以凭据轮换或请求计划变化会自动撤销能力。开发者目录只增加 `map-tiles`，`temporal-catalog/tiles` 仍需真实日期目录。运行时沿用 014C 的服务端请求构造、FIX-BATCH-013 固定传输和完整图片门；服务端返回可解码图片仍不构成浏览器 `rendered`。
 
 ### 搜索与核验边界
 

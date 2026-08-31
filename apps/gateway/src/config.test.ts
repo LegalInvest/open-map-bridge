@@ -116,14 +116,14 @@ it('requires a strong gateway token and derives exact loopback trust values', ()
 it('parses only unique, scoped developer principals', () => {
   const appToken = 'd'.repeat(43);
   const developer = JSON.stringify([
-    { id: 'org.example.history', token: appToken, permissions: ['read-source-metadata', 'read-tiles'] },
+    { id: 'org.example.history', token: appToken, permissions: ['read-source-metadata', 'read-map-tiles', 'read-tiles'] },
   ]);
   expect(parseGatewayServerConfig({ OMB_GATEWAY_TOKEN: gatewayToken, OMB_DEVELOPER_TOKENS_JSON: developer }))
     .toMatchObject({
       access: {
         principals: [
           { id: 'omb.local.web' },
-          { id: 'org.example.history', token: appToken, permissions: ['read-source-metadata', 'read-tiles'] },
+          { id: 'org.example.history', token: appToken, permissions: ['read-source-metadata', 'read-map-tiles', 'read-tiles'] },
         ],
       },
     });

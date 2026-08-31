@@ -142,6 +142,36 @@ export class OpenMapBridgeClient {
     return { body: new Uint8Array(await response.arrayBuffer()), contentType };
   }
 
+  mapTileUrl(
+    source: DeveloperSourceDescriptor,
+    input: { z: number; x: number; y: number },
+  ): string {
+    this.assertPermission('map-tiles');
+    assertSourceCapability(source, 'map-tiles');
+    const parsed = temporalTileRequestSchema.safeParse({ dateId: 'map-tile', ...input });
+    if (!parsed.success) throw new DeveloperSdkError('invalid-coordinate');
+    const template = source.links.mapTileTemplate;
+    if (!template) throw new DeveloperSdkError('capability-not-available');
+    const path = template
+      .replace('{z}', String(parsed.data.z))
+      .replace('{x}', String(parsed.data.x))
+      .replace('{y}', String(parsed.data.y));
+    return `${this.baseUrl}${path}`;
+  }
+
+  async fetchMapTile(
+    source: DeveloperSourceDescriptor,
+    input: { z: number; x: number; y: number },
+  ): Promise<{ body: Uint8Array; contentType: string }> {
+    const response = await this.fetcher(this.mapTileUrl(source, input), { headers: this.requestHeaders('*/*') });
+    if (!response.ok) throw new DeveloperSdkError('gateway-error', 'gateway-error', response.status);
+    const contentType = response.headers.get('content-type')?.split(';')[0]?.trim() ?? '';
+    if (!contentType.startsWith('image/')) {
+      throw new DeveloperSdkError('invalid-tile-response', 'invalid-tile-response', response.status);
+    }
+    return { body: new Uint8Array(await response.arrayBuffer()), contentType };
+  }
+
   private assertPermission(capability: DeveloperCapability): void {
     const permission = permissionForCapability(capability);
     if (!this.manifest.permissions.includes(permission)) {

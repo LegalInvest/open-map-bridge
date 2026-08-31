@@ -27,6 +27,7 @@ export interface CredentialVaultConfig {
 
 const developerPermissions = new Set<GatewayPermission>([
   'read-source-metadata',
+  'read-map-tiles',
   'read-temporal-catalog',
   'read-tiles',
 ]);
@@ -107,7 +108,7 @@ export function parseGatewayServerConfig(environment: NodeJS.ProcessEnv): Gatewa
     {
       id: 'omb.local.web',
       token: uiToken,
-      permissions: ['gateway:ui', 'read-source-metadata', 'read-temporal-catalog', 'read-tiles'],
+      permissions: ['gateway:ui', 'read-source-metadata', 'read-map-tiles', 'read-temporal-catalog', 'read-tiles'],
     },
     ...developerPrincipals,
   ];

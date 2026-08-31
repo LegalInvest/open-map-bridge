@@ -7,9 +7,9 @@
 - 状态：Approved / Implementing；用户于 2026-08-28 明确最终结果必须能基于已导入奥维图源进行二次开发
 - 产品裁决者：用户
 - 当前整合者：本 Codex 主线程
-- 更新时间：2026-09-01 04:19（Asia/Shanghai）
+- 更新时间：2026-09-01 04:52（Asia/Shanghai）
 - 适用目录：`/Users/assis/Documents/Codex/2026-08-27/open-map-bridge`
-- 当前切片：`FIX-BATCH-014A/B/C deployed-code / real probe blocked`。PR #35 的功能/证据 CI `33434618444`/`33434979533` 全绿，squash 合并为 runtime source `7da03c3`，runtime main CI `33435153343` 再次全绿。精确 runtime source 本地 production build/smoke 生成 gateway `a3d69a0e…56a1d`、Web `42368f3e…04ad`，腾讯安装 immutable release `7da03c3` 并从 `ccd3cd8` 原子切换 current；首次重启健康检查短暂 502，随后 health 200、未鉴权 401、双回环、artifact/state/vault hash 和 0600 权限全部通过，旧 release 保留。部署证据 PR #36 CI `33436046174` 全绿并合并为 docs-only main `84f103f`，main CI `33436199094` 全绿；该文档后代不生成第二个 release。014C 新增显式同 UUID 单坐标 probe，把 vault HMAC、014B 请求计划、逐请求 DNS/IP/peer 固定传输、受限凭证注入、完整图片门和脱敏 ProbeResult 贯通；但没有使用用户二维码、真实凭证或真实第三方源，也未把成功结果绑定为通用 tile/temporal runtime。官方 Ovi 真实 ProbeResult、通用真实源 rendered/accepted 均未达到。
+- 当前切片：`FIX-BATCH-014D local-verified / not main / not deployed / real probe blocked`。A/B/C 的 runtime source/Tencent current 仍为 `7da03c3`，docs-only main 为 `a98d096`，最新 main CI `33436794737` 全绿。014D 在本机回环合成上游上把“同 UUID、同请求计划/凭据修订的成功 ProbeResult”绑定为独立非时序 `map-tiles` 能力；每个瓦片请求继续重建服务端请求并执行固定传输和完整图片门，凭据轮换会立即撤销旧绑定。3 Node＋257 Vitest、8 workspace typecheck、production build/smoke 和 4 Chrome E2E 全绿。它没有伪造日期目录、没有真实第三方请求，也没有浏览器真实地图画布回执；因此不是 main/deployed/real-probed/rendered/accepted。
 - 上版：V0.4 奥维兼容双入口导入实施版
 
 <!-- GOAL_CAPSULE_START -->
@@ -21,7 +21,7 @@
 
 硬约束：clean-room 独立实现；不得复制奥维专有代码、商标或绕过会员/设备绑定；不得内置、记录或传播第三方 token；解析前不联网，确认前不请求图源；未知版本、解压异常、内网目标或不安全 URL 必须 fail closed；“文件已解析”“探测成功”“成功出图”是不同事实；任何成功都要有导入回执和可复现实证。
 
-当前只允许修改本项目目录和用户已批准的腾讯 OpenMapBridge 专用路径；禁止清理用户文件、改动其他服务器项目、开放公网、批量抓取图源或离线下载 20 年整域瓦片。不得把真实秘密写入 fixture、日志、回执、普通 JSON 或前端。可用空间低于 8 GiB 立即停止本机构建、测试、截图和新增缓存；2026-09-01 04:17 本机实测约 `10,272,588 KiB`，容量门恢复但仍保持轻量。014C 已执行全量单测、类型、构建、冒烟与公开浏览器门；继续禁止真实图源外联、影像下载和大文件写入，并在每个重型门前复核容量。发现越界需求写入 `BLOCKED.md`。
+当前只允许修改本项目目录和用户已批准的腾讯 OpenMapBridge 专用路径；禁止清理用户文件、改动其他服务器项目、开放公网、批量抓取图源或离线下载 20 年整域瓦片。不得把真实秘密写入 fixture、日志、回执、普通 JSON 或前端。可用空间低于 8 GiB 立即停止本机构建、测试、截图和新增缓存；2026-09-01 04:52 本机实测约 9.8 GiB，容量门恢复但仍保持轻量。014D 已执行全量单测、类型、构建、冒烟与公开浏览器门；继续禁止真实图源外联、影像下载和大文件写入，并在每个重型门前复核容量。发现越界需求写入 `BLOCKED.md`。
 
 `FIX-BATCH-001` 至 `FIX-BATCH-009` 已进入 GitHub main；`FIX-BATCH-010` 的项目 runtime、release、systemd、BaoTa nginx include、SSH tunnel 和重启证据已达到 `deployed`，证据回写正在进入 GitHub。技术部署不读取用户图源、不改变 source lifecycle，也不授予真实 Ovi 源 ready。
 
@@ -38,7 +38,7 @@
 
 `FIX-BATCH-007` 关联 `OMB-AUD-018`，保护 JRN-001/002、BR-004/005、FR-001/002/004 和 NFR-004/006。完成候选必须满足：预览主动 TTL 清理、最多 64 条且总估算 4 MiB 的 LRU；单预览超预算稳定失败；QR 图片声明/实际字节≤8 MiB；在 object URL/ZXing 前从 PNG/JPEG/WebP 头验证尺寸与≤16,777,216 像素；浏览器尺寸与头一致；2×/3× 只在缩放后像素预算内运行；拒绝路径不调用解码器。
 
-`FIX-BATCH-014` 关联 `OMB-AUD-002/007/008`，保护 JRN-001/007/011/012、BR-004/006/015/017/020、FR-005/009/015/017 和 AC-001/004/011/017/019/021。阶段 A 只处理官方回环 OviBridge：同一 source UUID、已登记 probe 请求和安全输入指纹必须产生脱敏 ProbeResult；成功和失败均追加证据，重启不得无条件重复外联，只有完整图片门通过才可 ready。阶段 B 处理普通 imported source 的请求计划真值：source schema 明确保留 transport scheme、非秘密常量 query 与推断来源，未知/旧版/HTTP 继续 fail closed。阶段 C 是显式用户触发的最小通用 probe：服务端仅从同 UUID source/vault 构造一个坐标请求，静态策略与每次 DNS/IP/peer 固定传输都通过后才发送；凭证 HMAC、请求指纹和 ProbeResult 不得含明文秘密、URL、host、响应正文或异常文本；只有完整图片门成功才可把 source 从 confirmed 晋级 probed。同一指纹应在并发和重启后复用。阶段 C 的成功不自动授予 tile/temporal runtime、rendered 或 accepted，这些能力仍需独立运行绑定和真实源证据。
+`FIX-BATCH-014` 关联 `OMB-AUD-002/007/008`，保护 JRN-001/007/011/012、BR-004/006/015/017/020、FR-005/009/015/017 和 AC-001/004/011/017/019/021。阶段 A 只处理官方回环 OviBridge：同一 source UUID、已登记 probe 请求和安全输入指纹必须产生脱敏 ProbeResult；成功和失败均追加证据，重启不得无条件重复外联，只有完整图片门通过才可 ready。阶段 B 处理普通 imported source 的请求计划真值：source schema 明确保留 transport scheme、非秘密常量 query 与推断来源，未知/旧版/HTTP 继续 fail closed。阶段 C 是显式用户触发的最小通用 probe：服务端仅从同 UUID source/vault 构造一个坐标请求，静态策略与每次 DNS/IP/peer 固定传输都通过后才发送；凭证 HMAC、请求指纹和 ProbeResult 不得含明文秘密、URL、host、响应正文或异常文本；只有完整图片门成功才可把 source 从 confirmed 晋级 probed。同一指纹应在并发和重启后复用。阶段 D 仅为普通非时序源绑定 `map-tiles`：必须存在与当前请求计划/凭据修订完全一致且指向成功 ProbeResult 的脱敏绑定；每个 tile 仍逐请求复核策略与固定传输，凭据轮换立即撤销能力。D 不生成日期目录、不授予 `temporal-catalog`，且服务端成功返回图片仍不等于浏览器 `rendered` 或用户 `accepted`。
 
 ## 一页产品定义
 
@@ -765,7 +765,7 @@ V1 公共类型和错误语义通过契约测试冻结；新增可选能力不�
 
 ### AC-017 二次开发脱敏与能力诚实
 
-确认一个含测试上游 host/path/query、兼容扩展和凭证引用的代表性图源后，开发者列表与单源接口只能返回 DATA-007 白名单字段；秘密/内部字段序列化扫描为 0。该源未绑定运行时适配器时只具备 `metadata`，SDK 对日期或瓦片调用在 fetch 前返回 `capability-not-available`。
+确认一个含测试上游 host/path/query、兼容扩展和凭证引用的代表性图源后，开发者列表与单源接口只能返回 DATA-007 白名单字段；秘密/内部字段序列化扫描为 0。该源未绑定运行时时只具备 `metadata`；同指纹成功 probe 可独立获得 `map-tiles`，但没有真实日期目录时仍不得获得 `temporal-catalog/tiles`。SDK 对未授予能力的调用必须在 fetch 前返回 `capability-not-available`。
 
 ### AC-018 SDK 代表性消费旅程
 

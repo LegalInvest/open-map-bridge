@@ -4,6 +4,7 @@ import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 export type GatewayPermission =
   | 'gateway:ui'
   | 'read-source-metadata'
+  | 'read-map-tiles'
   | 'read-temporal-catalog'
   | 'read-tiles';
 
@@ -39,6 +40,7 @@ function tokenMatches(received: string, expected: string): boolean {
 
 function requiredPermission(request: FastifyRequest): GatewayPermission {
   const path = request.url.split('?', 1)[0] ?? request.url;
+  if (/^\/api\/v1\/developer\/sources\/[^/]+\/map-tiles\//.test(path)) return 'read-map-tiles';
   if (/^\/api\/v1\/developer\/sources\/[^/]+\/tiles\//.test(path)) return 'read-tiles';
   if (/^\/api\/v1\/developer\/sources\/[^/]+\/dates$/.test(path)) return 'read-temporal-catalog';
   if (path === '/api/v1/developer/sources' || /^\/api\/v1\/developer\/sources\/[^/]+$/.test(path)) {
