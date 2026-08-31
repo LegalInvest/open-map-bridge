@@ -156,3 +156,7 @@
 - 唯一最安全下一步：由 Codex 等待本机恢复至少 8 GiB，运行 FIX-BATCH-013 全量 test/typecheck/build/production smoke/E2E；全部通过后再更新交底指纹、提交 PR 并由 GitHub CI 晋级 main，期间不请求任何真实第三方图源。
 - 2026-08-31 23:14：FIX-BATCH-013 提交 `68dac43` 由 PR #25 远端全门 `33406940553` 验证后 squash 合并为 main `32cb36d`；main CI `33407144250` 再次通过交底新鲜度、单测/契约、8 workspace typecheck、production build/smoke 和公开 Chrome 旅程。请求时 DNS/IP/连接固定传输代码达到 main，但尚未被 server/probe/tile 导入，因此无可达生产 bundle 变化，不更新腾讯 `3bbcbfa` release；真实源、ProbeResult、ready/rendered/accepted 均未晋级。
 - 唯一最安全下一步：由 Codex 在本机保持至少 8 GiB 且有安全余量后，开始 FIX-BATCH-014，把 main 中固定传输接入一个已确认 source 的最小 probe，注入同 UUID vault 凭证并持久化脱敏 ProbeResult；先用本机夹具和失败反例验证，仍不请求用户真实图源。
+- 2026-08-31 23:39：定时续跑核验本地、origin 与 GitHub main 一致为 `4252e92`，CI `33408261136` 全绿；腾讯 current `3bbcbfa`、service active、health=`atomic-json/encrypted-local`、未鉴权 401、4174/8080 双回环、state hash `07648ee2…d6e2` 与空 0600 vault 均保持。服务器根卷约 352 GiB 可用；本机约 8.03 GiB、swap 使用约 7.72 GiB，只有数十 MiB 余量，未运行构建、测试、浏览器、下载或影像。
+- FIX-BATCH-014 只读设计审查发现原下一步必须拆分：真实 Ovi QR 由官方回环桥持有私有认证，不能塞入通用 vault；普通 imported source 又因 OMB-AUD-007/008 尚未保存 scheme、并丢弃常量 query，当前无法形成不猜测的完整 URL。阶段 A 先为同 UUID OviBridge 建立带安全输入指纹、成功/失败均持久化且重启不无条件重复外联的脱敏 ProbeResult；阶段 B 先补请求计划真值，再接 vault＋FIX-BATCH-013。
+- 当前阶段：`FIX-BATCH-014 discovered / contract only`；不是 local-candidate、main、deployed 或 accepted，且没有真实外联。
+- 唯一最安全下一步：由 Codex 在本机可用空间具有明确安全余量后，先实现 FIX-BATCH-014A 的 OviBridge ProbeResult schema、原子持久化、输入指纹去重和本地成功/失败 fixture；不启用用户真实 Ovi 接口。
