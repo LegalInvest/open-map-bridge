@@ -1,9 +1,9 @@
-# FIX-BATCH-016 本地验收回执
+# FIX-BATCH-016 本地与 main 验收回执
 
-- 时间：2026-09-01 07:18（Asia/Shanghai）
-- 基线：本地/GitHub main/origin `7f38543`，CI `33448733929`；腾讯 runtime/current `67a6a0e`
-- 分支：`codex/fix-batch-016-comparison-receipts`
-- 阶段：`local-verified / not main / not deployed / not real-rendered / not accepted`
+- 创建时间：2026-09-01 07:18；main 状态更新：2026-09-01 07:49（Asia/Shanghai）
+- 基线：本地/main/origin `3cf763a`；PR 证据 CI `33450368931`、main CI `33450486867`；腾讯 runtime/current 最后可信 `67a6a0e`
+- 来源分支：`codex/fix-batch-016-comparison-receipts`，已由 PR #44 squash 合并
+- 阶段：`main / not deployed / not real-rendered / not accepted`
 - 真实外联：0；未读取或保存二维码载荷、token、cookie、密钥、凭证明文或私有认证值
 
 ## 先验与数据安全
@@ -31,13 +31,15 @@
 - production smoke：鉴权、持久化、SIGTERM 全绿。
 - Chrome E2E：4/4，全程使用唯一临时状态文件。
 - 完成后根卷 `8,990,284 KiB`（8.57 GiB），高于 8 GiB 门。
-- PR #44 首轮 CI `33450167879` 对 head `5d3adac` 完整全绿；这是分支远端验证，不是 main 或 deployed。
+- PR #44 首轮 CI `33450167879`、证据 CI `33450368931` 与 squash main `3cf763a` 的 main CI `33450486867` 完整全绿；这证明代码进入 main，不证明 deployed。
+- 07:49 对精确 main 重新构建成功；gateway/Web SHA-256=`fcc835ec…d0762`/`9f2aa734…ee90` 并与 build manifest 一致。
 
 ## 未达到
 
-- 分支尚未经过 PR CI、合并 main 或腾讯 versioned release。
+- 腾讯 versioned release 尚未更新；本轮 SSH 被执行沙箱拒绝，未发生服务器修改。
+- 本轮本地 production smoke 因执行沙箱禁止绑定 `127.0.0.1` 返回 `EPERM`；同一 main CI smoke 与合并前本地 smoke 已通过，因此只记录为本轮环境限制，不伪装成再次本地验证。
 - ObservationPanel 仍没有保存/读取业务闭环，因此 OMB-AUD-015 只是 partial。
 - 其他 receipt 的严格引用、跨进程写入和备份恢复仍开放，因此 OMB-AUD-016 只是 partial。
 - 合成瓦片事件回执不证明真实像素已绘入画布，不证明真实奥维源、真实历史日期、污染因果或用户 accepted。
 
-唯一最安全下一动作：由 Codex 更新技术交底指纹并提交 FIX-BATCH-016 PR；GitHub CI 全绿前不合并、不部署。用户行动：无。
+唯一最安全下一动作：由 Codex 在网络执行能力恢复后部署精确 main `3cf763a`，并验证 immutable artifact/current、service、health/401、双回环、state/vault 不变与 ComparisonReceipt 写入/刷新回访。用户行动：无。

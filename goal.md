@@ -7,9 +7,9 @@
 - 状态：Approved / Implementing；用户于 2026-08-28 明确最终结果必须能基于已导入奥维图源进行二次开发
 - 产品裁决者：用户
 - 当前整合者：本 Codex 主线程
-- 更新时间：2026-09-01 07:18（Asia/Shanghai）
+- 更新时间：2026-09-01 07:49（Asia/Shanghai）
 - 适用目录：`/Users/assis/Documents/Codex/2026-08-27/open-map-bridge`
-- 当前切片：`FIX-BATCH-016 / OMB-AUD-014/015/016 comparison receipts PR CI verified`。本地、GitHub main/origin 基线为 FIX-BATCH-015 最终证据 `7f38543`，CI `33448733929` 全绿；腾讯 runtime/current 保持 `67a6a0e`。016 在确认生产 `comparisons=0` 后冻结严格 V1：四个互异日期、四个顺序一致且全部结算的帧、expected/loaded/failed 数量守恒、精确 confirmed AOI 版本、ready source 和服务端身份/时间；Web 可保存并在刷新后回访。本地全门与 PR #44 首轮 CI `33450167879` 全绿。阶段仍是 `PR CI verified / not main / not deployed / not real-rendered / not accepted`；Observation 保存、真实 Ovi 日期/影像和用户验收继续开放。
+- 当前切片：`FIX-BATCH-016 / OMB-AUD-014/015/016 comparison receipts main / not deployed`。PR #44 的证据提交 CI `33450368931` 全绿后 squash 合并为本地/GitHub main/origin `3cf763a`，main CI `33450486867` 全绿；本轮精确 main 构建成功，gateway/Web 入口 SHA-256 为 `fcc835ec…d0762`/`9f2aa734…ee90`。腾讯 runtime/current 最后可信证据仍为 `67a6a0e`，本轮因执行环境禁止 SSH/GitHub 网络而未刷新、未发布；不得把最后可信值写成实时复核。阶段是 `main / not deployed / not real-rendered / not accepted`；Observation 保存、真实 Ovi 日期/影像和用户验收继续开放。
 - 上版：V0.4 奥维兼容双入口导入实施版
 
 <!-- GOAL_CAPSULE_START -->
@@ -21,7 +21,7 @@
 
 硬约束：clean-room 独立实现；不得复制奥维专有代码、商标或绕过会员/设备绑定；不得内置、记录或传播第三方 token；解析前不联网，确认前不请求图源；未知版本、解压异常、内网目标或不安全 URL 必须 fail closed；“文件已解析”“探测成功”“成功出图”是不同事实；任何成功都要有导入回执和可复现实证。
 
-当前只允许修改本项目目录和用户已批准的腾讯 OpenMapBridge 专用路径；禁止清理用户文件、改动其他服务器项目、开放公网、批量抓取图源或离线下载 20 年整域瓦片。不得把真实秘密写入 fixture、日志、回执、普通 JSON 或前端。可用空间低于 8 GiB 立即停止本机构建、测试、截图和新增缓存；2026-09-01 07:18 本机实测约 8.57 GiB，容量门通过但余量有限。016 已执行全量单测、类型、构建、冒烟与隔离浏览器门；继续禁止真实图源外联、影像下载和大文件写入，并在每个重型门前复核容量。发现越界需求写入 `BLOCKED.md`。
+当前只允许修改本项目目录和用户已批准的腾讯 OpenMapBridge 专用路径；禁止清理用户文件、改动其他服务器项目、开放公网、批量抓取图源或离线下载 20 年整域瓦片。不得把真实秘密写入 fixture、日志、回执、普通 JSON 或前端。可用空间低于 8 GiB 立即停止本机构建、测试、截图和新增缓存；2026-09-01 07:49 本机实测 `11,571,052 KiB`（约 11.04 GiB），容量门通过。016 的完整本地门和 GitHub main CI 已通过；本轮重建成功，但本地 smoke 因沙箱禁止监听 `127.0.0.1` 返回 `EPERM`，不作为产品回归，也不替代既有 smoke/CI 证据。继续禁止真实图源外联、影像下载和大文件写入，并在每个重型门前复核容量。发现越界需求写入 `BLOCKED.md`。
 
 `FIX-BATCH-001` 至 `FIX-BATCH-009` 已进入 GitHub main；`FIX-BATCH-010` 的项目 runtime、release、systemd、BaoTa nginx include、SSH tunnel 和重启证据已达到 `deployed`，证据回写正在进入 GitHub。技术部署不读取用户图源、不改变 source lifecycle，也不授予真实 Ovi 源 ready。
 
@@ -888,3 +888,4 @@ V1 公共类型和错误语义通过契约测试冻结；新增可选能力不�
 - 2026-09-01 07:00：FIX-BATCH-015 最终证据进入 docs-only main `7f38543`，CI `33448733929` 全绿；运行 current 保持 `67a6a0e`。
 - 2026-09-01 07:10：FIX-BATCH-016 达到 `local-verified`。生产权威 state 在变更前确认 `comparisons=0`；严格 ComparisonReceipt V1、创建/读取 API、精确 AOI/source/date 引用、Web 保存/计数/刷新回访和隔离 E2E 已贯通。全门为 3 Node＋271 Vitest、8 typecheck、production build/smoke、4 Chrome。唯一最安全下一步：由 Codex 更新技术交底指纹、提交 PR 并等待 GitHub CI；全绿前不合并或部署，真实源继续零请求。用户行动：无。
 - 2026-09-01 07:22：PR #44 首轮 CI `33450167879` 对 `5d3adac` 全绿；016 晋级 `PR CI verified / not main / not deployed`。唯一最安全下一步：由 Codex回写 CI 证据并等待证据提交复验；再次全绿后才 squash merge。用户行动：无。
+- 2026-09-01 07:49：PR #44 证据 CI `33450368931` 全绿并 squash 合并为 main/origin `3cf763a`，main CI `33450486867` 全绿。精确 main 构建成功，manifest 与 gateway/Web 哈希一致；本轮 GitHub/SSH 网络及本地监听被执行沙箱拒绝，故腾讯 `67a6a0e` 仅是最后可信值，016 明确为 `main / not deployed`。唯一最安全下一步：由 Codex 在网络执行能力恢复后部署精确 `3cf763a`，再核验 artifact、current、service、health/401、双回环、state/vault 和 ComparisonReceipt 持久化；用户行动：无。

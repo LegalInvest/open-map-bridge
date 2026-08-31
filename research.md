@@ -33,6 +33,7 @@
 - 2026-09-01 07:00 FIX-BATCH-015 最终证据 PR #43 已合并为 docs-only main `7f38543`，main CI `33448733929` 全绿；腾讯 runtime/current 保持 `67a6a0e`。帧质量代码三端已收口，但当时仍没有持久 ComparisonReceipt 或真实画布回执。
 - 2026-09-01 07:18 FIX-BATCH-016 达到 `local-verified`。变更前只读读取腾讯权威 state 得到 `comparisons=0`、`aois=2`，故严格 V1 不需要迁移未知旧回执。共享 schema、POST/GET、repository 重开、ready source／confirmed AOI 精确版本／日期目录／missing 引用门、Web 保存/计数/刷新回访已贯通；文档同步后最终复验为 3 Node＋271 Vitest、8 workspace typecheck、production build/smoke 与隔离 4 Chrome 全绿，根卷约 8.57 GiB。没有请求真实图源；当前不是 main/deployed/rendered/accepted，Observation 保存仍未实现。
 - 2026-09-01 07:22 PR #44 首轮 CI `33450167879` 对 `5d3adac` 完整全绿；FIX-BATCH-016 晋级 `PR CI verified / not main / not deployed`。该 run 不改变腾讯 `67a6a0e`，也不产生真实回执或真实源验收。
+- 2026-09-01 07:49 PR #44 证据 CI `33450368931` 全绿后 squash 合并为 main/origin `3cf763a`，main CI `33450486867` 全绿。精确 main 本轮 production build 成功，manifest 与 gateway/Web SHA-256 `fcc835ec…d0762`/`9f2aa734…ee90` 一致；本地 production smoke 仅因当前沙箱禁止绑定 `127.0.0.1` 返回 `EPERM`，而同一 main CI smoke 已通过。GitHub API 与腾讯 SSH 均被当前执行环境拒绝，未发生远端修改；腾讯 current=`67a6a0e` 只能标记为上轮最后可信证据。016 当前=`main / not deployed / not real-rendered / not accepted`。
 
 ### 本轮回答
 
@@ -157,8 +158,8 @@
 |---|---|---|---|
 | 项目目录 | 新建 `/Users/assis/Documents/Codex/2026-08-27/open-map-bridge` | 本轮文件系统创建 | 2026-08-27 |
 | 既有同类本地仓库 | 未发现 | `find /Users/assis/Documents/Codex -maxdepth 2` 仅命中既有 VegFlow mapping 目录，无 Ovi/OpenMapBridge 项目 | 2026-08-27 |
-| Git 仓库 | 本地/GitHub main/origin `7f38543`、CI `33448733929` 全绿；腾讯 current `67a6a0e`；当前为 FIX-BATCH-016 local-verified 分支 | `git branch --show-current`、`git rev-parse HEAD origin/main`、CI、腾讯 readlink | 2026-09-01 07:18 |
-| 根卷空间 | `8,990,284 KiB`（约 8.57 GiB），高于 8 GiB 门但余量有限；016 重型门已完成 | `df -k /` | 2026-09-01 07:18 |
+| Git 仓库 | 本地/main/origin `3cf763a`；PR 证据 CI `33450368931` 与 main CI `33450486867` 上轮已观测全绿；腾讯 current 最后可信 `67a6a0e` | `git status/rev-parse/log`、已记录 CI；当前网络沙箱阻止 GitHub/SSH 刷新 | 2026-09-01 07:49 |
+| 根卷空间 | `11,571,052 KiB`（约 11.04 GiB），高于 8 GiB 门；016 精确 main build 已完成 | `df -k /` | 2026-09-01 07:49 |
 | Node/Docker 工具链 | 本机 Node `v26.7.0`、npm `11.19.0`、Docker `29.4.0`、Compose `5.1.2`；计划冻结 Node `24.20.0` LTS 作为目标运行时 | 版本命令；[Node 官方发布表](https://nodejs.org/en/about/previous-releases) | 2026-08-27 |
 | 奥维桌面客户端 | 先发现旧 2.6.3；随后从官方分发安装并验签 10.6.0 到独立应用路径，未覆盖旧版 | 应用版本、代码签名、公证和官方安装包校验 | 2026-08-27 |
 
@@ -326,11 +327,11 @@ fixtures/synthetic/temporal  无外网的 20 年彩色/带标签时序瓦片
 | 二次开发 V1 | 脱敏源目录、能力协商、严格应用清单、TypeScript SDK、日期/瓦片和非时序 map-tiles 已实现；configured OviBridge 不授予运行能力 | code deployed / real source blocked | `packages/developer-sdk`、gateway routes、PR/main CI、本地 production smoke、腾讯 current `67a6a0e` |
 | 技术交底持续同步 | 中文技术交底书覆盖架构、流程、数据、安全、特征候选、实施例和当前证据边界；source set 生成 SHA-256，CI 检查陈旧 | local-verified mechanism | `docs/技术交底书.md`、`scripts/update-technical-disclosure.mjs`、`npm run disclosure:check`；精确文件数/指纹以交底元数据为准 |
 | 可视化/自动化方向 | 用户已批准继续实施；准备度四步账本、去重、process/job API 和驾驶舱已进入 main | main for 001A / later slices missing | `16f445c`、CI `33155671827`；2026-08-28 |
-| 审计问题账本 | 40 组问题与公开 backlog；FIX-BATCH-015 已 deployed，016 的比较回执子项 local-verified，仍有 24 组未闭合 | FIX-BATCH-001–016 as recorded | `docs/问题账本.md`、本地全门、PR/main CI、腾讯 release evidence；2026-09-01 07:18 |
-| 工作区基线 | main/origin `7f38543` / Tencent current `67a6a0e`；本机约 8.57 GiB | frame quality deployed / comparison receipt local-verified | `git status/log/rev-parse`、`df -k`；2026-09-01 07:18 |
-| 自动测试 | FIX-BATCH-016 本地 3 Node＋271 Vitest、8 typecheck、build/smoke、4 Chrome 全绿；main CI `33448733929` 是 015 最终证据基线 | 016 local-verified / PR CI pending | 本地命令与 GitHub CI；2026-09-01 07:18 |
-| GitHub main | 公共唯一主仓 `LegalInvest/open-map-bridge`；main/origin `7f38543`，016 尚在分支 | comparison receipt not main | CI `33448733929`；2026-09-01 07:18 |
-| 部署 | 腾讯私有 loopback current `67a6a0e`；016 变更前 state `comparisons=0`、`aois=2` | frame quality deployed / comparison receipt not deployed | artifact/health/401/双回环/state-vault；真实 Ovi 源未验收 |
+| 审计问题账本 | 40 组问题与公开 backlog；FIX-BATCH-015 已 deployed，016 的比较回执子项已进 main、待部署，仍有 24 组未闭合 | FIX-BATCH-001–016 as recorded | `docs/问题账本.md`、本地全门、PR/main CI、腾讯 release evidence；2026-09-01 07:49 |
+| 工作区基线 | main/origin `3cf763a` / Tencent current 最后可信 `67a6a0e`；本机约 11.04 GiB | comparison receipt main / not deployed | `git status/log/rev-parse`、`df -k`；2026-09-01 07:49 |
+| 自动测试 | FIX-BATCH-016 既有 3 Node＋271 Vitest、8 typecheck、build/smoke、4 Chrome 全绿；PR 证据 CI `33450368931`、main CI `33450486867` 全绿；本轮精确 build 成功，本地 bind 被沙箱 EPERM | 016 main / deploy pending | 本地命令与已记录 GitHub CI；2026-09-01 07:49 |
+| GitHub main | 公共唯一主仓 `LegalInvest/open-map-bridge`；本地/origin `3cf763a`，016 已合并 | comparison receipt main | main CI `33450486867`；当前 API 无法刷新 |
+| 部署 | 腾讯私有 loopback current 最后可信 `67a6a0e`；016 变更前 state `comparisons=0`、`aois=2` | frame quality deployed / comparison receipt not deployed | 本轮 SSH 被沙箱拒绝，未修改服务器；真实 Ovi 源未验收 |
 | 业务验收 | 真实 QR 安全预览和真实 `.ovmap` 五图层已过；真实 QR 瓦片渲染与用户独立签收未过 | import slice local-verified / AC-001 partial / accepted missing | `docs/acceptance/import-v0-local.md` |
 
 ## 13. 规格—代码—发布追踪矩阵
@@ -494,5 +495,6 @@ fixtures/synthetic/temporal  无外网的 20 年彩色/带标签时序瓦片
 - POST `/api/comparisons` 不接受客户端 ID 或时间。服务端生成两者，并核对 source 存在且 ready、AOI 精确版本存在且 confirmed、四个 dateId 位于当前 20 年目录；目录 missing 与 frame missing 必须一致，failed 日期不可伪装为已请求。repository 写入和重开复用相同 schema，并再次拒绝悬空 AOI 版本。
 - Web 在 AOI 版本或日期变化后清除旧面板状态，首个地图把 fit 后共享 ViewState 写入同步器；只有四日期互异、AOI confirmed、共享视角存在且四帧终态完整时保存按钮才启用。页面按 source/AOI/version 展示回执条数；隔离 E2E 完成新建任意区域、四屏完整、POST 201、刷新后仍显示 1 条。
 - 本地完整证据：3 个 Node 契约、46 文件/271 Vitest、8 workspace typecheck、production build、鉴权/持久化/SIGTERM smoke、4 条 Chrome E2E 和 diff check 全绿；最终复验后根卷约 8.57 GiB。该结果仅为合成源审计闭环，不证明真实画布像素、真实 Ovi 历史日期/瓦片、污染因果或用户 accepted。
-- 阶段与开放项：FIX-BATCH-016=`local-verified / not main / not deployed`；OMB-AUD-014 的持久质量回执达到本地候选，OMB-AUD-015 因 ObservationPanel 无业务动作仍 partial，OMB-AUD-016 的其他 receipt／跨进程恢复仍开放。唯一最安全下一动作是提交 PR 并由 GitHub CI 复验；全绿前不合并或部署。
+- 阶段与开放项：FIX-BATCH-016=`main / not deployed / not real-rendered / not accepted`；OMB-AUD-014 的持久质量回执子项进入 main，OMB-AUD-015 因 ObservationPanel 无业务动作仍 partial，OMB-AUD-016 的其他 receipt／备份恢复仍开放。唯一最安全下一动作是部署精确 main 并执行服务器持久化回访门；网络执行能力恢复前不虚构 deployed。
 - PR #44 首轮完整 CI `33450167879` 对功能/本地证据提交 `5d3adac` 全绿；阶段更新为 `PR CI verified / not main / not deployed`。证据提交仍需复验后才可合并。
+- PR #44 证据 CI `33450368931` 全绿后 squash 合并为 main `3cf763a`，main CI `33450486867` 全绿；阶段更新为 `main / not deployed`。本轮精确 main 构建和哈希门通过，但执行沙箱阻止 SSH 发布与本地监听复跑；没有远端变更或真实上游请求。
