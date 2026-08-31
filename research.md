@@ -37,7 +37,7 @@
 - `FIX-BATCH-007` 已由 PR #13 合并为 main `873705b`：预览 store 主动 TTL 清理并以访问顺序实施 64 条/4 MiB LRU；QR 图片在 object URL/ZXing 前限制声明/实际 8 MiB，解析 PNG/JPEG/WebP 头并限制 16,777,216 像素，浏览器尺寸须一致，2×/3× 受缩放像素预算约束。首次 CI `33166210759` 红灯保留；`33166313733` 全绿。
 - `FIX-BATCH-012` 已进入 main 并部署到腾讯 current `3bbcbfa`：严格凭证 bundle、AES-256-GCM 独立私有 vault、同 source UUID 引用、原子写入/失败关闭、配置/移除 API、Web 密码输入、readiness 命中校验与 `OMB-AUD-040` 8 GiB 自动门均生效。服务器只生成未回显独立 key 和空 0600 vault；未写入真实凭证、未发上游请求。
 - `FIX-BATCH-013` 已由 PR #25 合并为 main `32cb36d`：`apps/gateway/src/security/upstream-network.ts` 在每次请求前解析并检查全部 DNS 地址，永久拒绝 metadata，默认拒绝私网/回环/链路本地/保留/转换地址，只允许按 authority＋精确地址显式批准企业私网；授权快照由 WeakSet 防结构伪造，传输禁自动重定向、固定单地址 lookup、连接后核对 remote peer，并阻止 Host/代理/跳级头覆盖。37 个专项断言含本机回环真实连接，PR/main CI `33406940553`/`33407144250` 全门通过且零外部 DNS/HTTP；模块尚未接入 source probe/tile 路由。
-- `FIX-BATCH-014` 契约与证据已由 PR #27/#28 进入 main `4730395`，main CI `33410854421` 全绿。阶段 A 当前源码候选为 OviBridge 添加 `schemaVersion=1` 的严格 ProbeResult、只由同 source UUID／导入 SHA／回环 origin／mapType／排序日期目录／已登记 probe 坐标组成的 SHA-256 输入指纹，以及原子 `ensureProbeResult`；启动先复用同指纹结果，成功才 ready，失败保持 configured。fixture 覆盖成功尺寸、403、重开不重复 fetch 和持久字段白名单。根卷仅约 8.07 GiB，未运行本地测试/构建，阶段为 `local-candidate`；阶段 B 的 OMB-AUD-007/008 仍不动。
+- `FIX-BATCH-014` 契约与证据已由 PR #27/#28 进入 main `4730395`，main CI `33410854421` 全绿。阶段 A 功能 PR #29 为 OviBridge 添加 `schemaVersion=1` 的严格 ProbeResult、只由同 source UUID／导入 SHA／回环 origin／mapType／排序日期目录／已登记 probe 坐标组成的 SHA-256 输入指纹，以及原子 `ensureProbeResult`；启动先复用同指纹结果，成功才 ready，失败保持 configured。fixture 覆盖成功尺寸、403、重开不重复 fetch 和持久字段白名单。第二轮 CI `33416581636` 已全绿，仍待合并 main；阶段 B 的 OMB-AUD-007/008 不动。
 
 ### 搜索与核验边界
 
@@ -453,3 +453,4 @@ fixtures/synthetic/temporal  无外网的 20 年彩色/带标签时序瓦片
 - 候选不保存请求 URL、host、日期、地图编号、响应正文或错误消息；持久对象只含 source UUID、输入指纹、时间、稳定类别/错误码、HTTP 状态、MIME 和成功图片尺寸。失败结果与成功结果都按 source UUID＋fingerprint 原子去重，重开同输入不再次调用 fixture fetch。
 - 00:43 本机可用 `8,468,576 KiB`，只高于 8 GiB 门 `79,968 KiB`，swap 使用约 7.39 GiB。只执行了只读检查、`apply_patch`、`git diff --check` 与小型文档更新；未运行 test/typecheck/build/browser/download/image，最终验证交给 GitHub PR CI。
 - PR #29 首次 CI `33416353555` 通过环境门和 3 个 Node 契约；Vitest 已执行 234 项全过，但新增 developer route 测试文件因 `vi.fn` 少右括号在收集阶段失败，后续 typecheck/build/smoke/Chrome 未运行。修复只补配对括号，红灯保留且不计为局部验证完成。
+- PR #29 第二轮 CI `33416581636` 对 `8f9d88f` 通过技术交底新鲜度、3 Node、42 个文件/241 Vitest、8 workspace typecheck、production build/smoke 与 4 Chrome；这是分支远端验证，不是本地执行、main、deployed 或真实源验收。

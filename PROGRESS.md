@@ -168,3 +168,5 @@
 - 唯一最安全下一步：由 Codex 更新交底指纹并提交 `codex/fix-batch-014a-probe-result` PR；GitHub CI 全门通过后才合并 main，再在本机容量具有明确安全余量时构建和部署新的 versioned release。
 - 2026-09-01 00:52：PR #29 首次 CI `33416353555` 红灯保留。环境门与 3 个 Node 契约通过，Vitest 已执行的 234 项全部通过，但 `apps/gateway/src/routes/developer.test.ts` 在收集阶段因新增 `vi.fn` 少一个右括号而语法失败；typecheck/build/smoke/Chrome 未运行。单点语法已修正，批次仍为 `local-candidate`。
 - 唯一最安全下一步：由 Codex 更新交底指纹并推送语法修复，等待 PR #29 第二轮完整 CI；全绿前不合并、不部署。
+- 2026-09-01 00:55：PR #29 第二轮 CI `33416581636` 全绿：技术交底新鲜度、3 Node、42 个文件/241 Vitest、8 workspace typecheck、production build/smoke 和 4 Chrome 全部通过。功能提交 `8f9d88f` 达到 `local-candidate / PR CI verified`，尚未 main/deployed/accepted；本机仍未运行重型门。
+- 唯一最安全下一步：由 Codex 回写 CI 证据后等待该证据提交的 PR CI，通过即合并 PR #29；合并后核验 main CI，并仅在本机容量有明确安全余量时部署运行制品。
