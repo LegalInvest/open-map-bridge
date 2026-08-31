@@ -213,3 +213,5 @@
 - 2026-09-01 05:10：PR #38 证据提交 CI `33439507170` 全绿并 squash 合并为 main/origin `d350ac3`；main CI `33439685686` 复验完整门。精确 main 本地 build/smoke 后安装腾讯 immutable release `d350ac3`，current 从 `7da03c3` 原子切换；gateway/Web hash 与 manifest/远端一致，首次 nginx health 短暂 502 后恢复，401、双回环、service、state/vault hash 和 0600 权限通过，旧 release 保留。
 - 阶段：014D=`main + deployed-code / no real ProbeResult or binding / not rendered / not accepted`。本轮没有真实图源、凭证或外联，部署健康不替代业务验收。
 - 唯一最安全下一步：由 Codex 提交部署证据 docs-only PR并等待 PR/main CI；全绿后三端收口，下一业务动作仍是经单独授权获得第一条真实 ProbeResult，而不是扩大抓取。
+- 2026-09-01 05:20：部署证据 PR #39 CI `33440530796` 全绿并合并为 docs-only main/origin `c4f0dcf`，main CI `33440688435` 复验完整门。运行源码/腾讯 current 正确保留 `d350ac3`，不为文档后代重复发布；014D 三端证据收口。
+- 唯一最安全下一步：由 Codex 在下一批实现真实渲染回执门前先取得单独的操作时授权与合法最小真实源；若无授权则保持零真实外联，不扩大抓取。用户行动：无。

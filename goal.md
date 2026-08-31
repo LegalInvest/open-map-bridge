@@ -9,7 +9,7 @@
 - 当前整合者：本 Codex 主线程
 - 更新时间：2026-09-01 05:10（Asia/Shanghai）
 - 适用目录：`/Users/assis/Documents/Codex/2026-08-27/open-map-bridge`
-- 当前切片：`FIX-BATCH-014D main + deployed-code / real probe blocked`。PR #38 功能/证据 CI `33439198444`/`33439507170`、squash main `d350ac3` 与 main CI `33439685686` 全绿；精确 main 本地 build/smoke 后部署为腾讯 immutable release/current `d350ac3`。gateway/Web hash `73808e31…4eb8d`/`42368f3e…04ad` 一致，重启窗口首次 health 短暂 502 后恢复，直连 401、双回环、systemd、state/vault hash 与 0600 门均通过，旧 `7da03c3` 保留。014D 把同 UUID、同请求计划/凭据修订的成功 ProbeResult 绑定为独立非时序 `map-tiles`，并逐请求复用固定传输和完整图片门；但本轮没有真实第三方请求、真实 ProbeResult/绑定或浏览器真实地图画布回执，因此仍非 real-probed/rendered/accepted。
+- 当前切片：`FIX-BATCH-014D main + deployed-code / real probe blocked`。PR #38 功能/证据 CI `33439198444`/`33439507170`、runtime main `d350ac3` 与 CI `33439685686` 全绿；部署证据 PR #39 CI `33440530796` 已合并为 docs-only main `c4f0dcf`，main CI `33440688435` 全绿。腾讯 immutable release/current 保持 runtime source `d350ac3`，不为文档后代重复发布。gateway/Web hash `73808e31…4eb8d`/`42368f3e…04ad` 一致，重启窗口首次 health 短暂 502 后恢复，直连 401、双回环、systemd、state/vault hash 与 0600 门均通过，旧 `7da03c3` 保留。014D 把同 UUID、同请求计划/凭据修订的成功 ProbeResult 绑定为独立非时序 `map-tiles`，并逐请求复用固定传输和完整图片门；但本轮没有真实第三方请求、真实 ProbeResult/绑定或浏览器真实地图画布回执，因此仍非 real-probed/rendered/accepted。
 - 上版：V0.4 奥维兼容双入口导入实施版
 
 <!-- GOAL_CAPSULE_START -->
