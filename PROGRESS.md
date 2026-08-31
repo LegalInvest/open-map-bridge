@@ -226,3 +226,5 @@
 - 唯一最安全下一步：由 Codex只做本地 checkpoint 后保持 idle；待根卷恢复至少 8 GiB，再推送 FIX-BATCH-015 PR 并交由 GitHub CI 复验。用户行动：无。
 - 2026-09-01 06:42：根卷恢复到 `9,398,964 KiB`（约 8.96 GiB），容量门解除。只读复核 origin/main=`c6cd5be`、CI `33441198030` 全绿；腾讯 current=`d350ac3`、service active、4174/8080 双回环、nginx health 成功、直连 401、权威 state/vault 文件 0600、服务器根卷约 348 GiB 可用。首次误查不存在的 `state.json/credentials.vault` 路径失败，随后按部署契约 `temporal-state.json/credential-vault.json` 复核成功；未修改服务器。
 - 唯一最安全下一步：由 Codex推送本地 `96645f6` 后续证据提交并创建 FIX-BATCH-015 PR，等待 GitHub CI；全绿前不合并、不部署。用户行动：无。
+- 2026-09-01 06:45：FIX-BATCH-015 PR #41 首轮 CI `33447491953` 对 head `b614845` 全绿，远端完整门通过。阶段=`PR CI verified / not main / not deployed / not rendered / not accepted`；腾讯 current 仍为 `d350ac3`，零真实源请求。
+- 唯一最安全下一步：由 Codex回写首轮 CI 证据并等待证据提交复验；再次全绿后 squash 合并、核验 main CI，再仅因 Web 制品变化部署腾讯 versioned release。用户行动：无。

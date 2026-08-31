@@ -880,3 +880,4 @@ V1 公共类型和错误语义通过契约测试冻结；新增可选能力不�
 - 2026-09-01：FIX-BATCH-014D 已经 main/deployed-code（runtime/current `d350ac3`）；此前“尚未 main/deployed”的历史描述由此条取代。05:48 启动 FIX-BATCH-015：四屏每帧按唯一瓦片统计 expected/loaded/failed，有 pending 时不假报成功，结算后区分完整、部分和全失败，并在页面直接显示计数。
 - 当前边界：015 已为 `local-verified / not main / not deployed`，持久 ComparisonReceipt、真实浏览器画布回执、真实图源 probe/日期/影像和用户 accepted 均未达到。唯一最安全下一步是 PR CI；不得把合成测试结果写成真实 `rendered`。
 - 2026-09-01 06:42：容量恢复到约 8.96 GiB，允许恢复 FIX-BATCH-015 PR 流程；origin/main 与腾讯 runtime 无漂移。此复核不改变阶段：本批仍仅 local-verified，真实源 rendered/accepted 仍未达到。
+- 2026-09-01 06:45：PR #41 首轮 CI `33447491953` 全绿，015 晋级 `PR CI verified / not main`；持久质量回执与真实源 rendered/accepted 仍未达到。

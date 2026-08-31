@@ -479,3 +479,4 @@ fixtures/synthetic/temporal  无外网的 20 年彩色/带标签时序瓦片
 - 页面公开显示每帧成功数、expected 与失败数，不再把 partial 隐藏在“已加载”中。最终本地门为 3 Node＋260 Vitest、8 workspace typecheck、production build/smoke、4 Chrome、交底与 diff 全绿；前三轮 Chrome 因验收仍查旧文案依次为 2/4、3/4、3/4，统一断言后第四轮 4/4，红灯均保留。阶段为 `local-verified / not main / not deployed`。
 - 未完成边界：当前质量对象仍是浏览器内状态，尚未经创建 API 写入 `ComparisonReceipt`，也未证明像素已绘入真实画布。故 OMB-AUD-014 保持 partial，OMB-AUD-015 仍 open；没有真实源、二维码载荷、凭证、外联或影像写入。
 - 06:42 实时复核：本机容量恢复到约 8.96 GiB；origin/main `c6cd5be` 的 CI `33441198030` 仍绿；腾讯 `d350ac3` service active、双回环、nginx health、直连 401、`temporal-state.json`/`credential-vault.json` 0600 与服务器容量通过。首次按非权威旧文件名 stat 失败，未把该失败冒充持久化异常，随后按部署文档路径复核成功。
+- PR #41 head `b614845` 经 GitHub CI `33447491953` 完整复验全绿；该证据只把 FIX-BATCH-015 推进到 PR CI verified，不改变 origin/main `c6cd5be`、腾讯 `d350ac3` 或真实 source rendered/accepted。
