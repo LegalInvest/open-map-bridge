@@ -9,11 +9,11 @@
 5. `.ovmap` 无公开完整线协议；首个 codec 只承诺经差分证据验证的 `record37-zlib` 家族，其他版本保持 `unsupported` 并等待合法样本，不能承诺“所有文件已全兼容”。
 6. 用户真实历史二维码的 `at/ad/al` 和 72 字符不透明 `ul` 已安全识别但未保存；在本地凭证保险库或官方奥维回环桥接通过之前，无法从开放定义独立重建私有认证，也不得请求真实源或宣称出图。
 7. 导入配置目前可保存为 `confirmed`；零外联主机/端口/IP/云元数据/路径静态策略已进入 main。FIX-BATCH-011 只为固定回环 OviBridge 增加一个受控 probe/ready 候选；通用图源请求时 DNS 解析后 IP、连接固定/重绑定、瓦片代理和投影修正仍未实现。静态策略或 Ovi 候选通过不能证明其他网络源可用。
-8. 开发者 V1 契约和合成适配器已贯通；真实 imported source UUID 现在可与 OviBridge 同 ID 绑定。FIX-BATCH-011 已进入 main，只有显式 probe 瓦片通过完整图片门才赋予本次 runtime ready；该路径未对用户真实源执行，腾讯 current 仍为旧 runtime，因此权威部署中的真实 imported source 仍必须保持 `metadata-only`。
-9. 本机容量：2026-08-31 17:48 根卷可用约 7.3 GiB、swap 约 6.4 GiB，低于 8 GiB 执行门；已停止新的构建、测试、浏览器、下载和腾讯制品部署。不得通过删除用户数据、项目证据或真实运行数据规避。
+8. 开发者 V1 契约和合成适配器已贯通；真实 imported source UUID 现在可与 OviBridge 同 ID 绑定。FIX-BATCH-011 runtime source `94e42b1` 已进入 main 并部署到腾讯 current，只有显式 probe 瓦片通过完整图片门才赋予本次 runtime ready；该路径未对用户真实源执行，权威部署中的真实 imported source 仍必须保持 `metadata-only`。
+9. 本机容量：2026-08-31 18:19 根卷可用约 8.62 GiB、swap 约 6.24 GiB，暂时高于 8 GiB 执行门；已完成一次 production build/smoke 与腾讯 versioned deployment。空间仍接近门限，后续每次构建、测试、浏览器、下载或影像动作前必须重新核验；跌破 8 GiB 立即止写。不得通过删除用户数据、项目证据或真实运行数据规避。
 10. 全量审计：`docs/问题账本.md` 当前记录 39 组问题。FIX-BATCH-001–009 已进入 main，15 组达到 main、24 组仍未闭合；其余问题不得因生产制品与服务器候选就绪而标记解决。
 11. 真实 ready 晋级：configured 隐藏、空 probe 失败、图片解码/内容验证、本地 gateway 入站信任边界、“不伪造日期目录”和 FIX-BATCH-011 的“单个授权回环瓦片通过完整图片门才 runtime ready”编排均已进入 main。但本地凭证保险库、通用上游请求时 DNS/IP/重绑定门、ProbeResult 持久化、真实日期目录 provider 和用户真实瓦片仍缺。`OMB-AUD-002` 保持部分开放，不能把 fixture/CI 晋级为真实源验收。
-12. 三端部署：GitHub main `62ab114` 的 CI `33370752935` 与部署证据 PR CI `33371002982` 全绿；腾讯 current `62ab114` 的运行源码/制品哈希与当前 GitHub 运行输入一致，versioned release、项目 Node、systemd、宝塔 nginx include、双回环端口、隧道浏览器，以及 `62ab114 → 33f7f06 → 62ab114` 回滚/前滚均通过。后续仅文档证据提交不需要伪造新 runtime release；技术部署阻塞已解除，真实 Ovi source 业务验收仍独立阻塞。
+12. 三端部署：GitHub docs-only main `f21fefe` 的 CI `33380143272`、FIX-BATCH-011 runtime source `94e42b1` 的 PR/main CI `33379147631`/`33379302430` 全绿；腾讯 current 已更新为 `94e42b1`，gateway/Web hash、项目 Node、systemd、宝塔 nginx include、双回环端口、health 和持久状态 hash 均通过。保留 `62ab114` 与 `33f7f06` 作为已验证回退制品；技术部署阻塞已解除，真实 Ovi source 业务验收仍独立阻塞。
 13. QR 方言：公开样本新增观察到 `hs/mf/ml/ms/mt/pn/pt`。FIX-BATCH-008 只接受这些键并丢弃未知值；其业务语义、授权和服务器可用性仍未知，不能由“解析成功”晋级为 ready。
 
 ## 已解除的实施阻塞
