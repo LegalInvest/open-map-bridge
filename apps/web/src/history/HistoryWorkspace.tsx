@@ -20,7 +20,7 @@ interface HistoryWorkspaceProps {
 }
 
 function createInitialStatuses(): PaneStatus[] {
-  return Array.from({ length: 4 }, () => ({ state: 'waiting', loaded: 0, failed: 0 }));
+  return Array.from({ length: 4 }, () => ({ state: 'waiting', expected: 0, loaded: 0, failed: 0 }));
 }
 
 function latestAois(entries: AreaOfInterest[]): AreaOfInterest[] {
@@ -37,8 +37,17 @@ function chooseInitialDates(dates: TemporalDateEntry[]): string[] {
 }
 
 function statusLabel(index: number, status: PaneStatus): string {
-  const label = status.state === 'loaded' ? '已加载' : status.state === 'failed' ? '加载失败' : status.state === 'loading' ? '加载中' : '等待加载';
-  return `面板 ${index + 1}：${label}`;
+  const label = status.state === 'loaded'
+    ? '完整加载'
+    : status.state === 'partial'
+      ? '部分加载'
+      : status.state === 'failed'
+        ? '加载失败'
+        : status.state === 'loading'
+          ? '加载中'
+          : '等待加载';
+  const counts = status.expected > 0 ? `（成功 ${status.loaded}/${status.expected}，失败 ${status.failed}）` : '';
+  return `面板 ${index + 1}：${label}${counts}`;
 }
 
 export function HistoryWorkspace({ api, MapPaneComponent = MapPane, AoiCreatorComponent = AoiCreator }: HistoryWorkspaceProps) {
@@ -103,7 +112,13 @@ export function HistoryWorkspace({ api, MapPaneComponent = MapPane, AoiCreatorCo
   const handlePaneStatus = useCallback((index: number, status: PaneStatus) => {
     setPaneStatuses((current) => {
       const existing = current[index];
-      if (existing && existing.state === status.state && existing.loaded === status.loaded && existing.failed === status.failed) return current;
+      if (
+        existing &&
+        existing.state === status.state &&
+        existing.expected === status.expected &&
+        existing.loaded === status.loaded &&
+        existing.failed === status.failed
+      ) return current;
       const next = [...current];
       next[index] = status;
       return next;

@@ -12,12 +12,9 @@ import type { AreaOfInterest, Position } from '@omb/aois';
 import type { TemporalDateEntry, ViewState } from '@omb/temporal-source';
 import type { ViewSync } from './view-sync.js';
 import { aoiExtent3857 } from './aoi-view.js';
+import { FrameQualityTracker, type PaneStatus } from './frame-quality.js';
 
-export interface PaneStatus {
-  state: 'waiting' | 'loading' | 'loaded' | 'failed';
-  loaded: number;
-  failed: number;
-}
+export type { PaneStatus } from './frame-quality.js';
 
 export interface MapPaneProps {
   panelIndex: number;
@@ -39,22 +36,22 @@ export function MapPane({ panelIndex, sourceId, date, aoi, viewSync, onStatus }:
   useEffect(() => {
     const target = targetRef.current;
     if (!target || typeof ResizeObserver === 'undefined') return;
-    let loaded = 0;
-    let failed = 0;
+    let active = true;
     let applyingRemote = false;
+    const quality = new FrameQualityTracker();
     const source = new XYZ({
       url: `/api/temporal/tiles/${encodeURIComponent(sourceId)}/${encodeURIComponent(date.id)}/{z}/{x}/{y}`,
       crossOrigin: 'anonymous',
     });
-    source.on('tileloadstart', () => onStatus({ state: 'loading', loaded, failed }));
-    source.on('tileloadend', () => {
-      loaded += 1;
-      onStatus({ state: 'loaded', loaded, failed });
-    });
-    source.on('tileloaderror', () => {
-      failed += 1;
-      onStatus({ state: loaded > 0 ? 'loaded' : 'failed', loaded, failed });
-    });
+    const report = (status: PaneStatus) => {
+      if (active) onStatus(status);
+    };
+    const handleTileStart = (event: { tile: { getKey(): string } }) => report(quality.start(event.tile.getKey()));
+    const handleTileEnd = (event: { tile: { getKey(): string } }) => report(quality.succeed(event.tile.getKey()));
+    const handleTileError = (event: { tile: { getKey(): string } }) => report(quality.fail(event.tile.getKey()));
+    source.on('tileloadstart', handleTileStart);
+    source.on('tileloadend', handleTileEnd);
+    source.on('tileloaderror', handleTileError);
 
     const geometry = new Polygon([outerRing(aoi)]).transform('EPSG:4326', 'EPSG:3857');
     const outline = new VectorLayer({
@@ -113,6 +110,10 @@ export function MapPane({ panelIndex, sourceId, date, aoi, viewSync, onStatus }:
       viewSync.publish(paneId, state);
     });
     return () => {
+      active = false;
+      source.un('tileloadstart', handleTileStart);
+      source.un('tileloadend', handleTileEnd);
+      source.un('tileloaderror', handleTileError);
       unsubscribe();
       map.setTarget(undefined);
     };

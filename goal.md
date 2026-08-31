@@ -877,3 +877,5 @@ V1 公共类型和错误语义通过契约测试冻结；新增可选能力不�
 - 唯一最安全下一步：由 Codex 实现 FIX-BATCH-014D，把“当前同指纹成功 ProbeResult”安全绑定到最小通用 tile runtime，并复用同一请求构造、vault 与逐请求固定传输；先只用本机合成上游验证，继续零真实第三方请求。
 - 2026-09-01：04:29 部署证据 PR #36 CI `33436046174` 全绿并合并为 docs-only main `84f103f`，main CI `33436199094` 通过完整门。本地/main/origin clean；腾讯 runtime/current 仍为 `7da03c3`，服务健康、401、双回环及 state/vault hash 再次只读通过，docs-only 后代不重复发布。
 - 唯一最安全下一步：由 Codex 实现 FIX-BATCH-014D，把当前同指纹成功 ProbeResult 绑定到最小通用 tile runtime，并复用同一请求构造、vault 与逐请求固定传输；先只用本机合成上游验证，继续零真实第三方请求。
+- 2026-09-01：FIX-BATCH-014D 已经 main/deployed-code（runtime/current `d350ac3`）；此前“尚未 main/deployed”的历史描述由此条取代。05:48 启动 FIX-BATCH-015：四屏每帧按唯一瓦片统计 expected/loaded/failed，有 pending 时不假报成功，结算后区分完整、部分和全失败，并在页面直接显示计数。
+- 当前边界：015 已为 `local-verified / not main / not deployed`，持久 ComparisonReceipt、真实浏览器画布回执、真实图源 probe/日期/影像和用户 accepted 均未达到。唯一最安全下一步是 PR CI；不得把合成测试结果写成真实 `rendered`。

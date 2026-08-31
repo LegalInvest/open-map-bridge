@@ -1,5 +1,8 @@
 import { expect, test } from '@playwright/test';
 
+const completePaneStatus = (index: number) => new RegExp(`^面板 ${index}：完整加载（成功 \\d+/\\d+，失败 0）$`);
+const failedPaneStatus = (index: number) => new RegExp(`^面板 ${index}：加载失败（成功 0/\\d+，失败 \\d+）$`);
+
 test('draws an arbitrary non-preset area and automatically creates a four-frame comparison', async ({ page }) => {
   await page.goto('/');
   await expect(page).toHaveTitle('OpenMapBridge · 通用四期历史影像');
@@ -35,7 +38,7 @@ test('draws an arbitrary non-preset area and automatically creates a four-frame 
   await expect(page.getByText('已确认 v1')).toBeVisible();
   await expect(page.getByLabel('面板日期')).toHaveCount(4);
   for (let index = 1; index <= 4; index += 1) {
-    await expect(page.getByText(`面板 ${index}：已加载`)).toBeVisible();
+    await expect(page.getByText(completePaneStatus(index))).toBeVisible();
   }
   await expect(page.getByLabel(/历史影像地图/)).toHaveCount(4);
 });
@@ -59,7 +62,7 @@ test('compares both lake presets with aligned views, isolated failures, and an e
   const dateSelectors = page.getByLabel('面板日期');
   await expect(dateSelectors).toHaveCount(4);
   for (let index = 1; index <= 4; index += 1) {
-    await expect(page.getByText(`面板 ${index}：已加载`)).toBeVisible();
+    await expect(page.getByText(completePaneStatus(index))).toBeVisible();
   }
   await expect.poll(() => syntheticDates.size).toBeGreaterThanOrEqual(4);
   const maps = page.getByLabel(/历史影像地图/);
@@ -72,7 +75,7 @@ test('compares both lake presets with aligned views, isolated failures, and an e
   ]);
   await expect(area).toHaveValue('gaoyou-lake');
   for (let index = 1; index <= 4; index += 1) {
-    await expect(page.getByText(`面板 ${index}：已加载`)).toBeVisible();
+    await expect(page.getByText(completePaneStatus(index))).toBeVisible();
   }
   const gaoyouInitialView = JSON.parse((await maps.first().getAttribute('data-view-state')) ?? 'null') as { center: number[] };
   expect(gaoyouInitialView.center).not.toEqual(baoyingInitialView.center);
@@ -82,7 +85,7 @@ test('compares both lake presets with aligned views, isolated failures, and an e
   ]);
   await expect(area).toHaveValue('baoying-lake');
   for (let index = 1; index <= 4; index += 1) {
-    await expect(page.getByText(`面板 ${index}：已加载`)).toBeVisible();
+    await expect(page.getByText(completePaneStatus(index))).toBeVisible();
   }
   const baoyingReturnView = JSON.parse((await maps.first().getAttribute('data-view-state')) ?? 'null') as { center: number[] };
   expect(baoyingReturnView.center).toEqual(baoyingInitialView.center);
@@ -100,16 +103,16 @@ test('compares both lake presets with aligned views, isolated failures, and an e
   }).toBe(true);
 
   await dateSelectors.nth(1).selectOption('scene-2012');
-  await expect(page.getByText('面板 2：加载失败')).toBeVisible();
-  await expect(page.getByText('面板 1：已加载')).toBeVisible();
-  await expect(page.getByText('面板 3：已加载')).toBeVisible();
-  await expect(page.getByText('面板 4：已加载')).toBeVisible();
+  await expect(page.getByText(failedPaneStatus(2))).toBeVisible();
+  await expect(page.getByText(completePaneStatus(1))).toBeVisible();
+  await expect(page.getByText(completePaneStatus(3))).toBeVisible();
+  await expect(page.getByText(completePaneStatus(4))).toBeVisible();
 
   await page.getByRole('button', { name: '切换到 2011' }).click();
   await page.getByRole('button', { name: '播放变化' }).click();
   await expect(page.getByText('当前帧：2012')).toBeVisible({ timeout: 4_000 });
   await expect(page.getByText('2012：缺失')).toBeVisible();
-  await expect(page.getByText('面板 4：已加载')).toBeVisible();
+  await expect(page.getByText(completePaneStatus(4))).toBeVisible();
   await page.getByRole('button', { name: '暂停播放' }).click();
 
   await page.getByRole('button', { name: '双屏卷帘' }).click();

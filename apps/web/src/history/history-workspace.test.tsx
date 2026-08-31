@@ -48,7 +48,13 @@ const api: HistoryApi = {
 
 const TestMapPane: ComponentType<MapPaneProps> = ({ panelIndex, onStatus }) => {
   useEffect(() => {
-    onStatus(panelIndex === 2 ? { state: 'failed', loaded: 0, failed: 1 } : { state: 'loaded', loaded: 1, failed: 0 });
+    onStatus(
+      panelIndex === 1
+        ? { state: 'partial', expected: 2, loaded: 1, failed: 1 }
+        : panelIndex === 2
+          ? { state: 'failed', expected: 1, loaded: 0, failed: 1 }
+          : { state: 'loaded', expected: 2, loaded: 2, failed: 0 },
+    );
   }, [onStatus, panelIndex]);
   return <div aria-label={`测试地图 ${panelIndex + 1}`} />;
 };
@@ -67,8 +73,9 @@ describe('HistoryWorkspace', () => {
       'scene-2019',
       'scene-2025',
     ]);
-    expect(await screen.findByText('面板 3：加载失败')).toBeVisible();
-    expect(screen.getByText('面板 1：已加载')).toBeVisible();
+    expect(await screen.findByText('面板 3：加载失败（成功 0/1，失败 1）')).toBeVisible();
+    expect(screen.getByText('面板 1：完整加载（成功 2/2，失败 0）')).toBeVisible();
+    expect(screen.getByText('面板 2：部分加载（成功 1/2，失败 1）')).toBeVisible();
     expect(screen.getByText('范围待确认')).toBeVisible();
   });
 
