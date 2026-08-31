@@ -231,3 +231,5 @@
 - 2026-09-01 06:51：证据提交 CI `33447704065` 全绿后，PR #41 squash 合并为 main/origin `67a6a0e`，main CI `33447839812` 完整全绿。精确 main build/smoke 后安装腾讯 immutable release `67a6a0e`，current 从 `d350ac3` 原子切换；gateway hash 保持 `73808e31…4eb8d`，Web index 更新为 `3dd8d87d…d799`。首次重启 health 短暂 502 后恢复，service/health/401/双回环/state-vault hash/0600 全通过，旧 release 保留。
 - 部署浏览器只读验收：经临时 SSH 隧道打开腾讯页面，四个合成面板最终均显示“完整加载（成功 6/6，失败 0）”，控制台无 error/warning；临时页面与隧道已关闭。阶段=`main + deployed-code / not real-probed / not persistently receipted / not rendered / not accepted`，合成结果不替代真实源验收。
 - 唯一最安全下一步：由 Codex提交部署证据 docs-only PR，等待 PR/main CI 后三端收口；下一代码批次为 OMB-AUD-015 的 ComparisonReceipt 创建/持久化，不发真实上游请求。用户行动：无。
+- 2026-09-01 06:57：部署证据 PR #42 CI `33448263589` 全绿并合并为 docs-only main/origin `f506a12`，main CI `33448403058` 完整全绿。运行源码/腾讯 current 正确保留 `67a6a0e`，不为文档后代重复发布；FIX-BATCH-015 三端证据收口。
+- 唯一最安全下一步：由 Codex提交最终三端证据 docs-only PR；通过后下一代码批次收敛 OMB-AUD-015 ComparisonReceipt 创建/持久化，继续零真实外联。用户行动：无。

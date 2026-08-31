@@ -482,3 +482,4 @@ fixtures/synthetic/temporal  无外网的 20 年彩色/带标签时序瓦片
 - PR #41 head `b614845` 经 GitHub CI `33447491953` 完整复验全绿；该证据只把 FIX-BATCH-015 推进到 PR CI verified，不改变 origin/main `c6cd5be`、腾讯 `d350ac3` 或真实 source rendered/accepted。
 - PR #41 证据提交 CI `33447704065` 全绿后 squash 合并为 main `67a6a0e`，main CI `33447839812` 全绿。精确 main 重建的 gateway/Web index 哈希为 `73808e31…4eb8d`/`3dd8d87d…d799`，与腾讯新 release `67a6a0e` 一致；首次重启 health 短暂 502 后恢复，state/vault 哈希未变、双回环与 0600 通过。
 - 服务器浏览器经临时 SSH 隧道证明四个合成面板最终均显示完整 6/6 且无控制台 error/warning；这只把运行代码推进 deployed-code。没有真实 source、ProbeResult、画布像素回执或持久 ComparisonReceipt，故 OMB-AUD-014 仍 partial，rendered/accepted 未达到。
+- 部署证据 PR #42 CI `33448263589` 与 docs-only main `f506a12` CI `33448403058` 全绿；运行源码和腾讯 current 仍为 `67a6a0e`，不因证据后代重复发布。FIX-BATCH-015 的三端阶段已收口，业务缺口保持不变。
