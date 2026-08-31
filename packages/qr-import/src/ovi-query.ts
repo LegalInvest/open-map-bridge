@@ -8,12 +8,24 @@ export interface RawQrCandidate {
   pathTemplate: string;
   projection: ProjectionId;
   rawCodes: Record<string, string>;
+  opaqueFieldNames: string[];
   containsSensitiveQuery: boolean;
   queryParameters: Record<string, string>;
   opaqueTemplate: boolean;
 }
 
-const allowedKeys = new Set(['t', 'id', 'na', 'po', 'he', 'oy', 'df', 'hn', 'ul', 'at', 'ad', 'al']);
+const rawCodeKeys = ['t', 'po', 'he', 'oy', 'df'] as const;
+const credentialKeys = ['at', 'ad', 'al'] as const;
+const opaqueExtensionKeys = ['hs', 'mf', 'ml', 'ms', 'mt', 'pn', 'pt'] as const;
+const allowedKeys = new Set([
+  'id',
+  'na',
+  'hn',
+  'ul',
+  ...rawCodeKeys,
+  ...credentialKeys,
+  ...opaqueExtensionKeys,
+]);
 const coreKeys = new Set(['id', 'na', 'hn', 'ul']);
 const sensitiveKey = /token|key|secret|cookie|authorization|auth|sig|session|password|credential|access/i;
 const tileVariable = /\{\$(?:x|y|z|serverpart)(?:[}/]|$)/i;
@@ -57,6 +69,7 @@ export function decodeOviQuery(payload: string): RawQrCandidate[] {
     const value = decodePart(equals >= 0 ? pair.slice(equals + 1) : '');
     if (!allowedKeys.has(key)) throw new Error('FORMAT_QR_UNKNOWN_KEY');
     const existing = values.get(key) ?? [];
+    if (existing.length > 0) throw new Error('FORMAT_QR_DUPLICATE');
     existing.push(value);
     values.set(key, existing);
   }
@@ -64,10 +77,6 @@ export function decodeOviQuery(payload: string): RawQrCandidate[] {
     const entries = values.get(key);
     if (!entries || entries.length !== 1 || entries[0] === '') throw new Error(`FORMAT_QR_CORE_${key.toUpperCase()}`);
   }
-  for (const key of coreKeys) {
-    if ((values.get(key)?.length ?? 0) > 1) throw new Error('FORMAT_QR_DUPLICATE');
-  }
-
   const idText = values.get('id')?.[0] ?? '';
   const legacyId = Number(idText);
   if (!Number.isSafeInteger(legacyId) || legacyId < 0) throw new Error('FORMAT_QR_ID');
@@ -90,9 +99,10 @@ export function decodeOviQuery(payload: string): RawQrCandidate[] {
       host,
       pathTemplate: path.pathTemplate,
       projection: 'unknown',
-      rawCodes: Object.fromEntries(['t', 'po', 'he', 'oy', 'df'].map((key) => [key, values.get(key)?.[0] ?? ''])),
+      rawCodes: Object.fromEntries(rawCodeKeys.map((key) => [key, values.get(key)?.[0] ?? ''])),
+      opaqueFieldNames: opaqueExtensionKeys.filter((key) => values.has(key)),
       containsSensitiveQuery:
-        path.containsSensitiveQuery || ['at', 'ad', 'al'].some((key) => (values.get(key)?.[0]?.length ?? 0) > 0),
+        path.containsSensitiveQuery || credentialKeys.some((key) => (values.get(key)?.[0]?.length ?? 0) > 0),
       queryParameters: path.queryParameters,
       opaqueTemplate,
     },

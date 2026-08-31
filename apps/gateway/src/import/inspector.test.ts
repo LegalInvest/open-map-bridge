@@ -39,4 +39,13 @@ describe('zero-network import inspector', () => {
     expect(preview.layers[0]?.requiresCredential).toBe(true);
     expect(JSON.stringify(preview)).not.toContain('opaque-fixed-value');
   });
+
+  it('preserves only observed opaque QR field names in the open compatibility record', async () => {
+    const inspector = createImportInspector({ now: () => new Date('2026-08-28T00:00:00.000Z') });
+    const preview = await inspector.inspectQr(
+      'ovobj?t=1&id=402&na=Dialect&hn=tiles.example.invalid&ul=%2F%7B%24z%7D%2F%7B%24x%7D%2F%7B%24y%7D.png&hs=hidden-hs&mt=hidden-mt&pt=hidden-pt',
+    );
+    expect(preview.layers[0]?.source.compatibilityExtension.observedOpaqueFields).toEqual(['hs', 'mt', 'pt']);
+    expect(JSON.stringify(preview)).not.toContain('hidden-');
+  });
 });

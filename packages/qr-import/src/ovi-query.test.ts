@@ -13,6 +13,7 @@ describe('Ovital QR query adapter', () => {
       host: 'tiles.example.invalid',
       pathTemplate: '/{$z}/{$x}/{$y}.png',
       rawCodes: { t: '1', po: '1', he: '18', oy: '3', df: '0' },
+      opaqueFieldNames: [],
       projection: 'unknown',
     });
   });
@@ -36,5 +37,18 @@ describe('Ovital QR query adapter', () => {
     expect(result?.opaqueTemplate).toBe(true);
     expect(result?.pathTemplate).toBe('/');
     expect(JSON.stringify(result)).not.toContain('opaque-');
+  });
+
+  it('accepts observed opaque extension keys without returning or interpreting their values', () => {
+    const payload = `${fixture}&hs=private-hs&mf=private-mf&ml=private-ml&ms=private-ms&mt=private-mt&pn=private-pn&pt=private-pt`;
+    const [result] = decodeQrPayload(payload);
+    expect(result?.opaqueFieldNames).toEqual(['hs', 'mf', 'ml', 'ms', 'mt', 'pn', 'pt']);
+    expect(result?.projection).toBe('unknown');
+    expect(result?.rawCodes).toEqual({ t: '1', po: '1', he: '18', oy: '3', df: '0' });
+    expect(JSON.stringify(result)).not.toContain('private-');
+  });
+
+  it('rejects duplicate opaque extension keys instead of choosing an ambiguous value', () => {
+    expect(() => decodeQrPayload(`${fixture}&mt=one&mt=two`)).toThrow('FORMAT_QR_DUPLICATE');
   });
 });

@@ -846,3 +846,4 @@ V1 公共类型和错误语义通过契约测试冻结；新增可选能力不�
 - 2026-08-28：FIX-BATCH-006 证据 PR #12 经 CI `33165750762` 合并，main 为 `98a9828`；启动 FIX-BATCH-007，增加预览 LRU 和二维码图片解码前资源门，当前仅 `local-candidate`，待 PR CI。
 - 2026-08-28：PR #13 首次 CI `33166210759` 单测通过后在 Web 类型检查因测试 `Uint8Array<ArrayBufferLike>` 不满足 BlobPart 失败；构建/Chrome 未运行。测试 helper 改为明确 ArrayBuffer，失败保留并待重跑。
 - 2026-08-28：PR #13 第二轮 CI `33166313733` 通过 39 个 Vitest 文件/175 tests＋2 Node、8 workspace typecheck、生产构建、4 Chrome E2E 和交底新鲜度，随后合并为 main `873705b`。OMB-AUD-018 达到 main；相机帧、真实图源、部署和用户验收不随之晋级。
+- 2026-08-31：用户授权 Codex 自主推进，直到本机、GitHub、服务器均为最新可验收状态。主线仍是 `QR/.ovmap → 安全预览 → 确认 → 探测/ready → 真实渲染 → 四期消费 → SDK`，不以解析成功、CI 绿或服务器 HTTP 200 替代真实源验收。当前启动 `FIX-BATCH-008 / OMB-AUD-039`，先收敛已观察 QR 方言兼容且不保存未知值。
