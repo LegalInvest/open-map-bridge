@@ -228,3 +228,6 @@
 - 唯一最安全下一步：由 Codex推送本地 `96645f6` 后续证据提交并创建 FIX-BATCH-015 PR，等待 GitHub CI；全绿前不合并、不部署。用户行动：无。
 - 2026-09-01 06:45：FIX-BATCH-015 PR #41 首轮 CI `33447491953` 对 head `b614845` 全绿，远端完整门通过。阶段=`PR CI verified / not main / not deployed / not rendered / not accepted`；腾讯 current 仍为 `d350ac3`，零真实源请求。
 - 唯一最安全下一步：由 Codex回写首轮 CI 证据并等待证据提交复验；再次全绿后 squash 合并、核验 main CI，再仅因 Web 制品变化部署腾讯 versioned release。用户行动：无。
+- 2026-09-01 06:51：证据提交 CI `33447704065` 全绿后，PR #41 squash 合并为 main/origin `67a6a0e`，main CI `33447839812` 完整全绿。精确 main build/smoke 后安装腾讯 immutable release `67a6a0e`，current 从 `d350ac3` 原子切换；gateway hash 保持 `73808e31…4eb8d`，Web index 更新为 `3dd8d87d…d799`。首次重启 health 短暂 502 后恢复，service/health/401/双回环/state-vault hash/0600 全通过，旧 release 保留。
+- 部署浏览器只读验收：经临时 SSH 隧道打开腾讯页面，四个合成面板最终均显示“完整加载（成功 6/6，失败 0）”，控制台无 error/warning；临时页面与隧道已关闭。阶段=`main + deployed-code / not real-probed / not persistently receipted / not rendered / not accepted`，合成结果不替代真实源验收。
+- 唯一最安全下一步：由 Codex提交部署证据 docs-only PR，等待 PR/main CI 后三端收口；下一代码批次为 OMB-AUD-015 的 ComparisonReceipt 创建/持久化，不发真实上游请求。用户行动：无。
