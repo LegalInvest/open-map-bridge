@@ -173,3 +173,7 @@
 - 2026-09-01 01:01：PR #29 squash 合并为 main/origin `67ea901`；main CI `33417146165` 再次通过交底、3 Node、241 Vitest、8 typecheck、production build/smoke 和 4 Chrome。FIX-BATCH-014A 达到 `main`，不是 deployed/accepted。
 - 容量与部署：本机 `8,452,588 KiB` 可用，只高于 8 GiB 门约 62 MiB，swap 使用约 7.38 GiB；没有本地构建、测试或部署制品。腾讯 current 继续为已验证 `3bbcbfa`，服务健康/双回环/state/vault 证据沿用本轮只读复核，不包含 014A 运行代码。
 - 唯一最安全下一步：由 Codex 先合并本次 main 证据回写；待本机可用空间具有明确安全余量后，从精确 main 构建/冒烟并按 versioned release 契约部署 014A，再在用户授权启用官方 Ovi 回环接口后产生第一条真实 ProbeResult。
+- 2026-09-01 01:15：docs-only main/origin `16e805d` 的 CI `33417916800` 全绿。精确 main 通过 `git archive` 流式送入腾讯专用构建目录，以 Node 24.19/npm 11.17 完成 npm ci（0 vulnerabilities）、环境门、3 Node＋241 Vitest、8 typecheck、build 和 production smoke；本机未构建/下载。
+- 腾讯部署：新 release `/opt/open-map-bridge/releases/16e805d` 的 gateway/Web hash 与 manifest 匹配；current 从 `3bbcbfa` 原子切换到 `16e805d`。health=`atomic-json/encrypted-local`、未鉴权 401、4174/8080 双回环、service active，state/vault hash 前后不变；旧 release 保留，远端临时 build 已删除。
+- 阶段：FIX-BATCH-014A=`deployed`；真实 Ovi ProbeResult、真实日期、rendered、accepted 均未达到。通用源 014B 仍受 OMB-AUD-007/008 阻塞。
+- 唯一最安全下一步：用户在操作时确认后，由 Codex 在官方奥维客户端启用第三方接口并立即验证只监听 loopback；通过才为已授权同 UUID 源配置一个已核验日期/probe，产生第一条真实 ProbeResult。若监听非回环则立即关闭且不探测。

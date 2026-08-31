@@ -129,7 +129,7 @@ OMB_OVI_PROBE_JSON='<one registered {dateId,z,x,y} JSON object>' \
 npm run dev
 ```
 
-前三项必须一起配置且 map type 必须与目标导入源的 `legacyId` 匹配。日期 JSON 最多 500 项，只允许 `id/requestDate/captureDate/precision/availability`；额外字段失败关闭，`provenance` 由网关写成固定非秘密值。probe 必须引用其中一个非 `missing/failed` 日期，不能包含 token、Cookie、host 或私有认证值。网关只以显式 source UUID 建立 runtime；即使另一个源具有相同 legacy ID 也不会绑定。未配置 probe 或 probe 的 200/非空/PNG-JPEG 完整解码/尺寸门任一失败时仍为 configured，只有全部通过才在本次启动中标 ready。当前 probe 回执尚未持久化，单瓦片通过也不证明四期互异、真实日期目录或用户业务验收。
+前三项必须一起配置且 map type 必须与目标导入源的 `legacyId` 匹配。日期 JSON 最多 500 项，只允许 `id/requestDate/captureDate/precision/availability`；额外字段失败关闭，`provenance` 由网关写成固定非秘密值。probe 必须引用其中一个非 `missing/failed` 日期，不能包含 token、Cookie、host 或私有认证值。网关只以显式 source UUID 建立 runtime；即使另一个源具有相同 legacy ID 也不会绑定。未配置 probe 时保持 configured 且不产生 ProbeResult。已配置 probe 时，网关以同 source UUID、导入 SHA、回环 origin、mapType、排序日期目录和 probe 坐标形成安全输入指纹；首次成功或失败都先原子持久化脱敏 ProbeResult，同指纹重启直接复用且不重复请求。只有状态 200、非空、PNG/JPEG 完整解码和尺寸门全部通过并持久成功证据后才标 ready；失败保持 configured。当前没有显式“重试同指纹”操作，配置事实变化会产生新指纹；不要通过手改状态触发重试。单瓦片通过仍不证明四期互异、真实日期目录或用户业务验收。
 
 ## 数据真实性
 
