@@ -130,7 +130,7 @@ async function confirmCredentialSource(app: Awaited<ReturnType<typeof buildApp>>
     url: '/api/import/inspect/qr',
     payload: {
       payload:
-        'ovobj?t=1&id=402&na=Credential%20Fixture&po=1&he=18&oy=3&df=0&hn=tiles.example.invalid&ul=%2F%7B%24z%7D%2F%7B%24x%7D%2F%7B%24y%7D.png%3Ftoken%3Dredacted-fixture',
+        'ovobj?t=1&id=402&na=Credential%20Fixture&po=1&he=18&oy=3&df=0&hn=tiles.example.invalid&ul=https%3A%2F%2Ftiles.example.invalid%2F%7B%24z%7D%2F%7B%24x%7D%2F%7B%24y%7D.png%3Ftoken%3Dredacted-fixture',
     },
   });
   const preview = inspect.json();

@@ -124,6 +124,39 @@ export function inspectSourceNetworkPolicy(source: MapSourceDefinition): SourceP
       nextAction: '修正路径模板后重新导入',
     };
   }
+  const needsOviBridge = source.compatibilityExtension.needsOviBridge === true;
+  if (!needsOviBridge) {
+    const untrusted = new Set(['not-provided', 'redacted', 'legacy-unknown']);
+    const provenance = source.requestPlanProvenance;
+    if (
+      untrusted.has(provenance.hosts) ||
+      untrusted.has(provenance.pathTemplate) ||
+      Object.values(provenance.queryParameters).some((value) => untrusted.has(value))
+    ) {
+      return {
+        decision: 'intervention',
+        code: 'POLICY_REQUEST_PLAN_UNVERIFIED',
+        message: '图源请求主机、路径或公开参数仍含未确认字段，默认不允许外联',
+        nextAction: '重新导入或人工校正请求计划字段后再检查',
+      };
+    }
+    if (source.transportScheme === 'unknown') {
+      return {
+        decision: 'intervention',
+        code: 'POLICY_TRANSPORT_SCHEME_UNKNOWN',
+        message: '图源没有可证实的 HTTP/HTTPS 传输协议，默认不允许外联',
+        nextAction: '重新导入带完整 URL 的图源，或人工确认传输协议',
+      };
+    }
+    if (source.transportScheme === 'http') {
+      return {
+        decision: 'intervention',
+        code: 'POLICY_INSECURE_TRANSPORT_REVIEW',
+        message: '图源使用明文 HTTP，默认不允许携带凭证或直接外联',
+        nextAction: '优先改用 HTTPS；确需 HTTP 时进行逐源风险确认',
+      };
+    }
+  }
   for (const host of source.hosts) {
     const result = inspectHost(host);
     if (result.decision !== 'allowed') return result;

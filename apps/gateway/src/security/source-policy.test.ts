@@ -15,9 +15,16 @@ function source(overrides: Partial<MapSourceDefinition> = {}): MapSourceDefiniti
     maxZoom: 18,
     tileSize: 256,
     format: 'png',
+    transportScheme: 'https',
     hosts: ['tiles.example.invalid'],
     pathTemplate: '/{$z}/{$x}/{$y}.png',
     queryParameters: {},
+    requestPlanProvenance: {
+      transportScheme: 'parsed',
+      hosts: 'parsed',
+      pathTemplate: 'parsed',
+      queryParameters: {},
+    },
     credentialRef: null,
     attribution: null,
     license: null,
@@ -57,4 +64,34 @@ it('requires explicit enterprise review for private and nonstandard endpoints', 
   expect(inspectSourceNetworkPolicy(source({ hosts: ['tiles.example.invalid:8443'] }))).toEqual(
     expect.objectContaining({ decision: 'intervention', code: 'POLICY_ENTERPRISE_PORT_REVIEW' }),
   );
+});
+
+it('fails closed for unknown, insecure, or unproven generic request plans', () => {
+  expect(inspectSourceNetworkPolicy(source({ transportScheme: 'unknown' }))).toEqual(
+    expect.objectContaining({ decision: 'intervention', code: 'POLICY_TRANSPORT_SCHEME_UNKNOWN' }),
+  );
+  expect(inspectSourceNetworkPolicy(source({ transportScheme: 'http' }))).toEqual(
+    expect.objectContaining({ decision: 'intervention', code: 'POLICY_INSECURE_TRANSPORT_REVIEW' }),
+  );
+  expect(inspectSourceNetworkPolicy(source({
+    requestPlanProvenance: {
+      transportScheme: 'parsed',
+      hosts: 'redacted',
+      pathTemplate: 'parsed',
+      queryParameters: {},
+    },
+  }))).toEqual(expect.objectContaining({ decision: 'intervention', code: 'POLICY_REQUEST_PLAN_UNVERIFIED' }));
+});
+
+it('keeps opaque Ovi bridge records on the controlled bridge path', () => {
+  expect(inspectSourceNetworkPolicy(source({
+    transportScheme: 'unknown',
+    requestPlanProvenance: {
+      transportScheme: 'redacted',
+      hosts: 'parsed',
+      pathTemplate: 'redacted',
+      queryParameters: {},
+    },
+    compatibilityExtension: { credentialRequired: true, needsOviBridge: true },
+  }))).toEqual(expect.objectContaining({ decision: 'allowed', code: null }));
 });

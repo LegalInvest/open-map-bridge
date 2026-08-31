@@ -163,9 +163,11 @@ projection
 tileMatrix
 minZoom/maxZoom
 tileSize/format
+transportScheme     http | https | unknown
 hosts[]
 pathTemplate
 queryParameters      non-secret only
+requestPlanProvenance per-field parsed/inferred/user-corrected/not-provided/redacted/legacy-unknown
 credentialRef        opaque local reference
 subdomainPolicy
 overlayRelations

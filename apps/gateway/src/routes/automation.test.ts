@@ -12,11 +12,12 @@ afterEach(async () => {
 });
 
 async function importSource(app: Awaited<ReturnType<typeof buildApp>>, host: string, path: string) {
+  const requestPath = path.startsWith('/') ? `https://${host}${path}` : path;
   const inspect = await app.inject({
     method: 'POST',
     url: '/api/import/inspect/qr',
     payload: {
-      payload: `ovobj?t=1&id=402&na=Readiness%20Fixture&po=1&he=18&oy=3&df=0&hn=${encodeURIComponent(host)}&ul=${encodeURIComponent(path)}`,
+      payload: `ovobj?t=1&id=402&na=Readiness%20Fixture&po=1&he=18&oy=3&df=0&hn=${encodeURIComponent(host)}&ul=${encodeURIComponent(requestPath)}`,
     },
   });
   expect(inspect.statusCode).toBe(200);

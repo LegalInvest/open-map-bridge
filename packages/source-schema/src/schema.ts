@@ -5,6 +5,8 @@ export type SourceKind = 'qr' | 'ovmap' | 'oms' | 'manual';
 export type MapProtocol = 'xyz' | 'tms' | 'wmts' | 'wms' | 'arcgis' | 'ovi-template';
 export type ProjectionId = 'EPSG:3857' | 'EPSG:4326' | `EPSG:${number}` | 'unknown';
 export type TileFormat = 'png' | 'jpg' | 'webp' | 'unknown';
+export type TransportScheme = 'http' | 'https' | 'unknown';
+export type FieldProvenance = 'parsed' | 'inferred' | 'user-corrected' | 'not-provided' | 'redacted' | 'legacy-unknown';
 export type SourceStatus =
   | 'received'
   | 'parsed'
@@ -34,9 +36,16 @@ export interface MapSourceDefinition {
   maxZoom: number;
   tileSize: 256 | 512;
   format: TileFormat;
+  transportScheme: TransportScheme;
   hosts: string[];
   pathTemplate: string;
   queryParameters: Record<string, string>;
+  requestPlanProvenance: {
+    transportScheme: FieldProvenance;
+    hosts: FieldProvenance;
+    pathTemplate: FieldProvenance;
+    queryParameters: Record<string, FieldProvenance>;
+  };
   credentialRef: string | null;
   attribution: string | null;
   license: string | null;
@@ -107,6 +116,48 @@ export interface ImportReceipt {
 }
 
 const secretKey = /token|key|secret|cookie|authorization|auth|sig|session|password|credential|access/i;
+const tileVariable = /\{\$(?:x|y|z|serverpart)(?:[}/]|$)/i;
+const nonSecretConstantQueryKeys = new Set([
+  'bgcolor',
+  'crs',
+  'dpi',
+  'f',
+  'format',
+  'height',
+  'lang',
+  'language',
+  'layer',
+  'layers',
+  'mode',
+  'quality',
+  'request',
+  'service',
+  'srs',
+  'style',
+  'styles',
+  'tilematrixset',
+  'time',
+  'transparent',
+  'type',
+  'version',
+  'width',
+]);
+
+export function isSafeNonSecretQueryParameter(key: string, value: string): boolean {
+  if (
+    key.length < 1 ||
+    key.length > 128 ||
+    value.length > 4096 ||
+    secretKey.test(key) ||
+    /[\u0000-\u001f\u007f]/.test(key) ||
+    /[\u0000-\u001f\u007f]/.test(value)
+  ) {
+    return false;
+  }
+  if (tileVariable.test(value)) return true;
+  return value.length <= 512 && nonSecretConstantQueryKeys.has(key.toLowerCase());
+}
+
 const host = z
   .string()
   .min(1)
@@ -131,6 +182,24 @@ export const sourceStatusSchema = z.enum([
   'disabled',
 ]);
 
+const fieldProvenanceSchema = z.enum([
+  'parsed',
+  'inferred',
+  'user-corrected',
+  'not-provided',
+  'redacted',
+  'legacy-unknown',
+]);
+
+const requestPlanProvenanceSchema = z
+  .object({
+    transportScheme: fieldProvenanceSchema,
+    hosts: fieldProvenanceSchema,
+    pathTemplate: fieldProvenanceSchema,
+    queryParameters: z.record(z.string().min(1).max(128), fieldProvenanceSchema),
+  })
+  .strict();
+
 export const mapSourceDefinitionSchema = z
   .object({
     schemaVersion: z.literal(1),
@@ -144,6 +213,7 @@ export const mapSourceDefinitionSchema = z
     maxZoom: z.number().int().min(0).max(30),
     tileSize: z.union([z.literal(256), z.literal(512)]),
     format: z.enum(['png', 'jpg', 'webp', 'unknown']),
+    transportScheme: z.enum(['http', 'https', 'unknown']).default('unknown'),
     hosts: z.array(host).min(1).max(32),
     pathTemplate: z.string().min(1).max(8192),
     queryParameters: z
@@ -155,6 +225,7 @@ export const mapSourceDefinitionSchema = z
           }
         }
       }),
+    requestPlanProvenance: requestPlanProvenanceSchema.optional(),
     credentialRef: z.string().regex(/^vault:\/\/source\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/).nullable(),
     attribution: z.string().max(2048).nullable(),
     license: z.string().max(256).nullable(),
@@ -169,12 +240,42 @@ export const mapSourceDefinitionSchema = z
     lastVerifiedAt: z.string().datetime().nullable(),
   })
   .strict()
+  .transform((value) => ({
+    ...value,
+    requestPlanProvenance: value.requestPlanProvenance ?? {
+      transportScheme: 'legacy-unknown' as const,
+      hosts: 'legacy-unknown' as const,
+      pathTemplate: 'legacy-unknown' as const,
+      queryParameters: Object.fromEntries(
+        Object.keys(value.queryParameters).map((key) => [key, 'legacy-unknown' as const]),
+      ),
+    },
+  }))
   .superRefine((value, context) => {
     if (value.minZoom > value.maxZoom) {
       context.addIssue({ code: 'custom', message: 'minZoom must not exceed maxZoom', path: ['minZoom'] });
     }
     if (value.credentialRef !== null && value.credentialRef !== `vault://source/${value.id.toLowerCase()}`) {
       context.addIssue({ code: 'custom', message: 'credential reference must belong to the same source UUID', path: ['credentialRef'] });
+    }
+    const queryKeys = Object.keys(value.queryParameters).sort();
+    const provenanceKeys = Object.keys(value.requestPlanProvenance.queryParameters).sort();
+    if (JSON.stringify(queryKeys) !== JSON.stringify(provenanceKeys)) {
+      context.addIssue({
+        code: 'custom',
+        message: 'query parameter provenance must exactly match the public query parameters',
+        path: ['requestPlanProvenance', 'queryParameters'],
+      });
+    }
+    if (
+      value.transportScheme !== 'unknown' &&
+      ['not-provided', 'redacted', 'legacy-unknown'].includes(value.requestPlanProvenance.transportScheme)
+    ) {
+      context.addIssue({
+        code: 'custom',
+        message: 'known transport scheme requires explicit field provenance',
+        path: ['requestPlanProvenance', 'transportScheme'],
+      });
     }
   });
 

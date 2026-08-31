@@ -16,9 +16,16 @@ const source = parseMapSourceDefinition({
   maxZoom: 18,
   tileSize: 256,
   format: 'png',
+  transportScheme: 'https',
   hosts: ['tiles.example.invalid'],
   pathTemplate: '/{$z}/{$x}/{$y}.png',
   queryParameters: {},
+  requestPlanProvenance: {
+    transportScheme: 'parsed',
+    hosts: 'parsed',
+    pathTemplate: 'parsed',
+    queryParameters: {},
+  },
   credentialRef: null,
   attribution: null,
   license: null,
@@ -56,6 +63,19 @@ it('changes the deduplication fingerprint when runtime readiness changes', () =>
   const ready = buildSourceReadinessRun(source, registry('ready'), '2026-08-28T00:00:00.000Z');
   expect(configured.status).toBe('blocked');
   expect(configured.inputFingerprint).not.toBe(ready.inputFingerprint);
+});
+
+it('changes the fingerprint when request plan facts change', () => {
+  const baseline = buildSourceReadinessRun(source, registry('ready'), '2026-08-28T00:00:00.000Z');
+  const changed = buildSourceReadinessRun(parseMapSourceDefinition({
+    ...source,
+    queryParameters: { style: 'satellite' },
+    requestPlanProvenance: {
+      ...source.requestPlanProvenance,
+      queryParameters: { style: 'parsed' },
+    },
+  }), registry('ready'), '2026-08-28T00:00:00.000Z');
+  expect(changed.inputFingerprint).not.toBe(baseline.inputFingerprint);
 });
 
 it('requires the opaque reference to exist in the active credential vault', () => {

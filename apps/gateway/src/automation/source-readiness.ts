@@ -14,14 +14,17 @@ function fingerprint(
 ): string {
   const evidence = {
     processId: 'source-readiness',
-    evaluatorVersion: 1,
-    policyVersion: 1,
+    evaluatorVersion: 2,
+    policyVersion: 2,
     sourceId: source.id,
     status: source.status,
     updatedAt: source.updatedAt,
     credentialConfigured: source.credentialRef !== null && credentialVault?.has(source.credentialRef) === true,
+    transportScheme: source.transportScheme,
     hosts: source.hosts,
     pathTemplate: source.pathTemplate,
+    queryParameters: source.queryParameters,
+    requestPlanProvenance: source.requestPlanProvenance,
     compatibilityExtension: source.compatibilityExtension,
     runtime: runtime
       ? { id: runtime.id, kind: runtime.kind, legacyMapType: runtime.legacyMapType ?? null, availability: runtime.availability }

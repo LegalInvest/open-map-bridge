@@ -177,3 +177,12 @@
 - 腾讯部署：新 release `/opt/open-map-bridge/releases/16e805d` 的 gateway/Web hash 与 manifest 匹配；current 从 `3bbcbfa` 原子切换到 `16e805d`。health=`atomic-json/encrypted-local`、未鉴权 401、4174/8080 双回环、service active，state/vault hash 前后不变；旧 release 保留，远端临时 build 已删除。
 - 阶段：FIX-BATCH-014A=`deployed`；真实 Ovi ProbeResult、真实日期、rendered、accepted 均未达到。通用源 014B 仍受 OMB-AUD-007/008 阻塞。
 - 唯一最安全下一步：用户在操作时确认后，由 Codex 在官方奥维客户端启用第三方接口并立即验证只监听 loopback；通过才为已授权同 UUID 源配置一个已核验日期/probe，产生第一条真实 ProbeResult。若监听非回环则立即关闭且不探测。
+- 2026-09-01 02:48：本机容量恢复至 `10,332,424 KiB`。在分支 `codex/fix-batch-014b-request-plan-truth` 完成 transport scheme／字段 provenance、非秘密常量 query 保留、未知固定值脱敏、OMS 完整事实保留、旧状态兼容但外联失败关闭、HTTP/未知请求计划人工门和 readiness 指纹 V2；定向 48 项、全量 252 Vitest＋3 Node、8 workspace typecheck 均通过，零真实外联。
+- 当前阶段：014B=`local-verified / not main / not deployed / not accepted`；014A 仍为腾讯 `16e805d` deployed，真实 Ovi ProbeResult 仍未产生。OMB-AUD-007 仅关闭 OMS 扁平化子项，QR/`.ovmap` 的投影/缩放/协议长尾仍开放；OMB-AUD-008 仅完成 schema/import/policy 子项，导出与通用 probe 接线仍开放。
+- 2026-09-01 02:52：production build、鉴权/持久化/SIGTERM smoke 与交底新鲜度门通过；Vite 既有大 chunk 警告保留，不影响本批请求计划真值结论。
+- 唯一最安全下一步：由 Codex 提交 014B PR 并交由 GitHub CI 复验；全绿合并后才更新腾讯 versioned release，并继续禁止在 vault＋FIX-BATCH-013 接线完成前请求真实通用图源。
+- 2026-09-01 03:01：PR #32 首轮 CI `33428136462` 红灯保留。交底、3 Node＋252 Vitest、8 typecheck、build/smoke 均通过，公开 E2E 3/4；唯一失败是 QR 夹具使用相对 `ul`，新策略正确返回“等待处理/网络策略”，旧断言仍期待“已阻塞/运行时绑定”。
+- 修正：E2E 夹具改用同 authority 的短显式 HTTPS 模板，不放宽未知 scheme 门。首次完整绝对瓦片路径让 800px 生成二维码过密而本地解码失败，进一步缩短为等价 `/{$z}.png` 后定向旅程 1/1、完整公开旅程 4/4 本地通过；没有真实网络请求。
+- 唯一最安全下一步：由 Codex 同步红灯证据、提交并推送修正，等待 PR #32 第二轮完整 CI；全绿前不合并、不部署。
+- 2026-09-01 03:09：PR #32 第二轮 CI `33428818544` 全绿，完整通过交底新鲜度、3 Node＋252 Vitest、8 workspace typecheck、production build/smoke 和 4 条 Chrome 旅程。分支达到 `PR CI verified / not main`，仍无真实外联。
+- 唯一最安全下一步：由 Codex 回写第二轮 CI 证据并等待证据提交复验；全绿后 squash 合并 PR #32、核验 main CI，再按运行制品变化决定腾讯 versioned release。
