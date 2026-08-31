@@ -10,10 +10,11 @@
 6. 用户真实历史二维码的 `at/ad/al` 和 72 字符不透明 `ul` 已安全识别但未保存；FIX-BATCH-012 的标准 query/header vault 不解释或重建这些奥维私有字段。必须继续通过官方奥维回环桥接或后续有合法格式证据的专用适配器，不得把不透明载荷手工塞入通用 vault、请求真实源或宣称出图。
 7. 导入配置目前可保存为 `confirmed`；零外联静态策略、vault、Ovi ProbeResult、014B 请求计划、014C 通用最小 probe 与 014D 非时序 `map-tiles` 代码已部署到腾讯 `d350ac3`。014D 要求同 UUID、同请求计划/凭据修订的 success 并逐请求复用固定传输和图片门；开放导出、temporal runtime、投影修正和真实源证明仍未实现，合成 probe/部署健康不能证明其他网络源可用。
 8. 开发者 V1 契约和合成适配器已贯通；014D 新增独立 `map-tiles`，不伪造日期且凭据轮换会撤销旧能力。权威腾讯 `d350ac3` 已含代码，但官方 Ovi 和通用 probe 均未对用户真实源执行，故真实 imported source 仍是 `metadata-only`，不得写成 real-probed/rendered/accepted。
-9. 本机容量：2026-09-01 04:52 根卷可用约 9.8 GiB，高于 8 GiB 硬门；014D 全量单测、类型、build/smoke 与公开 E2E 已安全执行。仍须在每个重型动作前复核容量，低于门立即止写；不得通过删除用户数据、项目证据或真实运行数据规避。
+9. 本机容量：2026-09-01 06:42 根卷恢复到 `9,398,964 KiB`（约 8.96 GiB），高于 8 GiB 硬门；FIX-BATCH-015 已在跌破前完成 3 Node＋260 Vitest、8 typecheck、build/smoke、4 Chrome。可恢复小型 GitHub 流程，但每个重任务前仍须复核容量；不得通过删除用户数据、项目证据或真实运行数据规避。
 10. 全量审计：`docs/问题账本.md` 当前记录 40 组问题。FIX-BATCH-001–009 与 FIX-BATCH-012 已进入 main，16 组达到 main、24 组仍未闭合；其余问题不得因生产制品与服务器候选就绪而标记解决。
 11. 真实 ready 晋级：configured 隐藏、空 probe 失败、图片解码/内容验证、本地 gateway 入站信任边界、“不伪造日期目录”、回环 probe/ready、vault、固定传输、ProbeResult／输入指纹重启去重、014B 请求计划、014C 通用合成 probe 与 014D 非时序 tile runtime 均已进入 main/deployed-code。真实日期目录 provider、用户真实瓦片和第一条真实 ProbeResult 仍缺；官方客户端第三方接口的操作时开启与 loopback 监听验证需要用户确认。真实通用源、temporal runtime 和 QR/`.ovmap` 长尾字段仍阻塞。`OMB-AUD-002/007/008` 保持部分开放，不能把 fixture/CI/部署晋级为真实源验收。
-12. 三端部署：runtime source/Tencent current=`d350ac3`，runtime main CI=`33439685686`；部署证据 docs-only main=`c4f0dcf`，main CI=`33440688435`。gateway/Web hash、项目 Node、systemd、宝塔 nginx include、双回环、health/vault 和持久 state/vault hash 均通过，保留 `7da03c3`/`ccd3cd8`/`16e805d` 等回退制品；重启窗口首次 nginx health 短暂 502 后恢复。真实 Ovi 与真实通用 source 业务验收均独立阻塞。
+12. 三端部署：本地/GitHub main=`c6cd5be`，runtime source/Tencent current=`d350ac3`，runtime main CI=`33439685686`，最新 docs main CI=`33441198030`。FIX-BATCH-015 仍只在本地候选分支，腾讯尚未含帧质量修复。gateway/Web hash、项目 Node、systemd、宝塔 nginx include、双回环、health/vault 和持久 state/vault hash 均通过；真实 Ovi 与真实通用 source 业务验收仍独立阻塞。
+14. 帧质量与 rendered：FIX-BATCH-015 已 PR CI verified（PR #41 / CI `33447491953`），能区分 expected/loaded/failed、完整/partial/全失败，但质量状态尚未通过创建 API 写入 ComparisonReceipt；也没有浏览器画布像素/用户确认回执。因此 OMB-AUD-014 仅 partial，OMB-AUD-015 仍 open，任何合成四屏或服务器 200 都不是 `rendered/accepted`。
 13. QR 方言：公开样本新增观察到 `hs/mf/ml/ms/mt/pn/pt`。FIX-BATCH-008 只接受这些键并丢弃未知值；其业务语义、授权和服务器可用性仍未知，不能由“解析成功”晋级为 ready。
 
 ## 已解除的实施阻塞

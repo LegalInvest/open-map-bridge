@@ -215,3 +215,16 @@
 - 唯一最安全下一步：由 Codex 提交部署证据 docs-only PR并等待 PR/main CI；全绿后三端收口，下一业务动作仍是经单独授权获得第一条真实 ProbeResult，而不是扩大抓取。
 - 2026-09-01 05:20：部署证据 PR #39 CI `33440530796` 全绿并合并为 docs-only main/origin `c4f0dcf`，main CI `33440688435` 复验完整门。运行源码/腾讯 current 正确保留 `d350ac3`，不为文档后代重复发布；014D 三端证据收口。
 - 唯一最安全下一步：由 Codex 在下一批实现真实渲染回执门前先取得单独的操作时授权与合法最小真实源；若无授权则保持零真实外联，不扩大抓取。用户行动：无。
+- 2026-09-01 05:48：在 main/origin `c6cd5be` 与腾讯 runtime/current `d350ac3` 基线上启动 `FIX-BATCH-015 / OMB-AUD-014`。新增唯一瓦片质量状态机；只有全部已知瓦片结算且全成功才显示“完整加载”，混合结果显示“部分加载”，全失败独立显示，并在四屏状态条公开 expected/loaded/failed。重复事件不虚增 expected，失败重试可恢复；卸载后不再回写旧面板。
+- 当前阶段：`local-candidate / targeted-verified`。2 个测试文件共 8 项与 Web typecheck、diff check 通过；尚未运行全仓门、PR CI、main 或腾讯部署。ComparisonReceipt 的创建/持久化仍属 OMB-AUD-015，故本批不冒充真实画布 `rendered`；没有真实源、二维码载荷、凭证或外联。
+- 唯一最安全下一步：由 Codex 在容量仍高于 8 GiB 时运行完整本地门；全绿后更新交底指纹并提交 PR，以 GitHub CI 晋级 main，再仅因 Web 运行制品变化更新腾讯 versioned release。用户行动：无。
+- 2026-09-01 05:52：全仓 3 Node＋260 Vitest、8 workspace typecheck、production build/smoke 通过；首次公开 Chrome E2E 2/4 通过，两个时序旅程仍查找旧文案“已加载”，而产品已改为“完整加载（成功 n/n，失败 0）”。该红灯保留，属于验收断言未同步，不计 local-verified；已改为严格匹配新完整质量文案，等待重跑。
+- 2026-09-01 05:53：第二轮公开 Chrome E2E 3/4 通过；同一双湖用例切换到高邮湖后还有一处旧“已加载”断言遗漏。红灯继续保留，最终旧文案断言已改为严格完整质量计数，等待第三轮。
+- 2026-09-01 05:54：第三轮公开 Chrome E2E 仍为 3/4；双湖用例返回宝应湖后的第三处旧文案先触发。全仓搜索随后一次性定位该文件剩余 5 处旧断言，统一抽取完整/失败质量正则；三次红灯均保留，仍不计 local-verified。
+- 2026-09-01 05:55：第四轮公开 Chrome E2E 4/4 全绿。FIX-BATCH-015 达到 `local-verified`：3 Node＋260 Vitest、8 workspace typecheck、production build/smoke、4 Chrome、技术交底与 diff 门通过；三次旧文案断言红灯保留。真实源、持久 ComparisonReceipt、画布 rendered、腾讯部署和用户 accepted 均未达到。
+- 2026-09-01 05:56：本地全门完成后根卷从约 8.25 GiB 突降至 `7,562,484 KiB`，低于 8 GiB 硬门；swap 使用约 5.37 GiB。只读检查未发现 Playwright/Vite/本项目 gateway 残留，活动 agent 仅 root。已停止新测试、构建、浏览器、下载、影像和部署，不删除任何数据/证据。
+- 唯一最安全下一步：由 Codex只做本地 checkpoint 后保持 idle；待根卷恢复至少 8 GiB，再推送 FIX-BATCH-015 PR 并交由 GitHub CI 复验。用户行动：无。
+- 2026-09-01 06:42：根卷恢复到 `9,398,964 KiB`（约 8.96 GiB），容量门解除。只读复核 origin/main=`c6cd5be`、CI `33441198030` 全绿；腾讯 current=`d350ac3`、service active、4174/8080 双回环、nginx health 成功、直连 401、权威 state/vault 文件 0600、服务器根卷约 348 GiB 可用。首次误查不存在的 `state.json/credentials.vault` 路径失败，随后按部署契约 `temporal-state.json/credential-vault.json` 复核成功；未修改服务器。
+- 唯一最安全下一步：由 Codex推送本地 `96645f6` 后续证据提交并创建 FIX-BATCH-015 PR，等待 GitHub CI；全绿前不合并、不部署。用户行动：无。
+- 2026-09-01 06:45：FIX-BATCH-015 PR #41 首轮 CI `33447491953` 对 head `b614845` 全绿，远端完整门通过。阶段=`PR CI verified / not main / not deployed / not rendered / not accepted`；腾讯 current 仍为 `d350ac3`，零真实源请求。
+- 唯一最安全下一步：由 Codex回写首轮 CI 证据并等待证据提交复验；再次全绿后 squash 合并、核验 main CI，再仅因 Web 制品变化部署腾讯 versioned release。用户行动：无。

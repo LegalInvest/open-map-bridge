@@ -471,3 +471,12 @@ fixtures/synthetic/temporal  无外网的 20 年彩色/带标签时序瓦片
 - PR #29 随后 squash 合并为 main `67ea9013991b6c1c65aecba9d15dd18efc3f1e62`；main CI `33417146165` 再次通过相同全门。01:01 本机仅 `8,452,588 KiB` 可用，比 8 GiB 门多 `63,980 KiB`，因此不本地构建、不生成/上传新腾讯制品；腾讯仍是 prior deployed `3bbcbfa`，真实 ProbeResult 仍为 0/未知而非已验收。
 - 证据提交合并后精确 main `16e805d98320f9dd4860b0066f845c18d0b15bbc` 的 CI `33417916800` 全绿。由于本机余量继续收缩，源码通过 `git archive` 流式写入腾讯项目专用 `/opt/open-map-bridge/builds/16e805d`，远端以 Node 24.19/npm 11.17 执行 `npm ci`、环境门、3 Node＋241 Vitest、8 workspace typecheck、build 与 production smoke；0 vulnerabilities，只有既有 Web 大 chunk 警告。
 - 生成制品 manifest 为 gateway `4a8fc8a7a4224cf9b3c024639a142e217446ad1914857891b4591e157eb478d6`、Web index `5eb4f674b4274a98075278e6bc35fe849aa233121212b309d4633244c9685a8b`。新 release `/opt/open-map-bridge/releases/16e805d` root-owned、只读可执行，current 原子切换；health 200、未鉴权 401、双回环、state hash `07648ee2…d6e2` 与 vault hash `89c8d70d…db42` 前后相同，旧 `3bbcbfa` 保留。构建临时目录在 release 验证后已删除，未删除任何 state/vault/source/evidence。
+
+## 2026-09-01 FIX-BATCH-015 帧质量候选证据
+
+- 代码走查确认 `MapPane` 原先在任一 `tileloadend` 后立即上报整屏 `loaded`，而 `tileloaderror` 在已有一个成功瓦片时仍上报 `loaded`；这正是 OMB-AUD-014 的假绿路径。
+- 新候选以 OpenLayers tile key 为唯一计数键，状态集合直接导出 `expected/loaded/failed/pending`：存在 pending 时只能为 loading；全部结算后才可能是完整、partial 或全失败。相同 key 的重复 start 不虚增 expected，失败 key 再次 start/success 可从失败恢复；组件卸载后取消监听并禁止旧回调写入。
+- 页面公开显示每帧成功数、expected 与失败数，不再把 partial 隐藏在“已加载”中。最终本地门为 3 Node＋260 Vitest、8 workspace typecheck、production build/smoke、4 Chrome、交底与 diff 全绿；前三轮 Chrome 因验收仍查旧文案依次为 2/4、3/4、3/4，统一断言后第四轮 4/4，红灯均保留。阶段为 `local-verified / not main / not deployed`。
+- 未完成边界：当前质量对象仍是浏览器内状态，尚未经创建 API 写入 `ComparisonReceipt`，也未证明像素已绘入真实画布。故 OMB-AUD-014 保持 partial，OMB-AUD-015 仍 open；没有真实源、二维码载荷、凭证、外联或影像写入。
+- 06:42 实时复核：本机容量恢复到约 8.96 GiB；origin/main `c6cd5be` 的 CI `33441198030` 仍绿；腾讯 `d350ac3` service active、双回环、nginx health、直连 401、`temporal-state.json`/`credential-vault.json` 0600 与服务器容量通过。首次按非权威旧文件名 stat 失败，未把该失败冒充持久化异常，随后按部署文档路径复核成功。
+- PR #41 head `b614845` 经 GitHub CI `33447491953` 完整复验全绿；该证据只把 FIX-BATCH-015 推进到 PR CI verified，不改变 origin/main `c6cd5be`、腾讯 `d350ac3` 或真实 source rendered/accepted。
