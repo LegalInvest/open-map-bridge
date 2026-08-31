@@ -480,3 +480,5 @@ fixtures/synthetic/temporal  无外网的 20 年彩色/带标签时序瓦片
 - 未完成边界：当前质量对象仍是浏览器内状态，尚未经创建 API 写入 `ComparisonReceipt`，也未证明像素已绘入真实画布。故 OMB-AUD-014 保持 partial，OMB-AUD-015 仍 open；没有真实源、二维码载荷、凭证、外联或影像写入。
 - 06:42 实时复核：本机容量恢复到约 8.96 GiB；origin/main `c6cd5be` 的 CI `33441198030` 仍绿；腾讯 `d350ac3` service active、双回环、nginx health、直连 401、`temporal-state.json`/`credential-vault.json` 0600 与服务器容量通过。首次按非权威旧文件名 stat 失败，未把该失败冒充持久化异常，随后按部署文档路径复核成功。
 - PR #41 head `b614845` 经 GitHub CI `33447491953` 完整复验全绿；该证据只把 FIX-BATCH-015 推进到 PR CI verified，不改变 origin/main `c6cd5be`、腾讯 `d350ac3` 或真实 source rendered/accepted。
+- PR #41 证据提交 CI `33447704065` 全绿后 squash 合并为 main `67a6a0e`，main CI `33447839812` 全绿。精确 main 重建的 gateway/Web index 哈希为 `73808e31…4eb8d`/`3dd8d87d…d799`，与腾讯新 release `67a6a0e` 一致；首次重启 health 短暂 502 后恢复，state/vault 哈希未变、双回环与 0600 通过。
+- 服务器浏览器经临时 SSH 隧道证明四个合成面板最终均显示完整 6/6 且无控制台 error/warning；这只把运行代码推进 deployed-code。没有真实 source、ProbeResult、画布像素回执或持久 ComparisonReceipt，故 OMB-AUD-014 仍 partial，rendered/accepted 未达到。
