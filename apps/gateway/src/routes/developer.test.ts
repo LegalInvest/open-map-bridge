@@ -1,8 +1,29 @@
 import { mkdtemp } from 'node:fs/promises';
+import { createRequire } from 'node:module';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, expect, it } from 'vitest';
 import { buildTestApp as buildApp } from '../test-app.js';
+
+const localRequire = createRequire(import.meta.url);
+const { PNG } = localRequire('pngjs') as {
+  PNG: {
+    new (options: { width: number; height: number }): { width: number; height: number; data: Uint8Array };
+    sync: { write(image: { width: number; height: number; data: Uint8Array }): Uint8Array };
+  };
+};
+
+function validPng(): Uint8Array {
+  const image = new PNG({ width: 1, height: 1 });
+  image.data.set([12, 34, 56, 255]);
+  return PNG.sync.write(image);
+}
+
+function responseBody(bytes: Uint8Array): ArrayBuffer {
+  const copy = new Uint8Array(bytes.byteLength);
+  copy.set(bytes);
+  return copy.buffer;
+}
 
 const apps: Array<Awaited<ReturnType<typeof buildApp>>> = [];
 afterEach(async () => Promise.all(apps.splice(0).map((app) => app.close())));
@@ -98,6 +119,50 @@ it('binds an opaque Ovi import to its persisted UUID while keeping configured ru
   });
   expect(tile.statusCode).toBe(409);
   expect(tile.json()).toEqual({ error: 'source-not-ready' });
+});
+
+it('grants Ovi temporal capabilities only after an authorized tile probe decodes successfully', async () => {
+  const directory = await mkdtemp(join(tmpdir(), 'omb-ovi-probe-'));
+  const dataPath = join(directory, 'state.json');
+  const importing = await buildApp({ dataPath });
+  const importedId = await confirmImportedSource(importing, 'opaque-private-template');
+  await importing.close();
+  const verifiedDate = {
+    id: 'verified-scene-2018',
+    requestDate: '2018-06-30',
+    captureDate: null,
+    precision: 'request-date-only' as const,
+    availability: 'available' as const,
+    provenance: 'authorized test fixture',
+  };
+  const fetchImpl = async () =>
+    new Response(responseBody(validPng()), { status: 200, headers: { 'content-type': 'image/png' } });
+  const app = await buildApp({
+    dataPath,
+    ovi: {
+      baseUrl: 'http://127.0.0.1:54321',
+      mapType: 402,
+      sourceId: importedId,
+      verifiedDates: [verifiedDate],
+      probeRequest: { dateId: verifiedDate.id, z: 8, x: 212, y: 102 },
+      fetchImpl: fetchImpl as typeof fetch,
+    },
+  });
+  apps.push(app);
+
+  const descriptor = (await app.inject({ method: 'GET', url: `/api/v1/developer/sources/${importedId}` })).json();
+  expect(descriptor).toMatchObject({
+    id: importedId,
+    lifecycle: 'ready',
+    accessStatus: 'ready',
+    capabilities: ['metadata', 'temporal-catalog', 'tiles'],
+  });
+  const dates = await app.inject({
+    method: 'GET',
+    url: `/api/v1/developer/sources/${importedId}/dates?aoiId=area-1&from=2006-01-01&to=2025-12-31`,
+  });
+  expect(dates.statusCode).toBe(200);
+  expect(dates.json()).toEqual([verifiedDate]);
 });
 
 it('exposes runtime and imported sources through a secret-free capability directory', async () => {

@@ -113,10 +113,12 @@ node scripts/probe-ovi-bridge.mjs
 OMB_OVI_PORT=<local-port> \
 OMB_OVI_MAP_TYPE=<authorized-map-type> \
 OMB_OVI_SOURCE_ID=<persisted-imported-source-uuid> \
+OMB_OVI_VERIFIED_DATES_JSON='<strict TemporalDateEntry JSON array>' \
+OMB_OVI_PROBE_JSON='<one registered {dateId,z,x,y} JSON object>' \
 npm run dev
 ```
 
-三项必须一起配置且 map type 必须与目标导入源的 `legacyId` 匹配。网关只以显式 source UUID 建立 `configured` runtime；即使另一个源具有相同 legacy ID 也不会绑定。configured 源不会因配置存在而进入历史影像源列表。当前尚无自动真实探测/ready 晋级，不能用该启动命令证明影像可用。
+前三项必须一起配置且 map type 必须与目标导入源的 `legacyId` 匹配。日期 JSON 最多 500 项，只允许 `id/requestDate/captureDate/precision/availability`；额外字段失败关闭，`provenance` 由网关写成固定非秘密值。probe 必须引用其中一个非 `missing/failed` 日期，不能包含 token、Cookie、host 或私有认证值。网关只以显式 source UUID 建立 runtime；即使另一个源具有相同 legacy ID 也不会绑定。未配置 probe 或 probe 的 200/非空/PNG-JPEG 完整解码/尺寸门任一失败时仍为 configured，只有全部通过才在本次启动中标 ready。当前 probe 回执尚未持久化，单瓦片通过也不证明四期互异、真实日期目录或用户业务验收。
 
 ## 数据真实性
 

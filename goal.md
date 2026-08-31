@@ -7,9 +7,9 @@
 - 状态：Approved / Implementing；用户于 2026-08-28 明确最终结果必须能基于已导入奥维图源进行二次开发
 - 产品裁决者：用户
 - 当前整合者：本 Codex 主线程
-- 更新时间：2026-08-31 16:00（Asia/Shanghai）
+- 更新时间：2026-08-31 17:37（Asia/Shanghai）
 - 适用目录：`/Users/assis/Documents/Codex/2026-08-27/open-map-bridge`
-- 当前切片：`FIX-BATCH-010 deployed evidence`。本文件所在 GitHub 提交包含最终部署证据；运行源码自 `33f7f06` 后未变化，腾讯机 current 标签为 `62ab114`，制品哈希与 GitHub main 的运行输入一致，并完成 `62ab114 → 33f7f06 → 62ab114` 回滚/前滚演练。仅证据文档合并不触发无意义的服务重启或新 release。真实目录/provider/probe/ready、真实历史瓦片与用户业务签收仍未达到；本机低于 8 GiB，止写门保持触发
+- 当前切片：`FIX-BATCH-011 Ovi probe/ready local-verified`。GitHub main 与 origin/main 仍为 `9b73949`，CI `33371357929` 全绿；腾讯 current 仍为 `62ab114` 且服务健康。候选新增受限的非秘密日期/探针配置，只有显式探针瓦片通过 200、非空、PNG/JPEG MIME/magic、完整解码和尺寸门后，同一 imported UUID 的 Ovi runtime 才在本次启动中晋级 ready。182 个 Vitest＋2 个 Node 测试与 8 workspace 类型检查本地通过；尚未进入 main/deployed，也未对用户真实源发请求或形成持久化 ProbeResult
 - 上版：V0.4 奥维兼容双入口导入实施版
 
 <!-- GOAL_CAPSULE_START -->
@@ -21,7 +21,7 @@
 
 硬约束：clean-room 独立实现；不得复制奥维专有代码、商标或绕过会员/设备绑定；不得内置、记录或传播第三方 token；解析前不联网，确认前不请求图源；未知版本、解压异常、内网目标或不安全 URL 必须 fail closed；“文件已解析”“探测成功”“成功出图”是不同事实；任何成功都要有导入回执和可复现实证。
 
-当前只允许修改本项目目录和用户已批准的腾讯 OpenMapBridge 专用路径；禁止清理用户文件、改动其他服务器项目、开放公网、批量抓取图源或离线下载 20 年整域瓦片。不得把真实秘密写入 fixture、日志、回执、普通 JSON 或前端。可用空间低于 8 GiB 立即停止本机构建、测试、截图和新增缓存；2026-08-31 15:53 最新约 5.4 GiB，门禁已触发，本轮只做小型文档/证据收口。发现越界需求写入 `BLOCKED.md`。
+当前只允许修改本项目目录和用户已批准的腾讯 OpenMapBridge 专用路径；禁止清理用户文件、改动其他服务器项目、开放公网、批量抓取图源或离线下载 20 年整域瓦片。不得把真实秘密写入 fixture、日志、回执、普通 JSON 或前端。可用空间低于 8 GiB 立即停止本机构建、测试、截图和新增缓存；2026-08-31 17:37 实测约 9.0 GiB，刚越过门禁且仍属低余量，已完成测试/类型检查并优先用 GitHub CI 承担 build/production/E2E。发现越界需求写入 `BLOCKED.md`。
 
 `FIX-BATCH-001` 至 `FIX-BATCH-009` 已进入 GitHub main；`FIX-BATCH-010` 的项目 runtime、release、systemd、BaoTa nginx include、SSH tunnel 和重启证据已达到 `deployed`，证据回写正在进入 GitHub。技术部署不读取用户图源、不改变 source lifecycle，也不授予真实 Ovi 源 ready。
 
@@ -851,3 +851,4 @@ V1 公共类型和错误语义通过契约测试冻结；新增可选能力不�
 - 2026-08-31：FIX-BATCH-009 已进入 main。首个服务器目标经只读比较选定腾讯机；采用 versioned release、项目专用 Node 24 runtime、systemd gateway、loopback nginx 和 SSH tunnel，保持公网开放为禁用状态。部署验收仍必须与真实奥维源业务验收分开。
 - 2026-08-31：FIX-BATCH-010 已部署 main `33f7f06` 到腾讯机 `/opt/open-map-bridge/releases/33f7f06`。首次把 nginx 配置放入未被宝塔主配置 include 的 `/etc/nginx/conf.d`，8080 未监听；经 `nginx -T` 发现并改用 `/www/server/panel/vhost/nginx/*.conf` 后，UI/API、401 边界、双回环监听、状态 600 权限、重启哈希和四屏/播放浏览器旅程通过。该证据只晋级应用部署，不晋级真实 Ovi 源和用户 accepted。
 - 2026-08-31：部署证据 PR #18 合并为 main `62ab114`，main CI `33370752935` 全绿。服务器复制未变化的运行制品为 release `62ab114`，完成 `62ab114 → 33f7f06 → 62ab114`，每次健康通过且状态哈希不变；后续证据提交只改变文档，不改变服务器运行内容。
+- 2026-08-31：容量恢复后启动 `FIX-BATCH-011`。候选只接受严格 `TemporalDateEntry[]` 和一个已登记、可请求的 probe 坐标；OviBridge 启动时发出一次受控回环请求，只有 200 非空图片通过既有完整解码/尺寸门才把同一 imported UUID 的 runtime 标为 ready，403/损坏图片/无 probe 均保持 configured。182 个 Vitest＋2 个 Node 测试与 8 workspace 类型检查通过；当前为 `local-verified`，不是 main/deployed/真实源 accepted，且探测结果持久化、真实目录 provider、vault 与请求时 DNS/IP/重绑定门仍开放。

@@ -1,9 +1,17 @@
 import type { GatewayAccessConfig, GatewayPermission, GatewayPrincipal } from './security/gateway-access.js';
+import {
+  parseTemporalDateEntry,
+  parseTemporalTileRequest,
+  type TemporalDateEntry,
+  type TemporalTileRequest,
+} from '@omb/temporal-source';
 
 export interface OviBridgeConfig {
   baseUrl: string;
   mapType: number;
   sourceId: string;
+  verifiedDates?: TemporalDateEntry[];
+  probeRequest?: TemporalTileRequest;
 }
 
 export interface GatewayServerConfig {
@@ -121,9 +129,11 @@ export function parseOviBridgeConfig(environment: NodeJS.ProcessEnv): OviBridgeC
   const portValue = environment.OMB_OVI_PORT;
   const mapTypeValue = environment.OMB_OVI_MAP_TYPE;
   const sourceId = environment.OMB_OVI_SOURCE_ID;
+  const datesValue = environment.OMB_OVI_VERIFIED_DATES_JSON;
+  const probeValue = environment.OMB_OVI_PROBE_JSON;
   const configuredCount = [portValue, mapTypeValue, sourceId].filter(Boolean).length;
-  if (configuredCount > 0 && configuredCount < 3) {
-    throw new Error('OMB_OVI_PORT, OMB_OVI_MAP_TYPE, and OMB_OVI_SOURCE_ID must be configured together');
+  if ((configuredCount > 0 && configuredCount < 3) || (configuredCount === 0 && (datesValue || probeValue))) {
+    throw new Error('OMB_OVI_PORT, OMB_OVI_MAP_TYPE, and OMB_OVI_SOURCE_ID must be configured together before probe metadata');
   }
   if (!portValue || !mapTypeValue || !sourceId) return undefined;
 
@@ -138,5 +148,55 @@ export function parseOviBridgeConfig(environment: NodeJS.ProcessEnv): OviBridgeC
   if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(sourceId)) {
     throw new Error('OMB_OVI_SOURCE_ID must be a UUID');
   }
-  return { baseUrl: `http://127.0.0.1:${port}`, mapType, sourceId };
+  let verifiedDates: TemporalDateEntry[] | undefined;
+  if (datesValue) {
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(datesValue);
+    } catch {
+      throw new Error('OMB_OVI_VERIFIED_DATES_JSON must be valid JSON');
+    }
+    if (!Array.isArray(parsed) || parsed.length < 1 || parsed.length > 500) {
+      throw new Error('OMB_OVI_VERIFIED_DATES_JSON must contain 1 to 500 date entries');
+    }
+    const allowedDateKeys = new Set(['id', 'requestDate', 'captureDate', 'precision', 'availability']);
+    verifiedDates = parsed.map((entry) => {
+      if (
+        typeof entry !== 'object' ||
+        entry === null ||
+        Array.isArray(entry) ||
+        Object.keys(entry).some((key) => !allowedDateKeys.has(key))
+      ) {
+        throw new Error('OMB_OVI_VERIFIED_DATES_JSON contains an invalid or non-public field');
+      }
+      return parseTemporalDateEntry({ ...entry, provenance: 'authorized-operator-ovi-date' });
+    });
+    if (new Set(verifiedDates.map((entry) => entry.id)).size !== verifiedDates.length) {
+      throw new Error('OMB_OVI_VERIFIED_DATES_JSON date IDs must be unique');
+    }
+  }
+
+  let probeRequest: TemporalTileRequest | undefined;
+  if (probeValue) {
+    if (!verifiedDates) throw new Error('OMB_OVI_PROBE_JSON requires OMB_OVI_VERIFIED_DATES_JSON');
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(probeValue);
+    } catch {
+      throw new Error('OMB_OVI_PROBE_JSON must be valid JSON');
+    }
+    probeRequest = parseTemporalTileRequest(parsed);
+    const probeDate = verifiedDates.find((entry) => entry.id === probeRequest?.dateId);
+    if (!probeDate || ['missing', 'failed'].includes(probeDate.availability)) {
+      throw new Error('OMB_OVI_PROBE_JSON must reference a requestable verified date');
+    }
+  }
+
+  return {
+    baseUrl: `http://127.0.0.1:${port}`,
+    mapType,
+    sourceId,
+    ...(verifiedDates ? { verifiedDates } : {}),
+    ...(probeRequest ? { probeRequest } : {}),
+  };
 }

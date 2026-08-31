@@ -60,6 +60,40 @@ it('does not report readiness before a real tile has been verified', async () =>
   });
 });
 
+it('reports readiness only after the configured probe tile passes the full image gate', async () => {
+  const fetchImpl = vi.fn(async () =>
+    new Response(responseBody(validPng()), { status: 200, headers: { 'content-type': 'image/png' } }),
+  );
+  const adapter = new OviBridgeAdapter({
+    baseUrl: 'http://127.0.0.1:19991',
+    mapType: 200,
+    verifiedDates: [verifiedDate],
+    probeRequest: { dateId: verifiedDate.id, z: 8, x: 212, y: 102 },
+    fetchImpl: fetchImpl as typeof fetch,
+  });
+  await expect(adapter.probe()).resolves.toEqual({
+    ok: true,
+    detail: 'authorized loopback tile probe passed image validation',
+  });
+  expect(fetchImpl).toHaveBeenCalledTimes(1);
+});
+
+it('keeps the runtime unready when a configured probe is denied or invalid', async () => {
+  for (const response of [
+    new Response('', { status: 403 }),
+    new Response('not-an-image', { status: 200, headers: { 'content-type': 'image/png' } }),
+  ]) {
+    const adapter = new OviBridgeAdapter({
+      baseUrl: 'http://127.0.0.1:19991',
+      mapType: 200,
+      verifiedDates: [verifiedDate],
+      probeRequest: { dateId: verifiedDate.id, z: 8, x: 212, y: 102 },
+      fetchImpl: (async () => response) as typeof fetch,
+    });
+    await expect(adapter.probe()).resolves.toMatchObject({ ok: false });
+  }
+});
+
 it.each([
   { contentType: 'image/png', tileBytes: validPng() },
   { contentType: 'image/jpeg', tileBytes: validJpeg() },
@@ -202,6 +236,15 @@ it('rejects invalid or duplicate verified date catalog entries', () => {
         verifiedDates: [verifiedDate, { ...verifiedDate }],
       }),
   ).toThrow(/unique/i);
+  expect(
+    () =>
+      new OviBridgeAdapter({
+        baseUrl: 'http://127.0.0.1:19991',
+        mapType: 200,
+        verifiedDates: [verifiedDate],
+        probeRequest: { dateId: 'not-in-catalog', z: 8, x: 212, y: 102 },
+      }),
+  ).toThrow(/requestable verified date/i);
 });
 
 it('rejects invalid temporal inputs before an upstream fetch', async () => {

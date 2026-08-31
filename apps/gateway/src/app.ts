@@ -6,6 +6,7 @@ import { TemporalStateRepository } from './storage/temporal-state.js';
 import { TemporalSourceRegistry } from './temporal/registry.js';
 import { SyntheticTemporalAdapter } from './temporal/synthetic-adapter.js';
 import { OviBridgeAdapter } from './temporal/ovi-bridge.js';
+import type { OviBridgeOptions } from './temporal/ovi-bridge.js';
 import { createImportInspector } from './import/inspector.js';
 import { registerImportRoutes } from './routes/import.js';
 import { registerDeveloperRoutes } from './routes/developer.js';
@@ -19,29 +20,31 @@ import {
 
 export interface BuildAppOptions {
   dataPath: string | null;
-  ovi?: { baseUrl: string; mapType: number; sourceId: string };
+  ovi?: OviBridgeOptions & { sourceId: string };
   access: GatewayAccessConfig | null;
 }
 
-function bindImportedOviSource(
+async function bindImportedOviSource(
   registry: TemporalSourceRegistry,
   source: MapSourceDefinition,
   ovi: NonNullable<BuildAppOptions['ovi']>,
-): void {
+): Promise<void> {
   if (source.id !== ovi.sourceId) throw new Error('configured Ovi source ID does not match the imported source');
   if (source.compatibilityExtension.needsOviBridge !== true) {
     throw new Error('configured Ovi source does not require the local bridge');
   }
   if (source.legacyId !== ovi.mapType) throw new Error('configured Ovi map type does not match the imported source');
   if (registry.get(source.id)) throw new Error(`duplicate temporal source ${source.id}`);
+  const adapter = new OviBridgeAdapter(ovi);
+  const probe = await adapter.probe();
   registry.register({
     id: source.id,
     name: source.name,
     kind: 'ovi-bridge',
     legacyMapType: ovi.mapType,
-    availability: 'configured',
+    availability: probe.ok ? 'ready' : 'configured',
     datePrecision: 'request-date-only',
-    adapter: new OviBridgeAdapter(ovi),
+    adapter,
   });
 }
 
@@ -60,7 +63,7 @@ export async function buildApp(options: BuildAppOptions): Promise<FastifyInstanc
     const ovi = options.ovi;
     const source = repository.listImportSources().find((candidate) => candidate.id === ovi.sourceId);
     if (!source) throw new Error('configured Ovi source ID was not found in persisted imports');
-    bindImportedOviSource(registry, source, ovi);
+    await bindImportedOviSource(registry, source, ovi);
   }
 
   const app = Fastify({ logger: false });
