@@ -13,7 +13,7 @@
 9. 本机容量：2026-09-01 04:52 根卷可用约 9.8 GiB，高于 8 GiB 硬门；014D 全量单测、类型、build/smoke 与公开 E2E 已安全执行。仍须在每个重型动作前复核容量，低于门立即止写；不得通过删除用户数据、项目证据或真实运行数据规避。
 10. 全量审计：`docs/问题账本.md` 当前记录 40 组问题。FIX-BATCH-001–009 与 FIX-BATCH-012 已进入 main，16 组达到 main、24 组仍未闭合；其余问题不得因生产制品与服务器候选就绪而标记解决。
 11. 真实 ready 晋级：configured 隐藏、空 probe 失败、图片解码/内容验证、本地 gateway 入站信任边界、“不伪造日期目录”、回环 probe/ready、vault、固定传输、ProbeResult／输入指纹重启去重、014B 请求计划和 014C 通用合成 probe 均已进入 main/deployed-code；014D 通用非时序 tile runtime 仅 local-verified。真实日期目录 provider、用户真实瓦片和第一条真实 ProbeResult 仍缺；官方客户端第三方接口的操作时开启与 loopback 监听验证需要用户确认。真实通用源、temporal runtime 和 QR/`.ovmap` 长尾字段仍阻塞。`OMB-AUD-002/007/008` 保持部分开放，不能把 fixture/CI/部署晋级为真实源验收。
-12. 三端部署：runtime source/Tencent current=`7da03c3`，runtime main CI=`33435153343`；docs-only main=`a98d096`，main CI=`33436794737`。014D 仅本机候选，尚未 GitHub main 或腾讯。既有 gateway/Web hash、项目 Node、systemd、宝塔 nginx include、双回环、health/vault 和持久 state/vault hash 均通过，保留 `ccd3cd8`/`16e805d` 等回退制品；docs-only 后代不重复发布。真实 Ovi 与真实通用 source 业务验收均独立阻塞。
+12. 三端部署：runtime source/Tencent current=`7da03c3`，runtime main CI=`33435153343`；docs-only main=`a98d096`，main CI=`33436794737`。014D 功能提交 `72a054b` 的 PR #38 CI `33439198444` 全绿，但尚未 GitHub main 或腾讯。既有 gateway/Web hash、项目 Node、systemd、宝塔 nginx include、双回环、health/vault 和持久 state/vault hash 均通过，保留 `ccd3cd8`/`16e805d` 等回退制品；docs-only 后代不重复发布。真实 Ovi 与真实通用 source 业务验收均独立阻塞。
 13. QR 方言：公开样本新增观察到 `hs/mf/ml/ms/mt/pn/pt`。FIX-BATCH-008 只接受这些键并丢弃未知值；其业务语义、授权和服务器可用性仍未知，不能由“解析成功”晋级为 ready。
 
 ## 已解除的实施阻塞

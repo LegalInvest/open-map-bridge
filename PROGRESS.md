@@ -208,3 +208,5 @@
 - 本地门：3 Node＋257 Vitest、8 workspace typecheck、production build/smoke、4 Chrome E2E 全绿；只用本机回环合成上游，零用户二维码、零真实凭证、零真实 DNS/HTTP。容量约 9.8 GiB，高于 8 GiB 门。
 - 阶段：014D=`local-verified / not main / not deployed / not real-probed / not rendered / not accepted`；本地/GitHub main 基线 `a98d096`，腾讯 runtime/current 仍为 `7da03c3`。普通源没有日期目录时只获 `map-tiles`，不获 `temporal-catalog/tiles`；服务端图片成功不冒充浏览器画布 rendered。
 - 唯一最安全下一步：由 Codex 更新技术交底指纹并提交 014D PR；GitHub PR/main CI 全绿后才部署新的腾讯 versioned release，期间继续不请求任何真实第三方图源。
+- 2026-09-01 05:03：PR #38 CI `33439198444` 对功能提交 `72a054b` 全绿，完整复验交底、3 Node＋257 Vitest、8 typecheck、build/smoke 和 4 Chrome。阶段=`PR CI verified / not main / not deployed / not real-probed / not rendered / not accepted`。
+- 唯一最安全下一步：由 Codex 回写 PR CI 证据并等待证据提交复验；全绿后 squash 合并、核验 main CI，再仅因运行制品变化更新腾讯 versioned release。

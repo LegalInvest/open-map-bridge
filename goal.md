@@ -9,7 +9,7 @@
 - 当前整合者：本 Codex 主线程
 - 更新时间：2026-09-01 04:52（Asia/Shanghai）
 - 适用目录：`/Users/assis/Documents/Codex/2026-08-27/open-map-bridge`
-- 当前切片：`FIX-BATCH-014D local-verified / not main / not deployed / real probe blocked`。A/B/C 的 runtime source/Tencent current 仍为 `7da03c3`，docs-only main 为 `a98d096`，最新 main CI `33436794737` 全绿。014D 在本机回环合成上游上把“同 UUID、同请求计划/凭据修订的成功 ProbeResult”绑定为独立非时序 `map-tiles` 能力；每个瓦片请求继续重建服务端请求并执行固定传输和完整图片门，凭据轮换会立即撤销旧绑定。3 Node＋257 Vitest、8 workspace typecheck、production build/smoke 和 4 Chrome E2E 全绿。它没有伪造日期目录、没有真实第三方请求，也没有浏览器真实地图画布回执；因此不是 main/deployed/real-probed/rendered/accepted。
+- 当前切片：`FIX-BATCH-014D PR CI verified / not main / not deployed / real probe blocked`。A/B/C 的 runtime source/Tencent current 仍为 `7da03c3`，docs-only main 为 `a98d096`。014D 功能提交 `72a054b` 已由 PR #38 CI `33439198444` 完整复验；它在回环合成上游上把“同 UUID、同请求计划/凭据修订的成功 ProbeResult”绑定为独立非时序 `map-tiles` 能力，每个瓦片请求继续重建服务端请求并执行固定传输和完整图片门，凭据轮换立即撤销旧绑定。3 Node＋257 Vitest、8 workspace typecheck、production build/smoke 和 4 Chrome E2E 全绿。它没有伪造日期目录、没有真实第三方请求，也没有浏览器真实地图画布回执；因此不是 main/deployed/real-probed/rendered/accepted。
 - 上版：V0.4 奥维兼容双入口导入实施版
 
 <!-- GOAL_CAPSULE_START -->

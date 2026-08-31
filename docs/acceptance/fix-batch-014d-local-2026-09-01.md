@@ -1,7 +1,7 @@
 # FIX-BATCH-014D 本地验收回执
 
 - 时间：2026-09-01 04:52（Asia/Shanghai）
-- 阶段：`local-verified / not main / not deployed / not real-probed / not rendered / not accepted`
+- 阶段：`PR CI verified / not main / not deployed / not real-probed / not rendered / not accepted`
 - 工作树基线：`a98d096ff23c57145bec57f0d5f85fa23a74be22`
 - 真实外联：0；仅使用进程内本机回环合成上游
 
@@ -22,6 +22,7 @@
 - 制品：production build 与 production smoke 全绿；保留既有 Web 大 chunk warning。
 - 浏览器：4 条公开 Chrome E2E 全绿。
 - 容量：执行前后根卷约 9.8 GiB 可用，高于 8 GiB 硬门。
+- GitHub：PR #38 功能提交 `72a054b` 的 CI `33439198444` 完整全绿。
 
 ## 阶段边界
 

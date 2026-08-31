@@ -27,6 +27,7 @@
 - 2026-09-01 04:19 PR #35 证据提交 CI `33434979533` 全绿并 squash 合并为 main `7da03c3`；main CI `33435153343` 再次通过交底、256 Vitest＋3 Node、8 typecheck、build/smoke 与 4 Chrome。精确 main 本地 build/smoke 后，腾讯安装 release `7da03c3` 并原子切换 current；gateway/Web SHA-256 为 `a3d69a0e…56a1d`/`42368f3e…04ad`，health 200、直连 401、4174/8080 双回环、state `07648ee2…d6e2` 与 vault `89c8d70d…db42` 未变且均为 0600。重启窗口首次 nginx health 为 502，重试即恢复。014C 达到 `deployed-code`，但没有真实源请求、真实 ProbeResult、通用 runtime ready、rendered 或 accepted。
 - 2026-09-01 04:29 部署证据 PR #36 CI `33436046174` 全绿并合并为 docs-only main `84f103f`；main CI `33436199094` 再次通过完整门。本地/main/origin clean；腾讯 runtime/current 正确保留 `7da03c3`，只读复核 health/401/双回环/artifact/state/vault 均通过。docs-only main 与 runtime source 分开记录，不制造第二个 release。
 - 2026-09-01 04:52 以 docs-only main `a98d096` 为基线完成 FIX-BATCH-014D 本地验证。普通 imported source 只有在同 UUID 的成功 ProbeResult 与当前请求计划/凭据 HMAC 修订完全匹配时才获得独立 `map-tiles`；服务端持久绑定仅含两个 SHA-256 指纹和时间。直接/V1 路由只接受 sourceId＋z/x/y，拒绝任意 query；每次 tile 都重新执行静态策略、DNS/IP/peer 固定、5 MiB、MIME 和完整 PNG/JPEG 解码。凭据轮换立即使旧绑定失效，失败 probe 不绑定，重启只复用脱敏证据。3 Node＋257 Vitest、8 workspace typecheck、production build/smoke 和 4 Chrome E2E 全绿，仅使用本机回环合成上游；当前为 `local-verified / not main / not deployed / not real-probed / not rendered / not accepted`。
+- 2026-09-01 05:03 PR #38 CI `33439198444` 对功能提交 `72a054b` 全绿，远端复验交底新鲜度、3 Node＋257 Vitest、8 workspace typecheck、production build/smoke 与 4 Chrome。当前为 `PR CI verified / not main / not deployed`；CI 绿不产生真实 ProbeResult、rendered 或 accepted。
 
 ### 本轮回答
 
