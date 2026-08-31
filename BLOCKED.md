@@ -15,7 +15,7 @@
 11. 真实 ready 晋级：configured 隐藏、空 probe 失败、图片解码/内容验证、本地 gateway 入站信任边界、“不伪造日期目录”、回环 probe/ready、vault、固定传输、ProbeResult／输入指纹重启去重、014B 请求计划、014C 通用合成 probe 与 014D 非时序 tile runtime 均已进入 main/deployed-code。真实日期目录 provider、用户真实瓦片和第一条真实 ProbeResult 仍缺；官方客户端第三方接口的操作时开启与 loopback 监听验证需要用户确认。真实通用源、temporal runtime 和 QR/`.ovmap` 长尾字段仍阻塞。`OMB-AUD-002/007/008` 保持部分开放，不能把 fixture/CI/部署晋级为真实源验收。
 12. 三端部署：docs-only main=`7f38543`、CI=`33448733929`；runtime source/Tencent current=`67a6a0e`、runtime main CI=`33447839812`。gateway/Web index hash=`73808e31…4eb8d`/`3dd8d87d…d799`；项目 Node、systemd、宝塔 nginx include、双回环、health/vault、持久 state/vault hash 与服务器浏览器四屏 6/6 通过，旧 `d350ac3` 保留。真实 Ovi 与真实通用 source 业务验收仍独立阻塞。
 13. QR 方言：公开样本新增观察到 `hs/mf/ml/ms/mt/pn/pt`。FIX-BATCH-008 只接受这些键并丢弃未知值；其业务语义、授权和服务器可用性仍未知，不能由“解析成功”晋级为 ready。
-14. 帧质量与回执：FIX-BATCH-015 已 main+deployed-code（`67a6a0e`），能区分 expected/loaded/failed、完整/partial/全失败。FIX-BATCH-016 已在本地形成严格 ComparisonReceipt 创建、持久化和刷新回访候选；变更前生产 `comparisons=0`，当前腾讯尚无 016 代码或回执。ObservationPanel 保存、真实图源画布像素和用户确认回执仍缺，因此 OMB-AUD-015/016 保持 partial，任何合成回执、四屏或服务器 200 都不是真实 `rendered/accepted`。
+14. 帧质量与回执：FIX-BATCH-015 已 main+deployed-code（`67a6a0e`），能区分 expected/loaded/failed、完整/partial/全失败。FIX-BATCH-016 严格 ComparisonReceipt 创建、持久化和刷新回访候选已通过 PR #44 首轮 CI `33450167879`，但尚未 main/deployed；变更前生产 `comparisons=0`。ObservationPanel 保存、真实图源画布像素和用户确认回执仍缺，因此 OMB-AUD-015/016 保持 partial，任何合成回执、四屏或服务器 200 都不是真实 `rendered/accepted`。
 
 ## 已解除的实施阻塞
 

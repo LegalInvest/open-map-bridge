@@ -31,6 +31,7 @@
 - production smoke：鉴权、持久化、SIGTERM 全绿。
 - Chrome E2E：4/4，全程使用唯一临时状态文件。
 - 完成后根卷 `8,990,284 KiB`（8.57 GiB），高于 8 GiB 门。
+- PR #44 首轮 CI `33450167879` 对 head `5d3adac` 完整全绿；这是分支远端验证，不是 main 或 deployed。
 
 ## 未达到
 

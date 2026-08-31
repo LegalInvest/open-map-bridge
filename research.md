@@ -32,6 +32,7 @@
 - 2026-09-01 05:20 部署证据 PR #39 CI `33440530796` 全绿并合并为 docs-only main `c4f0dcf`；main CI `33440688435` 再次通过完整门。运行源码/腾讯 current 保持 `d350ac3`，docs-only 后代不重复发布；三端证据收口，真实源阶段不变。
 - 2026-09-01 07:00 FIX-BATCH-015 最终证据 PR #43 已合并为 docs-only main `7f38543`，main CI `33448733929` 全绿；腾讯 runtime/current 保持 `67a6a0e`。帧质量代码三端已收口，但当时仍没有持久 ComparisonReceipt 或真实画布回执。
 - 2026-09-01 07:18 FIX-BATCH-016 达到 `local-verified`。变更前只读读取腾讯权威 state 得到 `comparisons=0`、`aois=2`，故严格 V1 不需要迁移未知旧回执。共享 schema、POST/GET、repository 重开、ready source／confirmed AOI 精确版本／日期目录／missing 引用门、Web 保存/计数/刷新回访已贯通；文档同步后最终复验为 3 Node＋271 Vitest、8 workspace typecheck、production build/smoke 与隔离 4 Chrome 全绿，根卷约 8.57 GiB。没有请求真实图源；当前不是 main/deployed/rendered/accepted，Observation 保存仍未实现。
+- 2026-09-01 07:22 PR #44 首轮 CI `33450167879` 对 `5d3adac` 完整全绿；FIX-BATCH-016 晋级 `PR CI verified / not main / not deployed`。该 run 不改变腾讯 `67a6a0e`，也不产生真实回执或真实源验收。
 
 ### 本轮回答
 
@@ -494,3 +495,4 @@ fixtures/synthetic/temporal  无外网的 20 年彩色/带标签时序瓦片
 - Web 在 AOI 版本或日期变化后清除旧面板状态，首个地图把 fit 后共享 ViewState 写入同步器；只有四日期互异、AOI confirmed、共享视角存在且四帧终态完整时保存按钮才启用。页面按 source/AOI/version 展示回执条数；隔离 E2E 完成新建任意区域、四屏完整、POST 201、刷新后仍显示 1 条。
 - 本地完整证据：3 个 Node 契约、46 文件/271 Vitest、8 workspace typecheck、production build、鉴权/持久化/SIGTERM smoke、4 条 Chrome E2E 和 diff check 全绿；最终复验后根卷约 8.57 GiB。该结果仅为合成源审计闭环，不证明真实画布像素、真实 Ovi 历史日期/瓦片、污染因果或用户 accepted。
 - 阶段与开放项：FIX-BATCH-016=`local-verified / not main / not deployed`；OMB-AUD-014 的持久质量回执达到本地候选，OMB-AUD-015 因 ObservationPanel 无业务动作仍 partial，OMB-AUD-016 的其他 receipt／跨进程恢复仍开放。唯一最安全下一动作是提交 PR 并由 GitHub CI 复验；全绿前不合并或部署。
+- PR #44 首轮完整 CI `33450167879` 对功能/本地证据提交 `5d3adac` 全绿；阶段更新为 `PR CI verified / not main / not deployed`。证据提交仍需复验后才可合并。

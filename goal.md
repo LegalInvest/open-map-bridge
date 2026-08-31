@@ -9,7 +9,7 @@
 - 当前整合者：本 Codex 主线程
 - 更新时间：2026-09-01 07:18（Asia/Shanghai）
 - 适用目录：`/Users/assis/Documents/Codex/2026-08-27/open-map-bridge`
-- 当前切片：`FIX-BATCH-016 / OMB-AUD-014/015/016 comparison receipts local-verified`。本地、GitHub main/origin 基线为 FIX-BATCH-015 最终证据 `7f38543`，CI `33448733929` 全绿；腾讯 runtime/current 保持 `67a6a0e`。016 在确认生产 `comparisons=0` 后冻结严格 V1：四个互异日期、四个顺序一致且全部结算的帧、expected/loaded/failed 数量守恒、精确 confirmed AOI 版本、ready source 和服务端身份/时间；Web 可保存并在刷新后回访。3 Node＋271 Vitest、8 workspace typecheck、production build/smoke、4 Chrome E2E 全绿。阶段仍是 `local-verified / not main / not deployed / not real-rendered / not accepted`；Observation 保存、真实 Ovi 日期/影像和用户验收继续开放。
+- 当前切片：`FIX-BATCH-016 / OMB-AUD-014/015/016 comparison receipts PR CI verified`。本地、GitHub main/origin 基线为 FIX-BATCH-015 最终证据 `7f38543`，CI `33448733929` 全绿；腾讯 runtime/current 保持 `67a6a0e`。016 在确认生产 `comparisons=0` 后冻结严格 V1：四个互异日期、四个顺序一致且全部结算的帧、expected/loaded/failed 数量守恒、精确 confirmed AOI 版本、ready source 和服务端身份/时间；Web 可保存并在刷新后回访。本地全门与 PR #44 首轮 CI `33450167879` 全绿。阶段仍是 `PR CI verified / not main / not deployed / not real-rendered / not accepted`；Observation 保存、真实 Ovi 日期/影像和用户验收继续开放。
 - 上版：V0.4 奥维兼容双入口导入实施版
 
 <!-- GOAL_CAPSULE_START -->
@@ -887,3 +887,4 @@ V1 公共类型和错误语义通过契约测试冻结；新增可选能力不�
 - 2026-09-01 06:57：部署证据已进入 docs-only main `f506a12`，CI `33448403058` 全绿；运行 current 保持 `67a6a0e`。下一主线为持久 ComparisonReceipt，不改变真实源阻塞边界。
 - 2026-09-01 07:00：FIX-BATCH-015 最终证据进入 docs-only main `7f38543`，CI `33448733929` 全绿；运行 current 保持 `67a6a0e`。
 - 2026-09-01 07:10：FIX-BATCH-016 达到 `local-verified`。生产权威 state 在变更前确认 `comparisons=0`；严格 ComparisonReceipt V1、创建/读取 API、精确 AOI/source/date 引用、Web 保存/计数/刷新回访和隔离 E2E 已贯通。全门为 3 Node＋271 Vitest、8 typecheck、production build/smoke、4 Chrome。唯一最安全下一步：由 Codex 更新技术交底指纹、提交 PR 并等待 GitHub CI；全绿前不合并或部署，真实源继续零请求。用户行动：无。
+- 2026-09-01 07:22：PR #44 首轮 CI `33450167879` 对 `5d3adac` 全绿；016 晋级 `PR CI verified / not main / not deployed`。唯一最安全下一步：由 Codex回写 CI 证据并等待证据提交复验；再次全绿后才 squash merge。用户行动：无。
