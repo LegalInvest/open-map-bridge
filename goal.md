@@ -7,9 +7,9 @@
 - 状态：Approved / Implementing；用户于 2026-08-28 明确最终结果必须能基于已导入奥维图源进行二次开发
 - 产品裁决者：用户
 - 当前整合者：本 Codex 主线程
-- 更新时间：2026-08-28 19:15（Asia/Shanghai）
+- 更新时间：2026-08-31 15:53（Asia/Shanghai）
 - 适用目录：`/Users/assis/Documents/Codex/2026-08-27/open-map-bridge`
-- 当前切片：`FIX-BATCH-007 main`；预览缓存已有 TTL/数量/字节 LRU，二维码图片已有 object URL/ZXing 前字节/格式/像素/倍率门。PR #13 已合并为 `873705b`，首次红灯 `33166210759` 保留，最终 CI `33166313733` 全绿；当前只在证据分支回写 main/CI。真实目录/provider/probe/ready、部署与用户验收仍未达到
+- 当前切片：`FIX-BATCH-010 deployed evidence`。本地与 GitHub main 已一致为 `33f7f06`，main CI `33369816054` 全绿；同一制品已私有部署到腾讯机的 versioned release，并通过 loopback、鉴权、持久化、重启、日志和服务器 Web 四屏/播放浏览器验证。真实目录/provider/probe/ready、真实历史瓦片与用户业务签收仍未达到；本机 15:53 仅余约 5.4 GiB，已触发 8 GiB 止写门
 - 上版：V0.4 奥维兼容双入口导入实施版
 
 <!-- GOAL_CAPSULE_START -->
@@ -21,9 +21,9 @@
 
 硬约束：clean-room 独立实现；不得复制奥维专有代码、商标或绕过会员/设备绑定；不得内置、记录或传播第三方 token；解析前不联网，确认前不请求图源；未知版本、解压异常、内网目标或不安全 URL 必须 fail closed；“文件已解析”“探测成功”“成功出图”是不同事实；任何成功都要有导入回执和可复现实证。
 
-当前只允许修改本项目目录；禁止清理用户文件、接触生产服务器、部署公网、批量抓取图源或离线下载 20 年整域瓦片。不得把真实秘密写入 fixture、日志、回执、普通 JSON 或前端。可用空间低于 8 GiB 立即停止本机构建、测试、截图和新增缓存；2026-08-28 19:09 最新约 5.2 GiB，低于门禁，本轮只能做小型源码/文档并由 GitHub PR CI 验证。发现越界需求写入 `BLOCKED.md`。
+当前只允许修改本项目目录和用户已批准的腾讯 OpenMapBridge 专用路径；禁止清理用户文件、改动其他服务器项目、开放公网、批量抓取图源或离线下载 20 年整域瓦片。不得把真实秘密写入 fixture、日志、回执、普通 JSON 或前端。可用空间低于 8 GiB 立即停止本机构建、测试、截图和新增缓存；2026-08-31 15:53 最新约 5.4 GiB，门禁已触发，本轮只做小型文档/证据收口。发现越界需求写入 `BLOCKED.md`。
 
-`FIX-BATCH-001/002/003/004/005/006/007` 已进入 GitHub main `873705b`。第七批为未确认预览和 QR 图片建立资源上限并由 CI `33166313733` 验证；它不读取用户图片、不上传原图、不发真实请求、不改变 source lifecycle，也不授予 ready。
+`FIX-BATCH-001` 至 `FIX-BATCH-009` 已进入 GitHub main；`FIX-BATCH-010` 的项目 runtime、release、systemd、BaoTa nginx include、SSH tunnel 和重启证据已达到 `deployed`，证据回写正在进入 GitHub。技术部署不读取用户图源、不改变 source lifecycle，也不授予真实 Ovi 源 ready。
 
 第三批完成条件已由 CI `33161851375` 的 128 Vitest＋2 Node、8 workspace 类型检查、生产构建和 4 条 Chrome E2E 验证并进入 main：缺失/错误 Host、恶意 Origin、cross-site、缺失/错误 token、app ID 不符、权限不足、写请求缺 CSRF 和超限均在路由前稳定拒绝且不回显秘密；官方 Web 全旅程继续通过；直连 SDK 必须用独立 app token，服务端权限不能被 manifest 扩大。这不代表真实 probe 或 ready。项目最终完成条件仍是同一 source ID 获得有证据的 `tiles/temporal-catalog`，且至少两个真实日期返回可解码、非空并内容不同的瓦片。
 <!-- GOAL_CAPSULE_END -->
@@ -162,7 +162,7 @@ V0 的直接服务角色是“图源导入者”和“插件/行业应用开发�
 - 不提供盗链、共享 token、去水印或批量离线抓取。
 - 不承诺所有历史 `.ovmap` 在没有合法样本时都能正确解码。
 - 不把公开仓库中的图源地址自动内置为可用商业服务。
-- 不连接用户企业服务器、云服务器或 GitHub 执行部署。
+- 不连接未经批准的企业服务器或云服务器，不开放公网；2026-08-31 用户已单独批准本项目 GitHub 与腾讯机私有 loopback 部署，该授权不扩展到其他主机、企业图源或公网入口。
 - 不解密或逆向绕过 GEE 私有认证，不把本机奥维瓦片服务暴露到局域网或公网。
 - 不把水色、纹理或岸线变化自动写成污染、过度养殖或过度开发的确定因果结论。
 - 不因缺少某年影像而插值、复制邻年帧或把请求日期冒充真实拍摄日期。
@@ -795,7 +795,7 @@ V1 公共类型和错误语义通过契约测试冻结；新增可选能力不�
 - `local-candidate`：实现存在但任一冻结检查或真实旅程未通过。
 - `local-verified`：按切片独立晋级。SDK 薄切片需 AC-017/018 的单元、路由、类型和构建通过；导入主线仍需 AC-001，历史主线仍需 AC-011 且 AC-012/013 至少达到真实源 local 旅程，三者不得互相替代。
 - `main`：确切 commit 进入唯一 GitHub 主仓 `https://github.com/LegalInvest/open-map-bridge` 且真实 CI 通过；每个新提交必须独立取证，不继承旧 run 的成功。
-- `deployed`：同一制品进入指定环境，配置、健康、日志、数据和回滚核验；当前没有部署授权。
+- `deployed`：同一制品进入指定环境，配置、健康、日志、数据和回滚核验；应用制品已在腾讯私有 loopback 环境达到该阶段，首次发布尚无上一版本可做 release-to-release 回滚演练。
 - `accepted`：目标用户从实际入口独立完成二维码或 `.ovmap` 主旅程并签收；容器健康、HTTP 200 或开发者演示不能替代。
 
 ## 实施切片与变更记录
@@ -849,3 +849,4 @@ V1 公共类型和错误语义通过契约测试冻结；新增可选能力不�
 - 2026-08-31：用户授权 Codex 自主推进，直到本机、GitHub、服务器均为最新可验收状态。主线仍是 `QR/.ovmap → 安全预览 → 确认 → 探测/ready → 真实渲染 → 四期消费 → SDK`，不以解析成功、CI 绿或服务器 HTTP 200 替代真实源验收。当前启动 `FIX-BATCH-008 / OMB-AUD-039`，先收敛已观察 QR 方言兼容且不保存未知值。
 - 2026-08-31：FIX-BATCH-008 已进入 main；启动 FIX-BATCH-009，将服务器交付前置条件冻结为独立 gateway/Web 制品、确定性 manifest、鉴权健康、原子持久化、结构化生命周期、SIGTERM 正常退出、loopback 反向代理和可恢复回滚。公网开放不在该契约内，不以服务健康替代真实源验收。
 - 2026-08-31：FIX-BATCH-009 已进入 main。首个服务器目标经只读比较选定腾讯机；采用 versioned release、项目专用 Node 24 runtime、systemd gateway、loopback nginx 和 SSH tunnel，保持公网开放为禁用状态。部署验收仍必须与真实奥维源业务验收分开。
+- 2026-08-31：FIX-BATCH-010 已部署 main `33f7f06` 到腾讯机 `/opt/open-map-bridge/releases/33f7f06`。首次把 nginx 配置放入未被宝塔主配置 include 的 `/etc/nginx/conf.d`，8080 未监听；经 `nginx -T` 发现并改用 `/www/server/panel/vhost/nginx/*.conf` 后，UI/API、401 边界、双回环监听、状态 600 权限、重启哈希和四屏/播放浏览器旅程通过。该证据只晋级应用部署，不晋级真实 Ovi 源和用户 accepted。

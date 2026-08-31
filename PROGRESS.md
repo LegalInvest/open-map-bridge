@@ -119,3 +119,8 @@
 - 2026-08-31 15:43：服务器只读盘点完成。腾讯机根卷可用 369 GiB、已有 Node 24.19/Tailscale/nginx/systemd，4174/8080 空闲，三个目标目录和服务账号均不存在；阿里机只有 14 GiB 可用且业务端口密集，不选。Docker Hub 在腾讯机超时，不以拉取镜像作为部署依赖。
 - 当前批次：FIX-BATCH-010。把 systemd 改为项目专用 `/opt/open-map-bridge/runtime/current/bin/node`，计划从服务器已存在的 Node 24.19 复制，不替换系统 Node 或其他项目 runtime；部署仍只监听回环并经 SSH tunnel 访问。
 - 唯一最安全下一步：更新交底指纹、运行模板/构建/production smoke，全门绿后用 PR 进入 main，再按 versioned release 契约安装腾讯机。
+- 2026-08-31 15:53：FIX-BATCH-010 模板由 PR #17 合并为 GitHub main `33f7f06`，main CI `33369816054` 全绿；同一制品已安装到腾讯机 `/opt/open-map-bridge/releases/33f7f06`，使用项目专用 Node `v24.19.0`、systemd 和双回环端口。
+- 首次部署红灯已保留：服务器宝塔 nginx 不读取 `/etc/nginx/conf.d`，导致 8080 curl 失败；从 `nginx -T` 发现实际 `/www/server/panel/vhost/nginx/*.conf` 后安装同一模板，`nginx -t`、UI/API、401 边界、状态权限、重启哈希与 lifecycle 日志全部通过。
+- 服务器浏览器旅程：页面无 warning/error；合成源四屏 2006/2011/2019/2025 均加载，播放从 2006 前进到 2007。该结果把应用制品推进 `deployed`，不代表真实 Ovi source ready/rendered 或用户 accepted。
+- 容量门：本机 15:53 可用空间突降至约 5.4 GiB、swap 约 6.9 GiB，低于 8 GiB；已停止构建、测试、截图、浏览器和影像生成，未删除用户文件或项目证据。
+- 唯一最安全下一步：由 Codex 在容量恢复到 8 GiB 后继续 `OMB-AUD-002` 主链，先实现本地凭证引用与请求时 DNS/IP/重绑定门，再执行最小真实 probe；当前用户无需操作。
