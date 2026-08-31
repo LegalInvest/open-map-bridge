@@ -18,7 +18,7 @@
 - 2026-08-28 用户要求对整个仓库和文档做全量审计，并随后批准逐一修复、同步问题账本和解决进度 Markdown。当前以 `docs/问题账本.md` 的 38 项为完整审计边界，先修 P0 同 source UUID 与 configured/ready 真值；不得把单批 CI 绿写成全部问题关闭。
 - 2026-08-31 用户授权自主推进到本机、GitHub、服务器最新可验收。FIX-BATCH-012 已由腾讯 current `3bbcbfa` 部署；vault 运行态、401、双回环和 state hash 门通过，vault 为空、零真实外联。FIX-BATCH-013 经 PR #25/main CI 全门后合并为 main `32cb36d`；请求时 DNS/IP/连接固定/重绑定传输代码达到 main，但尚未接入 source probe/tile，真实源验收继续独立开放。
 - 2026-08-31 23:39 续跑复核本地/远端/GitHub main 为 `4252e92`、CI `33408261136` 全绿；腾讯 current `3bbcbfa` active，health=`atomic-json/encrypted-local`、未鉴权 401、双回环、state hash 不变。只读代码审查发现通用 probe 接线前置缺口：MapSourceDefinition 没有 transport scheme，导入归一化还会丢弃所有不能证明为非秘密的常量 query；因此不能猜测 URL 后直接注入 vault。用户的私有 Ovi QR 仍应由官方回环桥承接，通用 vault 不解释其不透明字段。
-- 2026-09-01 00:43 续跑复核本地/main/origin 为 `4730395`、GitHub CI `33410854421` 成功；腾讯 current 保持 `3bbcbfa`、服务 active、4174/8080 双回环、health=`atomic-json/encrypted-local`、未鉴权 401、state hash 与空 0600 vault 不变。FIX-BATCH-014A 已形成未本机执行的源码/测试候选：严格 ProbeResult、同 UUID 安全输入指纹、原子去重、成功/失败持久证据和重启零重复请求。
+- 2026-09-01 01:01 本地/main/origin 为 `67ea901`，GitHub main CI `33417146165` 成功；FIX-BATCH-014A 已进入 main。腾讯 current 保持 `3bbcbfa`、服务 active、4174/8080 双回环、health=`atomic-json/encrypted-local`、未鉴权 401、state hash 与空 0600 vault 不变；本机容量不足以安全生成新制品，故代码为 main、运行态仍为 prior deployed。
 
 ### 本轮回答
 
@@ -37,7 +37,7 @@
 - `FIX-BATCH-007` 已由 PR #13 合并为 main `873705b`：预览 store 主动 TTL 清理并以访问顺序实施 64 条/4 MiB LRU；QR 图片在 object URL/ZXing 前限制声明/实际 8 MiB，解析 PNG/JPEG/WebP 头并限制 16,777,216 像素，浏览器尺寸须一致，2×/3× 受缩放像素预算约束。首次 CI `33166210759` 红灯保留；`33166313733` 全绿。
 - `FIX-BATCH-012` 已进入 main 并部署到腾讯 current `3bbcbfa`：严格凭证 bundle、AES-256-GCM 独立私有 vault、同 source UUID 引用、原子写入/失败关闭、配置/移除 API、Web 密码输入、readiness 命中校验与 `OMB-AUD-040` 8 GiB 自动门均生效。服务器只生成未回显独立 key 和空 0600 vault；未写入真实凭证、未发上游请求。
 - `FIX-BATCH-013` 已由 PR #25 合并为 main `32cb36d`：`apps/gateway/src/security/upstream-network.ts` 在每次请求前解析并检查全部 DNS 地址，永久拒绝 metadata，默认拒绝私网/回环/链路本地/保留/转换地址，只允许按 authority＋精确地址显式批准企业私网；授权快照由 WeakSet 防结构伪造，传输禁自动重定向、固定单地址 lookup、连接后核对 remote peer，并阻止 Host/代理/跳级头覆盖。37 个专项断言含本机回环真实连接，PR/main CI `33406940553`/`33407144250` 全门通过且零外部 DNS/HTTP；模块尚未接入 source probe/tile 路由。
-- `FIX-BATCH-014` 契约与证据已由 PR #27/#28 进入 main `4730395`，main CI `33410854421` 全绿。阶段 A 功能 PR #29 为 OviBridge 添加 `schemaVersion=1` 的严格 ProbeResult、只由同 source UUID／导入 SHA／回环 origin／mapType／排序日期目录／已登记 probe 坐标组成的 SHA-256 输入指纹，以及原子 `ensureProbeResult`；启动先复用同指纹结果，成功才 ready，失败保持 configured。fixture 覆盖成功尺寸、403、重开不重复 fetch 和持久字段白名单。第二轮 CI `33416581636` 已全绿，仍待合并 main；阶段 B 的 OMB-AUD-007/008 不动。
+- `FIX-BATCH-014A` 已由 PR #29 合并为 main `67ea901`；分支 CI `33416581636` 和 main CI `33417146165` 均全绿。OviBridge 现在提供 `schemaVersion=1` 的严格 ProbeResult、只由同 source UUID／导入 SHA／回环 origin／mapType／排序日期目录／已登记 probe 坐标组成的 SHA-256 输入指纹，以及原子 `ensureProbeResult`；启动先复用同指纹结果，成功才 ready，失败保持 configured。fixture 覆盖成功尺寸、403、重开不重复 fetch 和持久字段白名单。阶段 B 的 OMB-AUD-007/008 不动。
 
 ### 搜索与核验边界
 
@@ -454,3 +454,4 @@ fixtures/synthetic/temporal  无外网的 20 年彩色/带标签时序瓦片
 - 00:43 本机可用 `8,468,576 KiB`，只高于 8 GiB 门 `79,968 KiB`，swap 使用约 7.39 GiB。只执行了只读检查、`apply_patch`、`git diff --check` 与小型文档更新；未运行 test/typecheck/build/browser/download/image，最终验证交给 GitHub PR CI。
 - PR #29 首次 CI `33416353555` 通过环境门和 3 个 Node 契约；Vitest 已执行 234 项全过，但新增 developer route 测试文件因 `vi.fn` 少右括号在收集阶段失败，后续 typecheck/build/smoke/Chrome 未运行。修复只补配对括号，红灯保留且不计为局部验证完成。
 - PR #29 第二轮 CI `33416581636` 对 `8f9d88f` 通过技术交底新鲜度、3 Node、42 个文件/241 Vitest、8 workspace typecheck、production build/smoke 与 4 Chrome；这是分支远端验证，不是本地执行、main、deployed 或真实源验收。
+- PR #29 随后 squash 合并为 main `67ea9013991b6c1c65aecba9d15dd18efc3f1e62`；main CI `33417146165` 再次通过相同全门。01:01 本机仅 `8,452,588 KiB` 可用，比 8 GiB 门多 `63,980 KiB`，因此不本地构建、不生成/上传新腾讯制品；腾讯仍是 prior deployed `3bbcbfa`，真实 ProbeResult 仍为 0/未知而非已验收。
