@@ -10,10 +10,10 @@
 6. 用户真实历史二维码的 `at/ad/al` 和 72 字符不透明 `ul` 已安全识别但未保存；FIX-BATCH-012 的标准 query/header vault 不解释或重建这些奥维私有字段。必须继续通过官方奥维回环桥接或后续有合法格式证据的专用适配器，不得把不透明载荷手工塞入通用 vault、请求真实源或宣称出图。
 7. 导入配置目前可保存为 `confirmed`；零外联静态策略和 FIX-BATCH-012 vault 已进入 main 并部署到腾讯 current `3bbcbfa`，FIX-BATCH-011 已为固定回环 OviBridge 增加受控 probe/ready。FIX-BATCH-013 的请求时 DNS/IP/连接固定/重绑定传输代码已进入 main，但尚未接入图源 probe/tile 路由；通用瓦片代理和投影修正仍未实现。静态策略、vault、未接线传输或 Ovi 候选通过均不能证明其他网络源可用。
 8. 开发者 V1 契约和合成适配器已贯通；真实 imported source UUID 现在可与 OviBridge 同 ID 绑定。FIX-BATCH-011 probe/ready 能力最初由 runtime source `94e42b1` 部署，并保留在当前 `3bbcbfa` 制品中；只有显式 probe 瓦片通过完整图片门才赋予本次 runtime ready。该路径未对用户真实源执行，权威部署中的真实 imported source 仍必须保持 `metadata-only`。
-9. 本机容量：2026-08-31 23:39 根卷可用约 8.03 GiB、swap 使用约 7.72 GiB，虽刚过 8 GiB 执行门但只有数十 MiB 余量；本轮只做只读设计审查和小型状态更新，构建、测试、浏览器、下载和影像继续暂停。不得通过删除用户数据、项目证据或真实运行数据规避。
+9. 本机容量：2026-09-01 00:43 根卷可用 `8,468,576 KiB`（约 8.07 GiB）、swap 使用约 7.39 GiB，只高于 8 GiB 硬门约 78 MiB；允许小型源码/文档候选与 GitHub PR CI，构建、测试、浏览器、下载和影像继续暂停。不得通过删除用户数据、项目证据或真实运行数据规避。
 10. 全量审计：`docs/问题账本.md` 当前记录 40 组问题。FIX-BATCH-001–009 与 FIX-BATCH-012 已进入 main，16 组达到 main、24 组仍未闭合；其余问题不得因生产制品与服务器候选就绪而标记解决。
-11. 真实 ready 晋级：configured 隐藏、空 probe 失败、图片解码/内容验证、本地 gateway 入站信任边界、“不伪造日期目录”、FIX-BATCH-011 回环 probe/ready、FIX-BATCH-012 vault 和 FIX-BATCH-013 固定传输均已进入 main，vault 已 deployed。固定传输尚未接入 probe/tile 主链；ProbeResult 持久化、真实日期目录 provider 和用户真实瓦片仍缺。进一步审查确认通用 imported source 还受 OMB-AUD-007/008 阻塞：模型没有 transport scheme，归一化器会丢弃无法证明为非秘密的常量 query，因而不能猜测 URL 后接 vault。Ovi 私有二维码则只能由官方回环桥承接，不得用通用 vault 重建私有认证。`OMB-AUD-002` 保持部分开放，不能把 fixture/CI 晋级为真实源验收。
-12. 三端部署：本地/GitHub main 为 FIX-BATCH-014 契约提交 `568fc80`，PR/main CI `33410108596`/`33410273091` 全绿；腾讯 current 保持 22:44 已验证 release `3bbcbfa`，gateway/Web hash、项目 Node、systemd、宝塔 nginx include、双回环、health/vault 状态和持久 state hash 均通过，保留 `94e42b1`、`62ab114`、`33f7f06` 回退制品。FIX-BATCH-014 尚无运行实现，故没有可达运行制品变化且不另造 release；真实 Ovi source 业务验收仍独立阻塞。
+11. 真实 ready 晋级：configured 隐藏、空 probe 失败、图片解码/内容验证、本地 gateway 入站信任边界、“不伪造日期目录”、FIX-BATCH-011 回环 probe/ready、FIX-BATCH-012 vault 和 FIX-BATCH-013 固定传输均已进入 main，vault 已 deployed。FIX-BATCH-014A 的 ProbeResult schema／持久化／输入指纹重启去重已由 PR #29 CI `33416581636` 完整验证，但尚未合并 main 或部署；真实日期目录 provider 和用户真实瓦片仍缺。通用 imported source 继续受 OMB-AUD-007/008 阻塞，不能猜测 URL 后接 vault。Ovi 私有二维码只能由官方回环桥承接，不得用通用 vault 重建私有认证。`OMB-AUD-002` 保持部分开放，不能把 fixture/CI 晋级为真实源验收。
+12. 三端部署：本地/main/origin 当前为 `4730395`，GitHub main CI `33410854421` 全绿；FIX-BATCH-014A 候选只存在功能分支。腾讯 current 保持 22:44 已验证 release `3bbcbfa`，gateway/Web hash、项目 Node、systemd、宝塔 nginx include、双回环、health/vault 状态和持久 state hash 均通过，保留 `94e42b1`、`62ab114`、`33f7f06` 回退制品。候选未验证/合并，故不部署；真实 Ovi source 业务验收仍独立阻塞。
 13. QR 方言：公开样本新增观察到 `hs/mf/ml/ms/mt/pn/pt`。FIX-BATCH-008 只接受这些键并丢弃未知值；其业务语义、授权和服务器可用性仍未知，不能由“解析成功”晋级为 ready。
 
 ## 已解除的实施阻塞

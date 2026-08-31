@@ -162,3 +162,11 @@
 - 唯一最安全下一步：由 Codex 在本机可用空间具有明确安全余量后，先实现 FIX-BATCH-014A 的 OviBridge ProbeResult schema、原子持久化、输入指纹去重和本地成功/失败 fixture；不启用用户真实 Ovi 接口。
 - 2026-08-31 23:47：FIX-BATCH-014 契约经 PR #27 合并为 main `568fc80`；PR CI `33410108596` 与 main CI `33410273091` 均通过环境/交底、单元与契约、8 workspace typecheck、production build/smoke 和公开 Chrome 旅程。阶段仅为 `contract main / implementation pending`，不改变腾讯可达运行制品，因此 current 保持 `3bbcbfa`；真实 ProbeResult、ready/rendered/accepted 均未晋级。
 - 唯一最安全下一步：由 Codex 在本机可用空间具有明确安全余量后，先实现 FIX-BATCH-014A 的 OviBridge ProbeResult schema、原子持久化、输入指纹去重和本地成功/失败 fixture；不启用用户真实 Ovi 接口。
+- 2026-09-01 00:43：本地/main/origin 精确为 `4730395`，GitHub main CI `33410854421` 成功；腾讯 current 仍为 `3bbcbfa`，service active、health=`atomic-json/encrypted-local`、未鉴权 401、4174/8080 双回环、state hash 与空 0600 vault 未漂移。
+- `FIX-BATCH-014A` 已形成 `local-candidate`：严格 ProbeResult schema；同 imported source UUID 和安全配置输入的 SHA-256 指纹；成功/失败原子持久化；同指纹重启复用且不重复 fetch；只有持久成功图片结果才恢复 ready。新增 schema、repository、adapter 和 gateway 重开正反 fixture，零真实外联、零真实秘密。
+- 容量门：本机仅 `8,468,576 KiB` 可用，比 8 GiB 硬门多约 78 MiB，swap 使用约 7.39 GiB；未执行本地 test/typecheck/build/browser/download/image，候选验证交给 GitHub PR CI。当前不是 local-verified/main/deployed/accepted，腾讯不更新 release。
+- 唯一最安全下一步：由 Codex 更新交底指纹并提交 `codex/fix-batch-014a-probe-result` PR；GitHub CI 全门通过后才合并 main，再在本机容量具有明确安全余量时构建和部署新的 versioned release。
+- 2026-09-01 00:52：PR #29 首次 CI `33416353555` 红灯保留。环境门与 3 个 Node 契约通过，Vitest 已执行的 234 项全部通过，但 `apps/gateway/src/routes/developer.test.ts` 在收集阶段因新增 `vi.fn` 少一个右括号而语法失败；typecheck/build/smoke/Chrome 未运行。单点语法已修正，批次仍为 `local-candidate`。
+- 唯一最安全下一步：由 Codex 更新交底指纹并推送语法修复，等待 PR #29 第二轮完整 CI；全绿前不合并、不部署。
+- 2026-09-01 00:55：PR #29 第二轮 CI `33416581636` 全绿：技术交底新鲜度、3 Node、42 个文件/241 Vitest、8 workspace typecheck、production build/smoke 和 4 Chrome 全部通过。功能提交 `8f9d88f` 达到 `local-candidate / PR CI verified`，尚未 main/deployed/accepted；本机仍未运行重型门。
+- 唯一最安全下一步：由 Codex 回写 CI 证据后等待该证据提交的 PR CI，通过即合并 PR #29；合并后核验 main CI，并仅在本机容量有明确安全余量时部署运行制品。

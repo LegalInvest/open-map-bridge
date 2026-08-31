@@ -28,6 +28,7 @@ export interface BuildAppOptions {
 
 async function bindImportedOviSource(
   registry: TemporalSourceRegistry,
+  repository: TemporalStateRepository,
   source: MapSourceDefinition,
   ovi: NonNullable<BuildAppOptions['ovi']>,
 ): Promise<void> {
@@ -38,13 +39,25 @@ async function bindImportedOviSource(
   if (source.legacyId !== ovi.mapType) throw new Error('configured Ovi map type does not match the imported source');
   if (registry.get(source.id)) throw new Error(`duplicate temporal source ${source.id}`);
   const adapter = new OviBridgeAdapter(ovi);
-  const probe = await adapter.probe();
+  let ready = false;
+  if (adapter.hasProbeRequest()) {
+    const inputFingerprint = adapter.probeInputFingerprint(source.id, source.sourceProvenance.inputSha256);
+    const existing = repository.findProbeResult(source.id, inputFingerprint);
+    if (existing) {
+      ready = existing.category === 'success';
+    } else {
+      const persisted = await repository.ensureProbeResult(
+        await adapter.createProbeResult(source.id, inputFingerprint),
+      );
+      ready = persisted.result.category === 'success';
+    }
+  }
   registry.register({
     id: source.id,
     name: source.name,
     kind: 'ovi-bridge',
     legacyMapType: ovi.mapType,
-    availability: probe.ok ? 'ready' : 'configured',
+    availability: ready ? 'ready' : 'configured',
     datePrecision: 'request-date-only',
     adapter,
   });
@@ -65,7 +78,7 @@ export async function buildApp(options: BuildAppOptions): Promise<FastifyInstanc
     const ovi = options.ovi;
     const source = repository.listImportSources().find((candidate) => candidate.id === ovi.sourceId);
     if (!source) throw new Error('configured Ovi source ID was not found in persisted imports');
-    await bindImportedOviSource(registry, source, ovi);
+    await bindImportedOviSource(registry, repository, source, ovi);
   }
 
   const app = Fastify({ logger: false });

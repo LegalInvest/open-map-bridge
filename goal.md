@@ -7,9 +7,9 @@
 - 状态：Approved / Implementing；用户于 2026-08-28 明确最终结果必须能基于已导入奥维图源进行二次开发
 - 产品裁决者：用户
 - 当前整合者：本 Codex 主线程
-- 更新时间：2026-08-31 23:47（Asia/Shanghai）
+- 更新时间：2026-09-01 00:44（Asia/Shanghai）
 - 适用目录：`/Users/assis/Documents/Codex/2026-08-27/open-map-bridge`
-- 当前切片：`FIX-BATCH-014 probe truth contract main / implementation pending`。契约由 PR #27 合并为 main `568fc80`，PR/main CI `33410108596`/`33410273091` 全绿；腾讯 current 仍为已验证 `3bbcbfa` vault 运行态，因为本批只有文档和设计裁决、没有可达运行代码变化。只读代码审查确认不能把 FIX-BATCH-013 直接接到任意 imported source：当前开放模型尚未保存 transport scheme，且归一化器会丢弃无法证明为非秘密的常量 query；猜测 `http/https` 或补回 query 会违反事实门。FIX-BATCH-014 因此拆为：先让官方回环 OviBridge 以同一 source UUID 产生可幂等恢复的脱敏 ProbeResult；再先完成 OMB-AUD-007/008 的请求计划真值，之后才允许通用源使用 vault＋DNS pinning。真实 ProbeResult、ready/rendered/accepted 均未达到
+- 当前切片：`FIX-BATCH-014A PR CI green / merge pending`。契约由 PR #27/#28 进入 main `4730395`；功能 PR #29 第二轮 CI `33416581636` 已通过 3 Node＋241 Vitest、8 workspace typecheck、production build/smoke 和 4 Chrome 旅程，首次语法红灯 `33416353555` 保留。候选为官方回环 OviBridge 增加严格脱敏 ProbeResult schema、同 source UUID＋安全输入指纹的原子去重账本、成功/失败证据和重启复用；只有持久成功结果才把 runtime 标为 ready。候选没有读取真实二维码、凭证或瓦片，本机也未运行重型门。腾讯 current 仍为已验证 `3bbcbfa`；通用 imported source 仍必须先完成 OMB-AUD-007/008 的 scheme/非秘密常量 query 真值。真实 Ovi ProbeResult、rendered/accepted 均未达到
 - 上版：V0.4 奥维兼容双入口导入实施版
 
 <!-- GOAL_CAPSULE_START -->
@@ -21,7 +21,7 @@
 
 硬约束：clean-room 独立实现；不得复制奥维专有代码、商标或绕过会员/设备绑定；不得内置、记录或传播第三方 token；解析前不联网，确认前不请求图源；未知版本、解压异常、内网目标或不安全 URL 必须 fail closed；“文件已解析”“探测成功”“成功出图”是不同事实；任何成功都要有导入回执和可复现实证。
 
-当前只允许修改本项目目录和用户已批准的腾讯 OpenMapBridge 专用路径；禁止清理用户文件、改动其他服务器项目、开放公网、批量抓取图源或离线下载 20 年整域瓦片。不得把真实秘密写入 fixture、日志、回执、普通 JSON 或前端。可用空间低于 8 GiB 立即停止本机构建、测试、截图和新增缓存；2026-08-31 23:39 实测约 8.03 GiB、swap 使用约 7.72 GiB，虽刚过阈值但没有安全余量，本轮只做只读设计审查和小型状态更新。发现越界需求写入 `BLOCKED.md`。
+当前只允许修改本项目目录和用户已批准的腾讯 OpenMapBridge 专用路径；禁止清理用户文件、改动其他服务器项目、开放公网、批量抓取图源或离线下载 20 年整域瓦片。不得把真实秘密写入 fixture、日志、回执、普通 JSON 或前端。可用空间低于 8 GiB 立即停止本机构建、测试、截图和新增缓存；2026-09-01 00:43 实测约 8.07 GiB、swap 使用约 7.39 GiB，只高于硬门约 78 MiB。当前只允许小型源码/文档候选和远端 CI，不运行本机构建、测试、浏览器、下载或影像。发现越界需求写入 `BLOCKED.md`。
 
 `FIX-BATCH-001` 至 `FIX-BATCH-009` 已进入 GitHub main；`FIX-BATCH-010` 的项目 runtime、release、systemd、BaoTa nginx include、SSH tunnel 和重启证据已达到 `deployed`，证据回写正在进入 GitHub。技术部署不读取用户图源、不改变 source lifecycle，也不授予真实 Ovi 源 ready。
 
@@ -862,3 +862,7 @@ V1 公共类型和错误语义通过契约测试冻结；新增可选能力不�
 - 2026-08-31：FIX-BATCH-012 经 PR #23 合并为 main `3d1ddf2`。PR 前两次 CI `33386547512`/`33386726268` 红灯均保留，第三次 `33386874683` 与 main CI `33387017311` 全绿；vault 与 OMB-AUD-040 达到 main。因本机 19:30 仍约 7.14 GiB，腾讯不更新运行制品、current 保持 `94e42b1`，真实源 accepted 仍未达到。
 - 2026-08-31：22:44 精确 main `3bbcbfa` 通过本地全门并部署为腾讯 current；加密 vault 运行态、401、双回环和 state hash 门通过，vault 为空且零真实外联。22:58 启动 FIX-BATCH-013，请求时 DNS/IP/固定连接候选通过 37 个专项断言和 gateway typecheck；全仓门随后因 7.59 GiB 被 preflight 正确阻断，候选保持 local-candidate。
 - 2026-08-31：FIX-BATCH-013 经 PR #25 合并为 main `32cb36d`；PR/main CI `33406940553`/`33407144250` 全门通过。模块未被生产入口导入，无可达 bundle 变化，腾讯 current 保持 `3bbcbfa`；下一批再接最小 probe、vault 注入和 ProbeResult。
+- 2026-08-31：FIX-BATCH-014 分流契约及证据分别经 PR #27/#28 进入 main `4730395`，main CI `33410854421` 全绿；只改变文档，不更新腾讯运行制品。
+- 2026-09-01：FIX-BATCH-014A 形成 `local-candidate`：OviBridge 为同 UUID 和安全输入指纹生成严格脱敏 ProbeResult，原子账本保存一次成功或失败，重启复用既有结果且不无条件重复请求。当前容量只有约 78 MiB 硬门余量，本机没有运行测试/构建；候选待 GitHub PR CI，零真实外联。
+- 2026-09-01：PR #29 首次 CI `33416353555` 因新增测试文件少一个右括号在 Vitest 收集阶段失败；已执行 234 tests 全过，类型/构建/浏览器未运行。语法已修正，候选仍待完整 CI，不晋级。
+- 2026-09-01：PR #29 第二轮 CI `33416581636` 通过 3 Node＋241 Vitest、8 workspace typecheck、production build/smoke 与 4 Chrome；阶段为 PR CI green，尚未 main/deployed/真实源 accepted。
