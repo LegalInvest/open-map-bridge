@@ -3,7 +3,7 @@ import QRCode from 'qrcode';
 import { buildSyntheticRecord37Ovmap } from '@omb/ovmap-codec/synthetic';
 
 test('imports a QR image only after a secret-safe preview and authorization', async ({ page }) => {
-  const payload = 'ovobj?t=1&id=402&na=E2E%20QR%20Source&po=1&he=18&oy=3&df=0&hn=tiles.example.invalid&ul=%2F%7B%24z%7D%2F%7B%24x%7D%2F%7B%24y%7D.png';
+  const payload = 'ovobj?t=1&id=402&na=E2E%20QR%20Source&po=1&he=18&oy=3&df=0&hn=tiles.example.invalid&ul=https%3A%2F%2Ftiles.example.invalid%2F%7B%24z%7D.png';
   const png = await QRCode.toBuffer(payload, { type: 'png', width: 800, margin: 6, errorCorrectionLevel: 'L' });
   await page.goto('/');
   await expect(page.getByRole('heading', { name: '导入奥维兼容图源' })).toBeVisible();
