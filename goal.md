@@ -7,9 +7,9 @@
 - 状态：Approved / Implementing；用户于 2026-08-28 明确最终结果必须能基于已导入奥维图源进行二次开发
 - 产品裁决者：用户
 - 当前整合者：本 Codex 主线程
-- 更新时间：2026-08-31 19:30（Asia/Shanghai）
+- 更新时间：2026-08-31 23:00（Asia/Shanghai）
 - 适用目录：`/Users/assis/Documents/Codex/2026-08-27/open-map-bridge`
-- 当前切片：`FIX-BATCH-012 encrypted credential vault main`。PR #23 的前两次 CI 红灯分别发现 fixture acquisition 前置 hook 拼写错误、以及 vault 已命中正例仍被阻塞；第三次 PR CI `33386874683` 与 main CI `33387017311` 完成单测、8 workspace typecheck、production build/smoke 和 4 条 Chrome E2E 后全绿，squash commit `3d1ddf2` 已进入本地/GitHub main。AES-256-GCM 本地保险库、严格 query/header bundle、同 source UUID 引用、私有原子文件、PUT/DELETE API、Web 密码表单、readiness 实际命中门和所有重型 root 命令自动 8 GiB 前置门均达到 `main`，不等于 deployed。19:30 本机约 7.14 GiB，低于门限，腾讯 current 保持 FIX-BATCH-011 runtime `94e42b1`，未生成 vault key、未请求真实源，ready/rendered/accepted 未达到
+- 当前切片：`FIX-BATCH-013 request-time DNS/IP pinning local-candidate`。FIX-BATCH-012 已于 22:44 从精确 main `3bbcbfa` 构建并部署到腾讯 current：vault 运行态、401、双回环和 state hash 门通过，vault 为空且未请求真实源。新候选对每次请求的全部 DNS 答案做公网/私网/metadata/转换地址检查，形成不可伪造授权快照，只向传输提供一个固定地址并在连接后核对 peer；禁自动重定向和 Host/代理头覆盖。37 个专项断言与 gateway typecheck 通过，但 22:58 根卷约 7.59 GiB、swap 约 8.37 GiB，全仓门被自动 preflight 阻断，因此候选尚非 local-verified/main/deployed，真实 ready/rendered/accepted 未达到
 - 上版：V0.4 奥维兼容双入口导入实施版
 
 <!-- GOAL_CAPSULE_START -->
@@ -21,7 +21,7 @@
 
 硬约束：clean-room 独立实现；不得复制奥维专有代码、商标或绕过会员/设备绑定；不得内置、记录或传播第三方 token；解析前不联网，确认前不请求图源；未知版本、解压异常、内网目标或不安全 URL 必须 fail closed；“文件已解析”“探测成功”“成功出图”是不同事实；任何成功都要有导入回执和可复现实证。
 
-当前只允许修改本项目目录和用户已批准的腾讯 OpenMapBridge 专用路径；禁止清理用户文件、改动其他服务器项目、开放公网、批量抓取图源或离线下载 20 年整域瓦片。不得把真实秘密写入 fixture、日志、回执、普通 JSON 或前端。可用空间低于 8 GiB 立即停止本机构建、测试、截图和新增缓存；2026-08-31 19:30 实测约 7.14 GiB，容量门仍生效，仅允许小型状态更新。发现越界需求写入 `BLOCKED.md`。
+当前只允许修改本项目目录和用户已批准的腾讯 OpenMapBridge 专用路径；禁止清理用户文件、改动其他服务器项目、开放公网、批量抓取图源或离线下载 20 年整域瓦片。不得把真实秘密写入 fixture、日志、回执、普通 JSON 或前端。可用空间低于 8 GiB 立即停止本机构建、测试、截图和新增缓存；2026-08-31 22:58 实测约 7.59 GiB，容量门再次生效，仅允许小型状态更新。发现越界需求写入 `BLOCKED.md`。
 
 `FIX-BATCH-001` 至 `FIX-BATCH-009` 已进入 GitHub main；`FIX-BATCH-010` 的项目 runtime、release、systemd、BaoTa nginx include、SSH tunnel 和重启证据已达到 `deployed`，证据回写正在进入 GitHub。技术部署不读取用户图源、不改变 source lifecycle，也不授予真实 Ovi 源 ready。
 
@@ -809,7 +809,7 @@ V1 公共类型和错误语义通过契约测试冻结；新增可选能力不�
 5. SLICE-TEMPORAL-003：以已保存真实图源贯通本机 OviBridge/标准适配器的日期瓦片闸门，并通过 SDK 消费。
 6. SLICE-TEMPORAL-005：真实导入与比较旅程稳定后增加 MP4/GIF 导出。
 7. SLICE-AUTOMATION-RUN-001A（main，CI 已验证）：已建立 `source-readiness` 四步零外联任务、输入/运行时指纹去重、原子账本、process/job API 和驾驶舱；`16f445c` / CI `33155671827` 全绿，但不证明真实探测。
-8. SLICE-AUTOMATION-RUN-001B（approved / partial local-verified）：本地加密凭证保险库与引用已形成候选；DNS/IP/连接固定/重绑定安全门、ProbeResult 持久化和可恢复步骤推进仍开放。
+8. SLICE-AUTOMATION-RUN-001B（vault deployed / DNS transport local-candidate）：本地加密凭证保险库与引用已部署；请求时 DNS/IP/连接固定/重绑定传输形成 targeted-verified 候选，但尚未完成全仓门或接入 probe/tile。ProbeResult 持久化和可恢复步骤推进仍开放。
 9. SLICE-AUTOMATION-FOURFRAME-001（approved / backlog）：真实 source ID 绑定后实现一键四期、断点续跑、质量卡和来源链。
 
 ### 止损
@@ -858,3 +858,4 @@ V1 公共类型和错误语义通过契约测试冻结；新增可选能力不�
 - 2026-08-31：启动 `FIX-BATCH-012` 并达到 local-verified。候选以独立 0600 文件保存 AES-256-GCM 认证加密 envelope，主状态只保存 `vault://source/<同一 UUID>`；Web/API 可配置或移除 query/header 凭证但永不回显值，readiness 只有在 active vault 真正存在引用时才通过凭证步骤。196 个 Vitest＋2 Node、8 workspace typecheck、production build/smoke 和 4 Chrome E2E 通过；尚未 main/deployed，DNS/IP/连接固定/重绑定与真实外联仍禁止。
 - 2026-08-31：19:08 容量复核为约 7.15 GiB，低于 8 GiB。此前一条组合命令仅输出容量、没有根据阈值阻断后续 build/smoke，形成 `OMB-AUD-040`；该次结果不作为最终分支验证。候选现为 `local-candidate`，新增 root `test/typecheck/build/dev/production smoke/compat/E2E/fixture acquisition` 自动前置 `env:check` 及静态脚本契约，交由 GitHub CI 验证；本机重任务和新腾讯制品部署立即暂停。
 - 2026-08-31：FIX-BATCH-012 经 PR #23 合并为 main `3d1ddf2`。PR 前两次 CI `33386547512`/`33386726268` 红灯均保留，第三次 `33386874683` 与 main CI `33387017311` 全绿；vault 与 OMB-AUD-040 达到 main。因本机 19:30 仍约 7.14 GiB，腾讯不更新运行制品、current 保持 `94e42b1`，真实源 accepted 仍未达到。
+- 2026-08-31：22:44 精确 main `3bbcbfa` 通过本地全门并部署为腾讯 current；加密 vault 运行态、401、双回环和 state hash 门通过，vault 为空且零真实外联。22:58 启动 FIX-BATCH-013，请求时 DNS/IP/固定连接候选通过 37 个专项断言和 gateway typecheck；全仓门随后因 7.59 GiB 被 preflight 正确阻断，候选保持 local-candidate。

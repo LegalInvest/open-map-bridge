@@ -16,7 +16,7 @@
 - 2026-08-28 用户提出“数字化之后，就是可视化和自动化”，要求提高两者程度。当前整合结论是把可视化从地图展示升级为真实任务状态、质量、来源和下一动作，把自动化从纯函数选四期升级为可恢复工作流；该方向必须直接推进真实 source ID，不得再用合成消费端掩盖导入/绑定缺口。
 - 2026-08-28 用户随后批准继续优化架构和代码并要求同步全部文档。当前只把 `source-readiness` 零外联准备度任务作为第一实现子集；这不是对真实探测、一键四期或完整续跑的批准验收。
 - 2026-08-28 用户要求对整个仓库和文档做全量审计，并随后批准逐一修复、同步问题账本和解决进度 Markdown。当前以 `docs/问题账本.md` 的 38 项为完整审计边界，先修 P0 同 source UUID 与 configured/ready 真值；不得把单批 CI 绿写成全部问题关闭。
-- 2026-08-31 用户授权自主推进到本机、GitHub、服务器最新可验收。FIX-BATCH-012 经 PR #23 合并为本地/GitHub main `3d1ddf2`；第三次 PR CI `33386874683` 与 main CI `33387017311` 全绿，前两次红灯保留。vault 与 OMB-AUD-040 达到 main；账本 40 组中 16 组达到 main、24 组未闭合。因本机约 7.14 GiB，腾讯 runtime source/current 保持 `94e42b1`，服务既有 active/atomic-json/双回环/state hash 证据未被新部署替换；真实源验收继续独立开放。
+- 2026-08-31 用户授权自主推进到本机、GitHub、服务器最新可验收。FIX-BATCH-012 经 PR #23 合并并由 docs-only main `3bbcbfa` 在 22:44 构建/部署为腾讯 current；vault 运行态、401、双回环和 state hash 门通过，vault 为空、零真实外联。FIX-BATCH-013 随后形成请求时 DNS/IP/连接固定/重绑定传输候选，37 个专项断言和 gateway typecheck 通过；全仓门因本机约 7.59 GiB 被 preflight 阻断，因此仍是 local-candidate，真实源验收继续独立开放。
 
 ### 本轮回答
 
@@ -33,7 +33,8 @@
 - `FIX-BATCH-005` 已由 PR #9 合并为 main `f84ae20`：`@omb/temporal-source` 统一实际 ISO 日期、顺序窗口、受限 AOI/date ID、规范十进制安全整数、z≤30 与 x/y<2^z；旧时序 API、V1、SDK、Ovi/合成适配器复用。首次 CI `33164557423` 的 414/400 分层失败已保留；第二次 `33164783702` 全绿。该批零真实外联。
 - `FIX-BATCH-006` 已由 PR #11 合并为 main `cfab0c2`：共享 1 MiB 原文件、精确 base64 上界和 4 KiB JSON 信封预算；只为 `.ovmap` 检查路由设置计算后的 bodyLimit，前端读取前拒绝超限，后端分别返回 `INPUT_OVMAP_LIMIT`/`INPUT_BODY_LIMIT` 413。CI `33165515010` 验证恰好边界、加一字节、超信封和前端零读取/零 fetch；零真实文件/外联。
 - `FIX-BATCH-007` 已由 PR #13 合并为 main `873705b`：预览 store 主动 TTL 清理并以访问顺序实施 64 条/4 MiB LRU；QR 图片在 object URL/ZXing 前限制声明/实际 8 MiB，解析 PNG/JPEG/WebP 头并限制 16,777,216 像素，浏览器尺寸须一致，2×/3× 受缩放像素预算约束。首次 CI `33166210759` 红灯保留；`33166313733` 全绿。
-- `FIX-BATCH-012` 已进入 main `3d1ddf2`：新增严格凭证 bundle schema、AES-256-GCM 认证加密的独立私有 vault、同 source UUID 引用、原子写入/重开/错 key/不安全 mode/悬空引用失败关闭、配置/移除 API、Web 密码输入和 readiness 实际引用校验；同时以 `OMB-AUD-040` 为所有重型 root 入口自动接入 8 GiB 门。PR 前两次 CI 红灯后，第三次 PR/main CI 全门通过。未写入真实凭证、未发上游请求、尚未 deployed。
+- `FIX-BATCH-012` 已进入 main 并部署到腾讯 current `3bbcbfa`：严格凭证 bundle、AES-256-GCM 独立私有 vault、同 source UUID 引用、原子写入/失败关闭、配置/移除 API、Web 密码输入、readiness 命中校验与 `OMB-AUD-040` 8 GiB 自动门均生效。服务器只生成未回显独立 key 和空 0600 vault；未写入真实凭证、未发上游请求。
+- `FIX-BATCH-013` 当前为 local-candidate：`apps/gateway/src/security/upstream-network.ts` 在每次请求前解析并检查全部 DNS 地址，永久拒绝 metadata，默认拒绝私网/回环/链路本地/保留/转换地址，只允许按 authority＋精确地址显式批准企业私网；授权快照由 WeakSet 防结构伪造，传输禁自动重定向、固定单地址 lookup、连接后核对 remote peer，并阻止 Host/代理/跳级头覆盖。37 个专项断言含本机回环真实连接，且零外部 DNS/HTTP；全仓门尚因容量阻断，也尚未接入 source probe/tile 路由。
 
 ### 搜索与核验边界
 
@@ -136,8 +137,8 @@
 |---|---|---|---|
 | 项目目录 | 新建 `/Users/assis/Documents/Codex/2026-08-27/open-map-bridge` | 本轮文件系统创建 | 2026-08-27 |
 | 既有同类本地仓库 | 未发现 | `find /Users/assis/Documents/Codex -maxdepth 2` 仅命中既有 VegFlow mapping 目录，无 Ovi/OpenMapBridge 项目 | 2026-08-27 |
-| Git 仓库 | FIX-BATCH-012 merge commit `3d1ddf2` 已在本地/GitHub main，main CI `33387017311` 全绿；runtime source/current `94e42b1`；当前为 docs-only 证据分支，remote 为 `https://github.com/LegalInvest/open-map-bridge.git` | `git branch --show-current`、`git rev-parse HEAD origin/main`、remote `ls-remote`、CI | 2026-08-31 19:30 |
-| 根卷空间 | 约 7.14 GiB，低于 8 GiB 门；已暂停本机构建、测试、浏览器、下载、影像和新腾讯制品部署，仅进行小型状态更新 | `df -Pk /System/Volumes/Data` | 2026-08-31 19:30 |
+| Git 仓库 | 本地/GitHub main 为 docs-only `3bbcbfa`，CI `33388066061` 全绿；腾讯 current 同为 `3bbcbfa`；当前 FIX-BATCH-013 分支为 local-candidate | `git branch --show-current`、`git rev-parse HEAD origin/main`、remote `ls-remote`、CI、腾讯 readlink | 2026-08-31 23:00 |
+| 根卷空间 | 约 7.59 GiB、swap 使用约 8.37 GiB，低于 8 GiB 门；FIX-BATCH-013 全仓门已由 preflight 阻断，只进行小型状态更新 | `df -Pk /System/Volumes/Data`、`sysctl vm.swapusage` | 2026-08-31 23:00 |
 | Node/Docker 工具链 | 本机 Node `v26.7.0`、npm `11.19.0`、Docker `29.4.0`、Compose `5.1.2`；计划冻结 Node `24.20.0` LTS 作为目标运行时 | 版本命令；[Node 官方发布表](https://nodejs.org/en/about/previous-releases) | 2026-08-27 |
 | 奥维桌面客户端 | 先发现旧 2.6.3；随后从官方分发安装并验签 10.6.0 到独立应用路径，未覆盖旧版 | 应用版本、代码签名、公证和官方安装包校验 | 2026-08-27 |
 
@@ -269,7 +270,7 @@ runtime temporal registry ┘                       capability gate
 
 静态检查确认 `/api/import/sources` 仍返回完整内部 `MapSourceDefinition`，不能作为开发者 API；V1 开发者目录使用白名单描述。审计发现的 imported UUID 与硬编码 runtime ID 断裂、readiness legacyId 误绑已由 `FIX-BATCH-001` 修复并进入 main；真实 ready 晋级仍未实现。
 
-上述导入路径中的开放 schema、显式状态机、QR 图片/摄像头、`ovobj` 两种真实结构、`.ovmap record37-zlib`、零上游预览、授权确认、原子 JSON 保存和 confirmed 回执已进入既有 main；本地加密凭证保险库为 local-verified 候选。仍缺请求时 DNS/IP/连接固定/重绑定门、通用瓦片代理和真实渲染。时序路径有合成日期/AOI/四期/卷帘/播放 UI，但审计确认 AOI 拓扑、部分瓦片、时间轴帧真值和观察持久化仍有问题。已有公共 CI 与私有 loopback 部署，不存在公网部署或用户独立签收。
+上述导入路径中的开放 schema、显式状态机、QR 图片/摄像头、`ovobj` 两种真实结构、`.ovmap record37-zlib`、零上游预览、授权确认、原子 JSON 保存和 confirmed 回执已进入既有 main；本地加密凭证保险库已部署。请求时 DNS/IP/连接固定/重绑定传输仅为 local-candidate，尚未接入 probe/tile；通用瓦片代理和真实渲染仍缺。时序路径有合成日期/AOI/四期/卷帘/播放 UI，但审计确认 AOI 拓扑、部分瓦片、时间轴帧真值和观察持久化仍有问题。已有公共 CI 与私有 loopback 部署，不存在公网部署或用户独立签收。
 
 历史影像增量目标路径：
 
@@ -302,14 +303,14 @@ fixtures/synthetic/temporal  无外网的 20 年彩色/带标签时序瓦片
 | Ovi Web 桥接 | 官方文档证明接口形态；main 只接受回环 origin/注入日期且已删除虚构年度目录。FIX-BATCH-011 用一个已登记瓦片通过完整图片门后才 runtime ready；本机官方服务尚未启用和请求 | date/response/probe-ready code deployed；real compatibility blocked | PR/main CI、local production smoke、Tencent artifact/state/health/loopback 门全绿；仍需验证官方监听、持久 ProbeResult、真实目录 provider 和特殊历史源出图 |
 | 时序 Web UI | 四屏、卷帘、播放、AOI 编辑和观察面板已实现 | local-candidate | Chrome E2E 通过；真实源未过门 |
 | 导入 Web UI | 默认首页提供二维码图片、摄像头和 `.ovmap` 点击/拖入，预览后授权保存 | local-verified slice | 4 默认 E2E + 2 授权本地 E2E |
-| 二次开发 V1 | 脱敏源目录、能力协商、严格应用清单、TypeScript SDK 和本地日期/瓦片消费已实现；configured OviBridge 不授予运行能力；FIX-BATCH-011 仅在受控 probe 解码成功后赋予 ready 能力 | code deployed / real source blocked | `packages/developer-sdk`、`apps/gateway/src/{app,developer,routes/developer}.ts`、PR/main CI、本地 production smoke、腾讯 current `94e42b1` |
+| 二次开发 V1 | 脱敏源目录、能力协商、严格应用清单、TypeScript SDK 和本地日期/瓦片消费已实现；configured OviBridge 不授予运行能力；FIX-BATCH-011 仅在受控 probe 解码成功后赋予 ready 能力 | code deployed / real source blocked | `packages/developer-sdk`、`apps/gateway/src/{app,developer,routes/developer}.ts`、PR/main CI、本地 production smoke、腾讯 current `3bbcbfa` |
 | 技术交底持续同步 | 中文技术交底书覆盖架构、流程、数据、安全、特征候选、实施例和当前证据边界；source set 生成 SHA-256，CI 检查陈旧 | local-verified mechanism | `docs/技术交底书.md`、`scripts/update-technical-disclosure.mjs`、`npm run disclosure:check`；精确文件数/指纹以交底元数据为准 |
 | 可视化/自动化方向 | 用户已批准继续实施；准备度四步账本、去重、process/job API 和驾驶舱已进入 main | main for 001A / later slices missing | `16f445c`、CI `33155671827`；2026-08-28 |
-| 审计问题账本 | 40 组问题与公开 backlog；16 组达到 main、24 组未闭合。OMB-AUD-040 自动容量门随 FIX-BATCH-012 进入 main；FIX-BATCH-011 的 OMB-AUD-002 probe/ready 子项仍是 deployed partial | FIX-BATCH-001–012 as recorded | `docs/问题账本.md`、PR/main CI、本地 production smoke、腾讯 release evidence；2026-08-31 19:30 |
-| 工作区基线 | FIX-BATCH-012 merge commit `3d1ddf2` 已在 main；runtime source/current `94e42b1`；本机约 7.14 GiB | code main / prior runtime deployed / docs-only evidence candidate | `git status/log/rev-parse/ls-remote`、`df -Pk`；2026-08-31 19:30 |
+| 审计问题账本 | 40 组问题与公开 backlog；16 组达到 main、24 组未闭合。FIX-BATCH-012 vault 已 deployed；FIX-BATCH-013 的 OMB-AUD-002 DNS 传输子项为 local-candidate | FIX-BATCH-001–012 as recorded / 013 candidate | `docs/问题账本.md`、PR/main CI、本地 targeted tests、腾讯 release evidence；2026-08-31 23:00 |
+| 工作区基线 | main/current `3bbcbfa`；FIX-BATCH-013 本地候选；本机约 7.59 GiB | vault deployed / DNS transport local-candidate | `git status/log/rev-parse/ls-remote`、`df -Pk`；2026-08-31 23:00 |
 | 自动测试 | PR #23 CI 前两轮 `33386547512`/`33386726268` 红灯保留；第三轮 `33386874683` 与 main CI `33387017311` 全绿，包含 unit/typecheck/build/production smoke/4 Chrome E2E | exact code main CI verified | GitHub CI；2026-08-31 19:30 |
-| GitHub main | 公共唯一主仓 `LegalInvest/open-map-bridge`；FIX-BATCH-012 merge commit `3d1ddf2` 已进入 main，腾讯运行源码仍为 FIX-BATCH-011 `94e42b1` | vault/code main；prior runtime deployed | PR #23、CI `33386874683`/`33387017311`；2026-08-31 19:30 |
-| 部署 | 腾讯私有 loopback current `94e42b1`；retained release `62ab114` 与 rollback `33f7f06` | deployed for artifact / synthetic browser journey | gateway/Web hash、health、双回环和状态 hash 前后不变；真实 Ovi 源未验收 |
+| GitHub main | 公共唯一主仓 `LegalInvest/open-map-bridge`；docs-only main `3bbcbfa`，FIX-BATCH-012 已随同一精确 main 制品部署 | vault code main/deployed | PR #23、CI `33386874683`/`33387017311`/`33388066061`；2026-08-31 23:00 |
+| 部署 | 腾讯私有 loopback current `3bbcbfa`；retained `94e42b1`、`62ab114` 与 rollback `33f7f06` | vault deployed / synthetic browser journey prior verified | gateway/Web hash、health/vault、401、双回环和状态 hash 前后不变；真实 Ovi 源未验收 |
 | 业务验收 | 真实 QR 安全预览和真实 `.ovmap` 五图层已过；真实 QR 瓦片渲染与用户独立签收未过 | import slice local-verified / AC-001 partial / accepted missing | `docs/acceptance/import-v0-local.md` |
 
 ## 13. 规格—代码—发布追踪矩阵
@@ -319,12 +320,12 @@ fixtures/synthetic/temporal  无外网的 20 年彩色/带标签时序瓦片
 | JRN-001 / FR-001 | 真实二维码到出图 | 用户 QR 已在 Chrome 解码成脱敏预览；合成 QR 已授权保存/刷新；标准 query/header 凭证可进入本地加密 vault | `apps/web/src/import`、`packages/qr-import`、gateway credential vault | AC-001 partial | preview/vault code main / render blocked | Ovi 私有不透明值仍仅走官方桥；vault 未部署，未探测/出图 | 2026-08-31 19:30 |
 | JRN-002 / FR-002 | 多图层 `.ovmap` | 公开真实 5 图层样本经 codec 与 UI 通过 | `packages/ovmap-codec`、IF-001 | AC-002/003 | local-verified family | 只覆盖 `record37-zlib`；其他家族 unsupported | 2026-08-28 |
 | FR-003 / DATA-001 | 统一开放模型 | schema v1、Zod 约束和显式状态机已实现 | `packages/source-schema` | schema/state tests | local-verified | 未来版本迁移尚无 v2 fixture | 2026-08-28 |
-| FR-004 / BR-004/005 | 安全预览、零外联、秘密 | 检查零上游、秘密剥离、授权前后端门已实现；FIX-BATCH-012 vault 使用严格 bundle、AES-GCM、私有原子文件与同 UUID 引用 | gateway import/security、Web import | unit/route/E2E | vault main / overall partial | 请求时 DNS/IP/连接固定/重绑定未实现；vault 未 deployed | 2026-08-31 19:30 |
+| FR-004 / BR-004/005 | 安全预览、零外联、秘密 | 检查零上游、秘密剥离、授权前后端门已实现；FIX-BATCH-012 vault 使用严格 bundle、AES-GCM、私有原子文件与同 UUID 引用 | gateway import/security、Web import | unit/route/E2E | vault deployed / overall partial | DNS/IP 固定传输仅 local-candidate 且未接 probe/tile | 2026-08-31 23:00 |
 | FR-005 / IF-003 | 代理和真实渲染 | 仅推荐架构 | `apps/gateway`、`apps/web` | AC-005/007 | planned | 缺协议、CORS、SSRF和真实源 E2E | 2026-08-27 |
 | FR-006 / DATA-002 | 保存、回执和重启恢复 | confirmed 定义/回执原子 JSON 保存，重开仓库和刷新恢复 | gateway persistence | AC-006 partial | local-verified for confirmed | 凭证、删除/撤销和生产迁移未实现 | 2026-08-28 |
 | FR-007 | 部分成功和诊断 | 稳定解析错误和 confirmed 回执已实现 | UI-004、receipt service | AC-003/008/009 | partial local-verified | 缺逐层探测、重试、撤销 | 2026-08-28 |
 | FR-008 / IF-004 | 开放导出 | 仅规格 | source-schema export | AC-010 | planned | 缺开放 schema 文档与 QR 容量策略 | 2026-08-27 |
-| NFR-001 | SSRF/解压/开放代理防护 | 解压/记录边界已验证；零外联 path/host/port/IP 静态策略已进入 main，元数据永久阻断，私网/裸 IP/企业域名转人工门 | `apps/gateway/src/security/source-policy.ts` | policy/route 反例由 CI `33155671827` 通过 | parser/static policy main | 缺请求时 DNS 解析结果、重绑定和实际网络执行门 | 2026-08-28 |
+| NFR-001 | SSRF/解压/开放代理防护 | 静态策略已 main；FIX-BATCH-013 候选增加请求时全 DNS 答案检查、metadata 永久阻断、精确私网例外、单 IP lookup pin、peer 复核和禁自动重定向/authority 头覆盖 | `apps/gateway/src/security/{source-policy,upstream-network}.ts` | 37 专项 tests＋gateway typecheck；全仓门未完成 | static main / request transport local-candidate | 尚未接入 source probe/tile，未 main/deployed | 2026-08-31 23:00 |
 | OMB-AUD-021 / NFR-004/006 | Ovi 响应资源与图片真实性 | main `de36012` 使用 Web Stream 逐块限制 5 MiB，只接受 200，其他状态丢弃正文，成功仅接受 PNG/JPEG 并检查 magic、完整解码、单边 2048 和 RGBA 长度；FIX-BATCH-011 复用同一门决定 runtime ready | `apps/gateway/src/temporal/{ovi-bridge,image-validation}.ts` | 响应反例 CI `33160315934`；probe 成功/403/损坏图由 PR/main CI 全门通过；腾讯 current `94e42b1` artifact/state/health 门通过 | code deployed | ProbeResult 持久化、真实源和通用请求时 DNS/IP 门仍缺 | 2026-08-31 18:19 |
 | OMB-AUD-020 / IF-006 / NFR-001/004 | 本地 gateway 入站信任边界 | main `1d0ebc4` 在首个 onRequest hook 校验精确 Host/Origin/Fetch-Site、constant-time Bearer、app ID/路径权限、写请求 CSRF 和每 principal/IP 固定窗口限流；FIX-BATCH-012 增加 vault | gateway access/config/Vite/SDK + credential vault | existing CI + PR #23/main CI | inbound/vault main | 上游请求时 DNS/IP/连接固定/重绑定仍缺；vault 未 deployed | 2026-08-31 19:30 |
 | OMB-AUD-010 / IF-001 / NFR-004 | `.ovmap` 上传信封真值 | main `cfab0c2` 共享 1 MiB 文件、base64 上界、4 KiB JSON 信封并只在导入路由设置 bodyLimit；前端预检，后端稳定区分文件/信封 413 | `packages/source-schema/src/import-limits.ts`、gateway import route、Web client | CI `33165515010` 通过恰好 1 MiB、加一字节、超信封、前端读取/fetch 反例及全门 | main | 本机容量门下未执行；QR 图片/预览内存资源门仍开放 | 2026-08-28 19:02 |
@@ -337,7 +338,7 @@ fixtures/synthetic/temporal  无外网的 20 年彩色/带标签时序瓦片
 | JRN-009 / FR-011/012 | 四屏、卷帘和播放 | 四屏、逐屏状态、共享/回放 ViewState、卷帘、播放和缺年隔离均已本地构建 | `apps/web/src/history` | UI/sync tests + Chrome E2E passed | synthetic local-verified | 真实奥维源和用户 AOI 未接受 | 2026-08-27 |
 | FR-013 / BR-014 | 变化观察证据等级 | 可见对象、原因假设和独立证据门已实现 | `apps/web/src/history/ObservationPanel.tsx` | component tests passed；AC-016 synthetic-only | UI local-verified | 尚无真实观察、外部逐年证据或用户接受 | 2026-08-27 |
 | JRN-007/008 / FR-010/014 | 任意框选后自动四期 | POST 创建、服务端 `area-*` 身份、矩形拖拽/多边形绘制、动态 20 年窗口、唯一四期、几何 fit 和真实浏览器非湖区旅程均已实现 | `packages/aois`、`packages/temporal-source`、`apps/gateway/src/routes/aois.ts`、`apps/web/src/history` | 单元/组件/路由测试 + 非湖区 Chrome E2E | synthetic local-verified / generic UI local-candidate | 真实奥维四日期闸门与用户独立签收未完成 | 2026-08-27 20:09 |
-| JRN-011 / FR-015/016 / IF-007 | 基于导入图源二次开发 | opaque Ovi runtime 与 imported UUID 合并；configured 仅 metadata。FIX-BATCH-011 在同 UUID 探针解码成功后才开放 temporal-catalog/tiles；FIX-BATCH-012 readiness 只承认 active vault 中实际存在的同 UUID 引用 | SDK、gateway app/config/developer/import/security | existing main CI + PR #23/main CI | binding/probe-ready code deployed / vault main | 仍缺请求时 DNS/IP、持久 ProbeResult、真实源；vault 未部署，SDK 尚无可发布制品 | 2026-08-31 19:30 |
+| JRN-011 / FR-015/016 / IF-007 | 基于导入图源二次开发 | opaque Ovi runtime 与 imported UUID 合并；configured 仅 metadata。FIX-BATCH-011 在同 UUID 探针解码成功后才开放能力；FIX-BATCH-012 vault 已部署；FIX-BATCH-013 固定传输为候选 | SDK、gateway app/config/developer/import/security | existing main CI + 37 DNS transport assertions | binding/probe-ready/vault deployed / DNS local-candidate | DNS 传输未接主链，仍缺持久 ProbeResult、真实源，SDK 尚无可发布制品 | 2026-08-31 23:00 |
 | JRN-012 / UI-008 / FR-017 | 可观察一键任务 | confirmed source 可创建四步零外联准备度 run；FIX-BATCH-012 把凭证步骤从“非空引用”提升为 active vault 实际命中 | automation schema/service/routes/Web | existing main CI + PR #23/main CI | base/vault main / AC-019/021 partial | 无 DNS/HTTP 探测、步骤级续跑/取消、AOI/四期步骤；不能标 ready | 2026-08-31 19:30 |
 | FR-018 / DATA-010 / AC-020/022 | 可解释四期和质量事实 | 等距唯一选择、逐屏 loaded/failed、内容哈希真实探针已分散存在 | `packages/temporal-source`、`apps/gateway/src/temporal`、`apps/web/src/history` | existing tests + new real-source AC planned | partially discovered / proposed | 缺覆盖/质量统一模型、选择解释、真实结果页和用户签收 | 2026-08-28 |
 
@@ -371,8 +372,8 @@ fixtures/synthetic/temporal  无外网的 20 年彩色/带标签时序瓦片
 | GitHub | 奥维相关仓库/样本 | 多查询族、代码搜索和重点仓库静态核验 | 第 9 节 | 中 | 私有/删除/未索引仓库不可见 |
 | 本地资产 | 是否已有项目 | 工作区深度 2 目录/关键文件 | find 输出 | 高 | 深层无关项目未扫描，因绿地命名已足够 |
 | 二进制样本 | `.ovmap` 基本容器 | 一个公开 455-byte 样本 | 魔数、zlib、字符串 | 中 | 字段边界、历史版本、加密未知 |
-| 运行链 | Web UI 到真实出图 | 双入口/合成消费链有既有 CI；FIX-BATCH-001/002/011 修复同 UUID/configured/probe 图片真值；FIX-BATCH-012 vault 已 main | main + deployed prior runtime + issue ledger | 高 | vault 未部署；请求时 DNS/IP/连接固定/重绑定、ProbeResult、真实 tile proxy 等仍缺 |
-| 发布链 | GitHub/CI/部署 | FIX-BATCH-012 main `3d1ddf2`、CI `33386874683`/`33387017311`；runtime source/current `94e42b1`、retained `62ab114`、rollback `33f7f06`、项目 Node、systemd、BaoTa nginx 与 SSH tunnel已核验 | new code main / prior private deployment verified | 高 | FIX-BATCH-012 未 deployed；公网仍禁用；真实 Ovi 源与用户 accepted 未完成 |
+| 运行链 | Web UI 到真实出图 | 双入口/合成消费链有既有 CI；FIX-BATCH-001/002/011 修复同 UUID/configured/probe 图片真值；FIX-BATCH-012 vault 已部署；FIX-BATCH-013 传输为候选 | deployed vault + local-candidate DNS transport + issue ledger | 高 | DNS 传输未接 probe/tile；ProbeResult、真实 tile proxy 等仍缺 |
+| 发布链 | GitHub/CI/部署 | docs-only main/腾讯 current `3bbcbfa`；FIX-BATCH-012 artifact/vault/state/health/双回环已核验；retained `94e42b1/62ab114/33f7f06` | vault deployed / DNS branch local-candidate | 高 | FIX-BATCH-013 未全仓验证、main 或 deployed；公网仍禁用；真实 Ovi 源与用户 accepted 未完成 |
 | 产品入口 | 可视化和自动化现实 | 本机空间低于 8 GiB，未操作浏览器；远端 Chrome 完成导入→任务→刷新恢复 | 源码与 CI E2E | 高 | main 已验证；本机和用户独立签收仍未做 |
 | 外部标准 | 时空元数据、任务与 telemetry | STAC、OGC Processes、OpenLayers、OpenTelemetry、STAC Browser 官方页 | 第 3 节链接；2026-08-28 | 高 | 尚未做依赖选型或标准合规测试 |
 

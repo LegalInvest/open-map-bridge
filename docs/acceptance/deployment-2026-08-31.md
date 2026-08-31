@@ -44,3 +44,11 @@ The artifact was installed without overwriting earlier releases at `/opt/open-ma
 At 2026-08-31 19:30 Asia/Shanghai, PR #23 had merged the encrypted credential vault and automatic 8 GiB root-command preflight into main `3d1ddf2`. The first two PR runs `33386547512` and `33386726268` failed on a hook spelling error and an incorrect credential-ready branch; both failures remain part of the audit trail. The third PR run `33386874683` and main run `33387017311` passed unit tests, all workspace type checks, production build/smoke, and four Chrome journeys.
 
 This is `main`, not `deployed`: the workstation had about 7.14 GiB free, so no new local artifact, Tencent release, or vault master key was created. Tencent current therefore remains the verified FIX-BATCH-011 release `94e42b1`; all real-source acceptance boundaries above remain unchanged.
+
+## FIX-BATCH-012 deployment — 22:44 Asia/Shanghai
+
+After workstation capacity recovered above the 8 GiB gate, exact docs-only main `3bbcbfabd2d61ba645c0be136ba8ac07c3816c15` passed 198 Vitest tests, 3 Node tests, all 8 workspace typechecks, production build, and isolated production smoke. The artifact gateway SHA-256 was `5827328217ead191356508c4a5e6a15e311b25f3138de8b257dd332d56ddd361`; Web index SHA-256 was `75495f47770bcf9655d12cda37cf83b5ed26b99524e1e22b748d8f7788c4de42`.
+
+The artifact was copied to the new immutable release `/opt/open-map-bridge/releases/3bbcbfa`, template and artifact hashes matched locally, and `current` was atomically switched. A distinct vault key was generated only in the root-owned `0600` server environment without being printed or persisted elsewhere; the service created an empty `0600` `/var/lib/open-map-bridge/credential-vault.json`. Health returned `{"ok":true,"persistence":"atomic-json","credentialVault":"encrypted-local"}`, direct unauthenticated gateway access remained 401, listeners remained `127.0.0.1:4174` and `127.0.0.1:8080`, and the persistent state SHA-256 stayed `07648ee28f9e50bdc581ae99a9c08d83b5a4b22bfd9e4fe8f1acd542b0c6d6e2`.
+
+This advances FIX-BATCH-012 to `deployed` only. The vault contains no real credential, no real Ovi or third-party request was sent, no ProbeResult was persisted, and real-source `ready/rendered/accepted` remains unmet.
