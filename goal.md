@@ -9,7 +9,7 @@
 - 当前整合者：本 Codex 主线程
 - 更新时间：2026-09-01 03:18（Asia/Shanghai）
 - 适用目录：`/Users/assis/Documents/Codex/2026-08-27/open-map-bridge`
-- 当前切片：`FIX-BATCH-014A deployed / real probe blocked；014B request-plan truth deployed / generic probe not wired`。PR #32 首轮 CI `33428136462` 的公开 QR E2E 红灯已保留；修正夹具、不放宽策略后，PR CI `33428818544`/`33429142239` 与 main CI `33429336750` 全绿，squash main 为 `ccd3cd8`。精确 main 在本机通过 production build/smoke，随后安装腾讯 release `ccd3cd8` 并原子切换 current；gateway/Web 哈希匹配 manifest，health 200、未鉴权 401、双回环和 state/vault hash 不变，旧 `16e805d` 保留回滚。014B 现在能保留 scheme、字段 provenance、非秘密常量 query 与完整 OMS 事实，并对未知/旧版/未证/HTTP 通用请求计划 fail closed；但 vault 注入、FIX-BATCH-013 固定传输、通用 ProbeResult 和实际第三方请求仍未接线。官方 Ovi 接口仍未获操作时开启，真实 ProbeResult、rendered/accepted 均未达到。
+- 当前切片：`FIX-BATCH-014A deployed / real probe blocked；014B request-plan truth deployed / generic probe not wired`。PR #32 首轮 CI `33428136462` 的公开 QR E2E 红灯已保留；修正夹具、不放宽策略后，PR CI `33428818544`/`33429142239` 与 runtime main CI `33429336750` 全绿，运行源码为 `ccd3cd8`。精确运行源码在本机通过 production build/smoke，随后安装腾讯 release `ccd3cd8` 并原子切换 current；gateway/Web 哈希匹配 manifest，health 200、未鉴权 401、双回环和 state/vault hash 不变，旧 `16e805d` 保留回滚。部署证据 PR #33 合并为 docs-only main `601ac68`，main CI `33430487066` 全绿，不生成第二个 release。014B 现在能保留 scheme、字段 provenance、非秘密常量 query 与完整 OMS 事实，并对未知/旧版/未证/HTTP 通用请求计划 fail closed；但 vault 注入、FIX-BATCH-013 固定传输、通用 ProbeResult 和实际第三方请求仍未接线。官方 Ovi 接口仍未获操作时开启，真实 ProbeResult、rendered/accepted 均未达到。
 - 上版：V0.4 奥维兼容双入口导入实施版
 
 <!-- GOAL_CAPSULE_START -->

@@ -190,3 +190,5 @@
 - 2026-09-01 03:18：精确 main 本地 production build/smoke 通过，gateway/Web hash 为 `273207cc…b826`/`42368f3e…04ad`。腾讯新增 release `ccd3cd8` 并从 `16e805d` 原子切换 current；health、401、双回环、artifact、state/vault hash 门全部通过，旧 release 保留，零真实外联。
 - 当前阶段：014B 请求计划真值=`deployed`；OMB-AUD-007/008 整体仍是 partial，通用 vault 注入、固定传输接线、ProbeResult 和真实图源验收未达。014A 的真实 Ovi ProbeResult、真实日期、rendered、accepted 也未达。
 - 唯一最安全下一步：由 Codex 实现 FIX-BATCH-014C 的通用 probe 编排，把同 UUID vault、014B 请求计划、FIX-BATCH-013 逐请求 DNS/IP 固定传输和脱敏 ProbeResult 只在本地合成上游夹具中接通；全门完成前不请求用户真实第三方图源。
+- 2026-09-01 03:27：部署证据 PR #33 CI `33430320616` 全绿并合并为 docs-only main `601ac68`；main CI `33430487066` 复验全门。本地/main/origin 同步；运行源码与腾讯 current 保持 `ccd3cd8`，不为 docs-only 后代重复发布。
+- 唯一最安全下一步：由 Codex 实现 FIX-BATCH-014C 的通用 probe 编排，把同 UUID vault、014B 请求计划、FIX-BATCH-013 逐请求 DNS/IP 固定传输和脱敏 ProbeResult 只在本地合成上游夹具中接通；全门完成前不请求用户真实第三方图源。
