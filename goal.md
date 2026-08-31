@@ -9,7 +9,7 @@
 - 当前整合者：本 Codex 主线程
 - 更新时间：2026-09-01 04:19（Asia/Shanghai）
 - 适用目录：`/Users/assis/Documents/Codex/2026-08-27/open-map-bridge`
-- 当前切片：`FIX-BATCH-014A/B/C deployed-code / real probe blocked`。PR #35 的功能/证据 CI `33434618444`/`33434979533` 全绿，squash 合并为 main `7da03c3`，main CI `33435153343` 再次全绿。精确 main 本地 production build/smoke 生成 gateway `a3d69a0e…56a1d`、Web `42368f3e…04ad`，腾讯安装 immutable release `7da03c3` 并从 `ccd3cd8` 原子切换 current；首次重启健康检查短暂 502，随后 health 200、未鉴权 401、双回环、artifact/state/vault hash 和 0600 权限全部通过，旧 release 保留。014C 新增显式同 UUID 单坐标 probe，把 vault HMAC、014B 请求计划、逐请求 DNS/IP/peer 固定传输、受限凭证注入、完整图片门和脱敏 ProbeResult 贯通；但没有使用用户二维码、真实凭证或真实第三方源，也未把成功结果绑定为通用 tile/temporal runtime。官方 Ovi 真实 ProbeResult、通用真实源 rendered/accepted 均未达到。
+- 当前切片：`FIX-BATCH-014A/B/C deployed-code / real probe blocked`。PR #35 的功能/证据 CI `33434618444`/`33434979533` 全绿，squash 合并为 runtime source `7da03c3`，runtime main CI `33435153343` 再次全绿。精确 runtime source 本地 production build/smoke 生成 gateway `a3d69a0e…56a1d`、Web `42368f3e…04ad`，腾讯安装 immutable release `7da03c3` 并从 `ccd3cd8` 原子切换 current；首次重启健康检查短暂 502，随后 health 200、未鉴权 401、双回环、artifact/state/vault hash 和 0600 权限全部通过，旧 release 保留。部署证据 PR #36 CI `33436046174` 全绿并合并为 docs-only main `84f103f`，main CI `33436199094` 全绿；该文档后代不生成第二个 release。014C 新增显式同 UUID 单坐标 probe，把 vault HMAC、014B 请求计划、逐请求 DNS/IP/peer 固定传输、受限凭证注入、完整图片门和脱敏 ProbeResult 贯通；但没有使用用户二维码、真实凭证或真实第三方源，也未把成功结果绑定为通用 tile/temporal runtime。官方 Ovi 真实 ProbeResult、通用真实源 rendered/accepted 均未达到。
 - 上版：V0.4 奥维兼容双入口导入实施版
 
 <!-- GOAL_CAPSULE_START -->
@@ -875,3 +875,5 @@ V1 公共类型和错误语义通过契约测试冻结；新增可选能力不�
 - 唯一最安全下一步：由 Codex 回写该 CI 证据并等待证据提交复验；再次全绿后 squash 合并 PR #35、核验 main CI，再仅因运行制品变化更新腾讯 versioned release。
 - 2026-09-01：04:19 PR #35 证据提交 CI `33434979533` 全绿并 squash 合并为 main `7da03c3`，main CI `33435153343` 复验完整门。精确 main 本地 build/smoke 后部署腾讯 release `7da03c3`；health/401/双回环/artifact/state/vault/权限门通过，首次健康检查短暂 502 后恢复。014C 达到 `deployed-code`，真实源 ProbeResult、runtime ready、rendered、accepted 仍未达到。
 - 唯一最安全下一步：由 Codex 实现 FIX-BATCH-014D，把“当前同指纹成功 ProbeResult”安全绑定到最小通用 tile runtime，并复用同一请求构造、vault 与逐请求固定传输；先只用本机合成上游验证，继续零真实第三方请求。
+- 2026-09-01：04:29 部署证据 PR #36 CI `33436046174` 全绿并合并为 docs-only main `84f103f`，main CI `33436199094` 通过完整门。本地/main/origin clean；腾讯 runtime/current 仍为 `7da03c3`，服务健康、401、双回环及 state/vault hash 再次只读通过，docs-only 后代不重复发布。
+- 唯一最安全下一步：由 Codex 实现 FIX-BATCH-014D，把当前同指纹成功 ProbeResult 绑定到最小通用 tile runtime，并复用同一请求构造、vault 与逐请求固定传输；先只用本机合成上游验证，继续零真实第三方请求。

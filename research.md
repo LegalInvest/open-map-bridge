@@ -25,6 +25,7 @@
 - 2026-09-01 03:57 FIX-BATCH-014C 达到 `local-verified`：网关新增只接受 source UUID＋单瓦片坐标的显式 probe；从同 UUID vault 解密后用 keyed HMAC 形成凭证修订而不暴露值，复核静态请求计划并逐请求执行 DNS/IP/peer 固定传输，完成 query/header 注入、5 MiB 上限、PNG/JPEG 完整解码、脱敏 ProbeResult、同指纹并发/重启复用和 confirmed→probed。只用本机回环合成上游验证，53 项定向、256 Vitest＋3 Node、8 workspace typecheck、production build/smoke、4 Chrome 全绿；默认生产策略会在 DNS 前阻止 HTTP、私网和未知凭证需求。当前 main/CI/腾讯仍分别是 `601ac68`/`33430487066`/`ccd3cd8`，没有真实第三方请求、真实 Ovi ProbeResult、rendered 或 accepted。
 - 2026-09-01 04:12 PR #35 首轮 CI `33434618444` 对 `d3118b8` 完整通过，014C 晋级 `PR CI verified / not main`。GitHub main 与腾讯 current 仍分别为 `601ac68`/`ccd3cd8`；CI 绿不替代真实源 ProbeResult、rendered 或 accepted。
 - 2026-09-01 04:19 PR #35 证据提交 CI `33434979533` 全绿并 squash 合并为 main `7da03c3`；main CI `33435153343` 再次通过交底、256 Vitest＋3 Node、8 typecheck、build/smoke 与 4 Chrome。精确 main 本地 build/smoke 后，腾讯安装 release `7da03c3` 并原子切换 current；gateway/Web SHA-256 为 `a3d69a0e…56a1d`/`42368f3e…04ad`，health 200、直连 401、4174/8080 双回环、state `07648ee2…d6e2` 与 vault `89c8d70d…db42` 未变且均为 0600。重启窗口首次 nginx health 为 502，重试即恢复。014C 达到 `deployed-code`，但没有真实源请求、真实 ProbeResult、通用 runtime ready、rendered 或 accepted。
+- 2026-09-01 04:29 部署证据 PR #36 CI `33436046174` 全绿并合并为 docs-only main `84f103f`；main CI `33436199094` 再次通过完整门。本地/main/origin clean；腾讯 runtime/current 正确保留 `7da03c3`，只读复核 health/401/双回环/artifact/state/vault 均通过。docs-only main 与 runtime source 分开记录，不制造第二个 release。
 
 ### 本轮回答
 
