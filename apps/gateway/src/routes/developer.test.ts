@@ -1,8 +1,8 @@
-import { mkdtemp } from 'node:fs/promises';
+import { mkdtemp, readFile } from 'node:fs/promises';
 import { createRequire } from 'node:module';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { afterEach, expect, it } from 'vitest';
+import { afterEach, expect, it, vi } from 'vitest';
 import { buildTestApp as buildApp } from '../test-app.js';
 
 const localRequire = createRequire(import.meta.url);
@@ -135,7 +135,7 @@ it('grants Ovi temporal capabilities only after an authorized tile probe decodes
     availability: 'available' as const,
     provenance: 'authorized test fixture',
   };
-  const fetchImpl = async () =>
+  const fetchImpl = vi.fn(async () =>
     new Response(responseBody(validPng()), { status: 200, headers: { 'content-type': 'image/png' } });
   const app = await buildApp({
     dataPath,
@@ -148,7 +148,6 @@ it('grants Ovi temporal capabilities only after an authorized tile probe decodes
       fetchImpl: fetchImpl as typeof fetch,
     },
   });
-  apps.push(app);
 
   const descriptor = (await app.inject({ method: 'GET', url: `/api/v1/developer/sources/${importedId}` })).json();
   expect(descriptor).toMatchObject({
@@ -163,6 +162,109 @@ it('grants Ovi temporal capabilities only after an authorized tile probe decodes
   });
   expect(dates.statusCode).toBe(200);
   expect(dates.json()).toEqual([verifiedDate]);
+
+  const state = JSON.parse(await readFile(dataPath, 'utf8')) as { probeResults: Array<Record<string, unknown>> };
+  expect(state.probeResults).toHaveLength(1);
+  expect(state.probeResults[0]).toMatchObject({
+    schemaVersion: 1,
+    sourceId: importedId,
+    category: 'success',
+    httpStatus: 200,
+    contentType: 'image/png',
+    width: 1,
+    height: 1,
+    errorCode: null,
+  });
+  expect(Object.keys(state.probeResults[0] ?? {}).sort()).toEqual([
+    'category',
+    'contentType',
+    'endedAt',
+    'errorCode',
+    'height',
+    'httpStatus',
+    'inputFingerprint',
+    'schemaVersion',
+    'sourceId',
+    'startedAt',
+    'width',
+  ]);
+  expect(fetchImpl).toHaveBeenCalledTimes(1);
+  await app.close();
+
+  const restartFetch = vi.fn<typeof fetch>();
+  const restarted = await buildApp({
+    dataPath,
+    ovi: {
+      baseUrl: 'http://127.0.0.1:54321',
+      mapType: 402,
+      sourceId: importedId,
+      verifiedDates: [verifiedDate],
+      probeRequest: { dateId: verifiedDate.id, z: 8, x: 212, y: 102 },
+      fetchImpl: restartFetch,
+    },
+  });
+  apps.push(restarted);
+  expect(restartFetch).not.toHaveBeenCalled();
+  expect(
+    (await restarted.inject({ method: 'GET', url: `/api/v1/developer/sources/${importedId}` })).json(),
+  ).toMatchObject({ lifecycle: 'ready', accessStatus: 'ready' });
+});
+
+it('persists a failed Ovi probe and does not retry the same input on restart', async () => {
+  const directory = await mkdtemp(join(tmpdir(), 'omb-ovi-probe-failure-'));
+  const dataPath = join(directory, 'state.json');
+  const importing = await buildApp({ dataPath });
+  const importedId = await confirmImportedSource(importing, 'opaque-private-template');
+  await importing.close();
+  const verifiedDate = {
+    id: 'verified-scene-2018',
+    requestDate: '2018-06-30',
+    captureDate: null,
+    precision: 'request-date-only' as const,
+    availability: 'available' as const,
+    provenance: 'authorized test fixture',
+  };
+  const deniedFetch = vi.fn(async () => new Response('', { status: 403 }));
+  const first = await buildApp({
+    dataPath,
+    ovi: {
+      baseUrl: 'http://127.0.0.1:54321',
+      mapType: 402,
+      sourceId: importedId,
+      verifiedDates: [verifiedDate],
+      probeRequest: { dateId: verifiedDate.id, z: 8, x: 212, y: 102 },
+      fetchImpl: deniedFetch as typeof fetch,
+    },
+  });
+  expect(deniedFetch).toHaveBeenCalledTimes(1);
+  await first.close();
+
+  const retryFetch = vi.fn<typeof fetch>();
+  const restarted = await buildApp({
+    dataPath,
+    ovi: {
+      baseUrl: 'http://127.0.0.1:54321',
+      mapType: 402,
+      sourceId: importedId,
+      verifiedDates: [verifiedDate],
+      probeRequest: { dateId: verifiedDate.id, z: 8, x: 212, y: 102 },
+      fetchImpl: retryFetch,
+    },
+  });
+  apps.push(restarted);
+  expect(retryFetch).not.toHaveBeenCalled();
+  expect(
+    (await restarted.inject({ method: 'GET', url: `/api/v1/developer/sources/${importedId}` })).json(),
+  ).toMatchObject({ lifecycle: 'configured', accessStatus: 'metadata-only' });
+  const state = JSON.parse(await readFile(dataPath, 'utf8')) as { probeResults: Array<Record<string, unknown>> };
+  expect(state.probeResults).toEqual([
+    expect.objectContaining({
+      sourceId: importedId,
+      category: 'forbidden',
+      httpStatus: 403,
+      errorCode: 'PROBE_HTTP_403',
+    }),
+  ]);
 });
 
 it('exposes runtime and imported sources through a secret-free capability directory', async () => {

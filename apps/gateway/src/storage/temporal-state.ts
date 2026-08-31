@@ -5,9 +5,11 @@ import { parseAreaOfInterest, type AreaOfInterest } from '@omb/aois';
 import {
   parseAutomationRun,
   parseMapSourceDefinition,
+  parseProbeResult,
   type AutomationRun,
   type ImportReceipt,
   type MapSourceDefinition,
+  type ProbeResult,
 } from '@omb/source-schema';
 
 export interface FrameReceipt {
@@ -33,6 +35,7 @@ interface TemporalState {
   importSources: MapSourceDefinition[];
   importReceipts: ImportReceipt[];
   automationRuns: AutomationRun[];
+  probeResults: ProbeResult[];
 }
 
 function parseImportReceipt(value: unknown): ImportReceipt {
@@ -88,6 +91,7 @@ export class TemporalStateRepository {
         importSources: [],
         importReceipts: [],
         automationRuns: [],
+        probeResults: [],
       });
     }
     try {
@@ -97,6 +101,7 @@ export class TemporalStateRepository {
         importSources?: unknown;
         importReceipts?: unknown;
         automationRuns?: unknown;
+        probeResults?: unknown;
       };
       if (!Array.isArray(parsed.aois) || !Array.isArray(parsed.comparisons)) throw new Error('invalid temporal state');
       return new TemporalStateRepository(path, {
@@ -105,6 +110,7 @@ export class TemporalStateRepository {
         importSources: Array.isArray(parsed.importSources) ? parsed.importSources.map(parseMapSourceDefinition) : [],
         importReceipts: Array.isArray(parsed.importReceipts) ? parsed.importReceipts.map(parseImportReceipt) : [],
         automationRuns: Array.isArray(parsed.automationRuns) ? parsed.automationRuns.map(parseAutomationRun) : [],
+        probeResults: Array.isArray(parsed.probeResults) ? parsed.probeResults.map(parseProbeResult) : [],
       });
     } catch (error) {
       if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
@@ -114,6 +120,7 @@ export class TemporalStateRepository {
         importSources: [],
         importReceipts: [],
         automationRuns: [],
+        probeResults: [],
       });
       await repository.persist();
       return repository;
@@ -138,6 +145,17 @@ export class TemporalStateRepository {
 
   listAutomationRuns(): AutomationRun[] {
     return structuredClone(this.state.automationRuns).sort((left, right) => right.createdAt.localeCompare(left.createdAt));
+  }
+
+  listProbeResults(): ProbeResult[] {
+    return structuredClone(this.state.probeResults);
+  }
+
+  findProbeResult(sourceId: string, inputFingerprint: string): ProbeResult | null {
+    const result = this.state.probeResults.find(
+      (entry) => entry.sourceId === sourceId && entry.inputFingerprint === inputFingerprint,
+    );
+    return result ? structuredClone(result) : null;
   }
 
   getAutomationRun(id: string): AutomationRun | null {
@@ -218,6 +236,23 @@ export class TemporalStateRepository {
       }
       result = { run: structuredClone(parsed), created: true };
       return { ...state, automationRuns: [...state.automationRuns, parsed] };
+    });
+    return result;
+  }
+
+  async ensureProbeResult(input: ProbeResult): Promise<{ result: ProbeResult; created: boolean }> {
+    const parsed = parseProbeResult(input);
+    let result: { result: ProbeResult; created: boolean } = { result: structuredClone(parsed), created: true };
+    await this.mutate((state) => {
+      const existing = state.probeResults.find(
+        (entry) => entry.sourceId === parsed.sourceId && entry.inputFingerprint === parsed.inputFingerprint,
+      );
+      if (existing) {
+        result = { result: structuredClone(existing), created: false };
+        return state;
+      }
+      result = { result: structuredClone(parsed), created: true };
+      return { ...state, probeResults: [...state.probeResults, parsed] };
     });
     return result;
   }

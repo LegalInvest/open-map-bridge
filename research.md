@@ -18,6 +18,7 @@
 - 2026-08-28 用户要求对整个仓库和文档做全量审计，并随后批准逐一修复、同步问题账本和解决进度 Markdown。当前以 `docs/问题账本.md` 的 38 项为完整审计边界，先修 P0 同 source UUID 与 configured/ready 真值；不得把单批 CI 绿写成全部问题关闭。
 - 2026-08-31 用户授权自主推进到本机、GitHub、服务器最新可验收。FIX-BATCH-012 已由腾讯 current `3bbcbfa` 部署；vault 运行态、401、双回环和 state hash 门通过，vault 为空、零真实外联。FIX-BATCH-013 经 PR #25/main CI 全门后合并为 main `32cb36d`；请求时 DNS/IP/连接固定/重绑定传输代码达到 main，但尚未接入 source probe/tile，真实源验收继续独立开放。
 - 2026-08-31 23:39 续跑复核本地/远端/GitHub main 为 `4252e92`、CI `33408261136` 全绿；腾讯 current `3bbcbfa` active，health=`atomic-json/encrypted-local`、未鉴权 401、双回环、state hash 不变。只读代码审查发现通用 probe 接线前置缺口：MapSourceDefinition 没有 transport scheme，导入归一化还会丢弃所有不能证明为非秘密的常量 query；因此不能猜测 URL 后直接注入 vault。用户的私有 Ovi QR 仍应由官方回环桥承接，通用 vault 不解释其不透明字段。
+- 2026-09-01 00:43 续跑复核本地/main/origin 为 `4730395`、GitHub CI `33410854421` 成功；腾讯 current 保持 `3bbcbfa`、服务 active、4174/8080 双回环、health=`atomic-json/encrypted-local`、未鉴权 401、state hash 与空 0600 vault 不变。FIX-BATCH-014A 已形成未本机执行的源码/测试候选：严格 ProbeResult、同 UUID 安全输入指纹、原子去重、成功/失败持久证据和重启零重复请求。
 
 ### 本轮回答
 
@@ -36,7 +37,7 @@
 - `FIX-BATCH-007` 已由 PR #13 合并为 main `873705b`：预览 store 主动 TTL 清理并以访问顺序实施 64 条/4 MiB LRU；QR 图片在 object URL/ZXing 前限制声明/实际 8 MiB，解析 PNG/JPEG/WebP 头并限制 16,777,216 像素，浏览器尺寸须一致，2×/3× 受缩放像素预算约束。首次 CI `33166210759` 红灯保留；`33166313733` 全绿。
 - `FIX-BATCH-012` 已进入 main 并部署到腾讯 current `3bbcbfa`：严格凭证 bundle、AES-256-GCM 独立私有 vault、同 source UUID 引用、原子写入/失败关闭、配置/移除 API、Web 密码输入、readiness 命中校验与 `OMB-AUD-040` 8 GiB 自动门均生效。服务器只生成未回显独立 key 和空 0600 vault；未写入真实凭证、未发上游请求。
 - `FIX-BATCH-013` 已由 PR #25 合并为 main `32cb36d`：`apps/gateway/src/security/upstream-network.ts` 在每次请求前解析并检查全部 DNS 地址，永久拒绝 metadata，默认拒绝私网/回环/链路本地/保留/转换地址，只允许按 authority＋精确地址显式批准企业私网；授权快照由 WeakSet 防结构伪造，传输禁自动重定向、固定单地址 lookup、连接后核对 remote peer，并阻止 Host/代理/跳级头覆盖。37 个专项断言含本机回环真实连接，PR/main CI `33406940553`/`33407144250` 全门通过且零外部 DNS/HTTP；模块尚未接入 source probe/tile 路由。
-- `FIX-BATCH-014` 契约已由 PR #27 合并为 main `568fc80`，PR/main CI `33410108596`/`33410273091` 全绿；这只证明文档契约进入主线，不是实现候选。阶段 A 将 OviBridge 的一次受控回环请求改为带安全输入指纹、可持久化且可幂等恢复的脱敏 ProbeResult，不使用通用 vault 重建 Ovi 私有认证；阶段 B 先关闭 OMB-AUD-007/008 的 scheme/常量参数事实缺口，再把普通 imported source 接入同 UUID vault 与 FIX-BATCH-013 传输。当前没有源码候选、测试或外联，不得写成 local-candidate。
+- `FIX-BATCH-014` 契约与证据已由 PR #27/#28 进入 main `4730395`，main CI `33410854421` 全绿。阶段 A 当前源码候选为 OviBridge 添加 `schemaVersion=1` 的严格 ProbeResult、只由同 source UUID／导入 SHA／回环 origin／mapType／排序日期目录／已登记 probe 坐标组成的 SHA-256 输入指纹，以及原子 `ensureProbeResult`；启动先复用同指纹结果，成功才 ready，失败保持 configured。fixture 覆盖成功尺寸、403、重开不重复 fetch 和持久字段白名单。根卷仅约 8.07 GiB，未运行本地测试/构建，阶段为 `local-candidate`；阶段 B 的 OMB-AUD-007/008 仍不动。
 
 ### 搜索与核验边界
 
@@ -444,3 +445,10 @@ fixtures/synthetic/temporal  无外网的 20 年彩色/带标签时序瓦片
 - 第一轮 UI 验证失败，因为宝塔 nginx 不读取 `/etc/nginx/conf.d`。从 `nginx -T` 解析到 `/www/server/panel/vhost/nginx/*.conf` 后安装同一模板并通过 `nginx -t`；8080/4174 均只监听 `127.0.0.1`。
 - 隧道 UI、health、AOI API 为 200，gateway 直连未鉴权为 401；重启后服务 active、状态哈希不变，日志包含 started/stopped。服务器 Web 浏览器无 warning/error，四屏 2006/2011/2019/2025 全加载，播放从 2006 前进到 2007。
 - 服务器完成 `62ab114 → 33f7f06 → 62ab114` 回滚/前滚，每次 health 成功、state hash 不变。该证据把应用制品推进 `deployed`，不把合成源、HTTP 200 或浏览器加载冒充真实奥维源的 `ready/rendered/accepted`。
+
+## 2026-09-01 FIX-BATCH-014A 候选证据
+
+- 本地/main/origin 精确为 `4730395d3e95f5acaebb699fb653253af42f6b5f`，工作树从干净 main 新建 `codex/fix-batch-014a-probe-result`；GitHub main CI `33410854421` 成功。
+- 腾讯只读核验仍为 `/opt/open-map-bridge/releases/3bbcbfa`，systemd active/running，4174/8080 仅监听 127.0.0.1，根卷约 351 GiB 可用，state hash `07648ee2…d6e2`，vault 为 42 字节 0600 空文件；鉴权 health 200 且未鉴权 401。首次无超时参数的健康命令等待 30 秒且无输出，随后用 3 秒连接／8 秒总时限复核成功；不把首次静默当健康证据。
+- 候选不保存请求 URL、host、日期、地图编号、响应正文或错误消息；持久对象只含 source UUID、输入指纹、时间、稳定类别/错误码、HTTP 状态、MIME 和成功图片尺寸。失败结果与成功结果都按 source UUID＋fingerprint 原子去重，重开同输入不再次调用 fixture fetch。
+- 00:43 本机可用 `8,468,576 KiB`，只高于 8 GiB 门 `79,968 KiB`，swap 使用约 7.39 GiB。只执行了只读检查、`apply_patch`、`git diff --check` 与小型文档更新；未运行 test/typecheck/build/browser/download/image，最终验证交给 GitHub PR CI。

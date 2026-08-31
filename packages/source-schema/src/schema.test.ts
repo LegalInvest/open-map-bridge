@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { parseMapSourceDefinition } from './index.js';
+import { parseMapSourceDefinition, parseProbeResult } from './index.js';
 
 const validSource = {
   schemaVersion: 1,
@@ -52,5 +52,44 @@ describe('MapSourceDefinition', () => {
   it('rejects invalid zoom ordering and non-host input', () => {
     expect(() => parseMapSourceDefinition({ ...validSource, minZoom: 19 })).toThrow();
     expect(() => parseMapSourceDefinition({ ...validSource, hosts: ['https://tiles.example.invalid/path'] })).toThrow();
+  });
+});
+
+describe('ProbeResult', () => {
+  const success = {
+    schemaVersion: 1,
+    sourceId: validSource.id,
+    inputFingerprint: 'b'.repeat(64),
+    startedAt: '2026-08-31T15:00:00.000Z',
+    endedAt: '2026-08-31T15:00:01.000Z',
+    category: 'success',
+    httpStatus: 200,
+    contentType: 'image/png',
+    width: 256,
+    height: 256,
+    errorCode: null,
+  } as const;
+
+  it('accepts complete redacted image evidence', () => {
+    expect(parseProbeResult(success)).toEqual(success);
+  });
+
+  it('rejects success without decoded dimensions and failures without stable error codes', () => {
+    expect(() => parseProbeResult({ ...success, width: null })).toThrow(/validated image evidence/i);
+    expect(() =>
+      parseProbeResult({
+        ...success,
+        category: 'forbidden',
+        httpStatus: 403,
+        contentType: null,
+        width: null,
+        height: null,
+      }),
+    ).toThrow(/error code/i);
+  });
+
+  it('rejects unknown fields and reversed timestamps', () => {
+    expect(() => parseProbeResult({ ...success, upstreamUrl: 'http://private.invalid' })).toThrow();
+    expect(() => parseProbeResult({ ...success, endedAt: '2026-08-31T14:59:59.000Z' })).toThrow(/precede/i);
   });
 });

@@ -1,3 +1,5 @@
+import { createHash } from 'node:crypto';
+import { parseProbeResult, type ProbeResult } from '@omb/source-schema';
 import {
   parseTemporalDateEntry,
   parseTemporalDateWindow,
@@ -27,6 +29,62 @@ interface OviPathInput {
 
 const MAX_TILE_BYTES = 5 * 1024 * 1024;
 const SAFE_UPSTREAM_ERROR_STATUSES = new Set([400, 401, 403, 404, 408, 409, 410, 422, 429, 500, 502, 503, 504]);
+
+interface OviProbeObservation {
+  category: ProbeResult['category'];
+  httpStatus: number | null;
+  contentType: string | null;
+  width: number | null;
+  height: number | null;
+  errorCode: string | null;
+}
+
+function statusObservation(status: number): OviProbeObservation {
+  const category: ProbeResult['category'] = status === 401
+    ? 'unauthorized'
+    : status === 403
+      ? 'forbidden'
+      : status === 404
+        ? 'not-found'
+        : status === 408
+          ? 'timeout'
+          : status === 429
+            ? 'rate-limited'
+            : 'upstream';
+  return {
+    category,
+    httpStatus: status,
+    contentType: null,
+    width: null,
+    height: null,
+    errorCode: `PROBE_HTTP_${status}`,
+  };
+}
+
+function failureObservation(error: unknown): OviProbeObservation {
+  if (
+    (error instanceof DOMException && error.name === 'AbortError') ||
+    (error instanceof Error && error.name === 'AbortError')
+  ) {
+    return {
+      category: 'timeout',
+      httpStatus: null,
+      contentType: null,
+      width: null,
+      height: null,
+      errorCode: 'PROBE_TIMEOUT',
+    };
+  }
+  const invalidContent = error instanceof Error && /^Ovi bridge (?:returned|response|tile|image|decoder)/.test(error.message);
+  return {
+    category: invalidContent ? 'invalid-content' : 'upstream',
+    httpStatus: null,
+    contentType: null,
+    width: null,
+    height: null,
+    errorCode: invalidContent ? 'PROBE_INVALID_CONTENT' : 'PROBE_TRANSPORT',
+  };
+}
 
 async function readCappedBody(response: Response): Promise<Uint8Array> {
   if (!response.body) throw new Error('Ovi bridge returned an empty image response');
@@ -91,18 +149,71 @@ export class OviBridgeAdapter implements TemporalSourceAdapter {
     this.fetchImpl = options.fetchImpl ?? fetch;
   }
 
+  hasProbeRequest(): boolean {
+    return this.probeRequest !== null;
+  }
+
+  probeInputFingerprint(sourceId: string, inputSha256: string): string {
+    if (!/^[0-9a-f-]{36}$/i.test(sourceId) || !/^[a-f0-9]{64}$/.test(inputSha256)) {
+      throw new Error('Ovi probe fingerprint requires a source UUID and input SHA-256');
+    }
+    const canonicalInput = {
+      schemaVersion: 1,
+      sourceId: sourceId.toLowerCase(),
+      inputSha256,
+      loopbackOrigin: this.baseUrl.origin,
+      mapType: this.mapType,
+      verifiedDates: [...this.verifiedDates.values()].sort((left, right) => left.id.localeCompare(right.id)),
+      probeRequest: this.probeRequest,
+    };
+    return createHash('sha256').update(JSON.stringify(canonicalInput)).digest('hex');
+  }
+
+  async createProbeResult(sourceId: string, inputFingerprint: string): Promise<ProbeResult> {
+    if (!this.probeRequest) throw new Error('Ovi probe result requires a configured probe request');
+    const startedAt = new Date().toISOString();
+    const observation = await this.observeProbe();
+    const endedAt = new Date().toISOString();
+    return parseProbeResult({
+      schemaVersion: 1,
+      sourceId,
+      inputFingerprint,
+      startedAt,
+      endedAt,
+      ...observation,
+    });
+  }
+
   async probe(): Promise<{ ok: boolean; detail: string }> {
     if (!this.probeRequest) {
       return { ok: false, detail: 'loopback configuration accepted; no tile has been verified' };
     }
+    const observation = await this.observeProbe();
+    if (observation.category === 'success') {
+      return { ok: true, detail: 'authorized loopback tile probe passed image validation' };
+    }
+    if (observation.httpStatus !== null) {
+      return { ok: false, detail: `authorized loopback tile probe returned status ${observation.httpStatus}` };
+    }
+    return { ok: false, detail: 'authorized loopback tile probe failed image validation or transport checks' };
+  }
+
+  private async observeProbe(): Promise<OviProbeObservation> {
+    if (!this.probeRequest) throw new Error('Ovi probe request is not configured');
     try {
       const response = await this.tile(this.probeRequest);
-      if (response.status !== 200 || response.body.byteLength === 0) {
-        return { ok: false, detail: `authorized loopback tile probe returned status ${response.status}` };
-      }
-      return { ok: true, detail: 'authorized loopback tile probe passed image validation' };
-    } catch {
-      return { ok: false, detail: 'authorized loopback tile probe failed image validation or transport checks' };
+      if (response.status !== 200 || response.body.byteLength === 0) return statusObservation(response.status);
+      const image = validateDecodedTile(response.body, response.contentType);
+      return {
+        category: 'success',
+        httpStatus: 200,
+        contentType: response.contentType,
+        width: image.width,
+        height: image.height,
+        errorCode: null,
+      };
+    } catch (error) {
+      return failureObservation(error);
     }
   }
 

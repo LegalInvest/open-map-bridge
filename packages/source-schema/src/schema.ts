@@ -68,7 +68,9 @@ export interface ImportPreview {
 }
 
 export interface ProbeResult {
+  schemaVersion: 1;
   sourceId: string;
+  inputFingerprint: string;
   startedAt: string;
   endedAt: string;
   category:
@@ -176,6 +178,57 @@ export const mapSourceDefinitionSchema = z
     }
   });
 
+export const probeResultSchema = z
+  .object({
+    schemaVersion: z.literal(1),
+    sourceId: z.string().uuid(),
+    inputFingerprint: z.string().regex(/^[a-f0-9]{64}$/),
+    startedAt: z.string().datetime(),
+    endedAt: z.string().datetime(),
+    category: z.enum([
+      'success',
+      'dns',
+      'tls',
+      'timeout',
+      'unauthorized',
+      'forbidden',
+      'not-found',
+      'rate-limited',
+      'upstream',
+      'invalid-content',
+    ]),
+    httpStatus: z.number().int().min(100).max(599).nullable(),
+    contentType: z.string().max(256).nullable(),
+    width: z.number().int().positive().max(2048).nullable(),
+    height: z.number().int().positive().max(2048).nullable(),
+    errorCode: z.string().regex(/^[A-Z][A-Z0-9_]{0,127}$/).nullable(),
+  })
+  .strict()
+  .superRefine((value, context) => {
+    if (value.endedAt < value.startedAt) {
+      context.addIssue({ code: 'custom', message: 'probe end must not precede start', path: ['endedAt'] });
+    }
+    if (value.category === 'success') {
+      if (
+        value.httpStatus !== 200 ||
+        !['image/png', 'image/jpeg'].includes(value.contentType ?? '') ||
+        value.width === null ||
+        value.height === null ||
+        value.errorCode !== null
+      ) {
+        context.addIssue({ code: 'custom', message: 'successful probe requires validated image evidence' });
+      }
+      return;
+    }
+    if (value.width !== null || value.height !== null || value.errorCode === null) {
+      context.addIssue({ code: 'custom', message: 'failed probe requires an error code and no image dimensions' });
+    }
+  });
+
 export function parseMapSourceDefinition(value: unknown): MapSourceDefinition {
   return mapSourceDefinitionSchema.parse(value) as MapSourceDefinition;
+}
+
+export function parseProbeResult(value: unknown): ProbeResult {
+  return probeResultSchema.parse(value) as ProbeResult;
 }

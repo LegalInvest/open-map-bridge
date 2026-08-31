@@ -78,6 +78,35 @@ it('reports readiness only after the configured probe tile passes the full image
   expect(fetchImpl).toHaveBeenCalledTimes(1);
 });
 
+it('creates a stable redacted probe fingerprint and decoded ProbeResult', async () => {
+  const fetchImpl = vi.fn(async () =>
+    new Response(responseBody(validPng()), { status: 200, headers: { 'content-type': 'image/png' } }),
+  );
+  const adapter = new OviBridgeAdapter({
+    baseUrl: 'http://127.0.0.1:19991',
+    mapType: 200,
+    verifiedDates: [verifiedDate],
+    probeRequest: { dateId: verifiedDate.id, z: 8, x: 212, y: 102 },
+    fetchImpl: fetchImpl as typeof fetch,
+  });
+  const sourceId = '018f4d39-32f1-7a31-9f60-81c6b453b886';
+  const fingerprint = adapter.probeInputFingerprint(sourceId, 'a'.repeat(64));
+  expect(fingerprint).toMatch(/^[a-f0-9]{64}$/);
+  expect(adapter.probeInputFingerprint(sourceId, 'a'.repeat(64))).toBe(fingerprint);
+  await expect(adapter.createProbeResult(sourceId, fingerprint)).resolves.toMatchObject({
+    schemaVersion: 1,
+    sourceId,
+    inputFingerprint: fingerprint,
+    category: 'success',
+    httpStatus: 200,
+    contentType: 'image/png',
+    width: 1,
+    height: 1,
+    errorCode: null,
+  });
+  expect(fetchImpl).toHaveBeenCalledTimes(1);
+});
+
 it('keeps the runtime unready when a configured probe is denied or invalid', async () => {
   for (const response of [
     new Response('', { status: 403 }),

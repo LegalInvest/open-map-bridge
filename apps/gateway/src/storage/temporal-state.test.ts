@@ -106,3 +106,34 @@ it('persists an automation run once under concurrent duplicate starts', async ()
   const reopened = await TemporalStateRepository.open(path, lakeAoiPresets);
   expect(reopened.listAutomationRuns()).toEqual([run]);
 });
+
+it('atomically persists one redacted probe result per source input fingerprint', async () => {
+  const directory = await mkdtemp(join(tmpdir(), 'omb-probe-state-'));
+  const path = join(directory, 'state.json');
+  const repository = await TemporalStateRepository.open(path, lakeAoiPresets);
+  const result = {
+    schemaVersion: 1 as const,
+    sourceId: '018f4d39-32f1-7a31-9f60-81c6b453b886',
+    inputFingerprint: 'c'.repeat(64),
+    startedAt: '2026-08-31T15:00:00.000Z',
+    endedAt: '2026-08-31T15:00:01.000Z',
+    category: 'forbidden' as const,
+    httpStatus: 403,
+    contentType: null,
+    width: null,
+    height: null,
+    errorCode: 'PROBE_HTTP_403',
+  };
+  const [first, second] = await Promise.all([
+    repository.ensureProbeResult(result),
+    repository.ensureProbeResult({ ...result, endedAt: '2026-08-31T15:00:02.000Z' }),
+  ]);
+  expect([first.created, second.created].sort()).toEqual([false, true]);
+
+  const reopened = await TemporalStateRepository.open(path, lakeAoiPresets);
+  expect(reopened.listProbeResults()).toHaveLength(1);
+  expect(reopened.findProbeResult(result.sourceId, result.inputFingerprint)).toEqual(result);
+  const serialized = await readFile(path, 'utf8');
+  expect(serialized).not.toContain('upstreamUrl');
+  expect(serialized).not.toContain('credential');
+});
