@@ -154,3 +154,5 @@
 - 2026-08-31 22:58：启动 `FIX-BATCH-013 / OMB-AUD-002 partial`。新增请求时全部 DNS 结果的公网/元数据/私网/IPv4-mapped IPv6 校验、精确企业私网地址例外、不可伪造授权快照、单地址 lookup 固定、连接后 peer 复核、禁自动重定向和 Host/代理头覆盖；37 个专项断言、gateway typecheck 与本机回环实连通过，零外部 DNS/HTTP。
 - 容量门再次正确阻断全仓验证：根卷约 7.59 GiB、swap 使用约 8.37 GiB；`npm run test` 只执行了自动 `env:check` 即退出，测试主体未启动。工作区因此仍是 `local-candidate`，请求时传输尚未接入图源 probe/tile 路由，不是 main/deployed/真实源 accepted。
 - 唯一最安全下一步：由 Codex 等待本机恢复至少 8 GiB，运行 FIX-BATCH-013 全量 test/typecheck/build/production smoke/E2E；全部通过后再更新交底指纹、提交 PR 并由 GitHub CI 晋级 main，期间不请求任何真实第三方图源。
+- 2026-08-31 23:14：FIX-BATCH-013 提交 `68dac43` 由 PR #25 远端全门 `33406940553` 验证后 squash 合并为 main `32cb36d`；main CI `33407144250` 再次通过交底新鲜度、单测/契约、8 workspace typecheck、production build/smoke 和公开 Chrome 旅程。请求时 DNS/IP/连接固定传输代码达到 main，但尚未被 server/probe/tile 导入，因此无可达生产 bundle 变化，不更新腾讯 `3bbcbfa` release；真实源、ProbeResult、ready/rendered/accepted 均未晋级。
+- 唯一最安全下一步：由 Codex 在本机保持至少 8 GiB 且有安全余量后，开始 FIX-BATCH-014，把 main 中固定传输接入一个已确认 source 的最小 probe，注入同 UUID vault 凭证并持久化脱敏 ProbeResult；先用本机夹具和失败反例验证，仍不请求用户真实图源。
