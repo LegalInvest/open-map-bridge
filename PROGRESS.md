@@ -202,3 +202,5 @@
 - 精确 main 本地 build/smoke 后安装腾讯 immutable release `7da03c3`，current 从 `ccd3cd8` 原子切换。gateway/Web hash `a3d69a0e…56a1d`/`42368f3e…04ad` 与 manifest/服务器一致；首次 nginx health 在重启窗口短暂 502，随后 health=`atomic-json/encrypted-local`、直连 401、4174/8080 双回环、service active；state/vault hash 与 0600 权限不变，旧 release 保留。
 - 当前阶段：014C=`deployed-code / no real ProbeResult / not runtime-ready / not rendered / not accepted`。本轮没有读取用户二维码、写真实凭证或请求真实 Ovi/第三方源；合成 fixture、CI 绿和服务器健康都不替代真实源验收。
 - 唯一最安全下一步：由 Codex 实现 FIX-BATCH-014D，把当前同指纹成功 ProbeResult 绑定到最小通用 tile runtime，并复用同一请求构造、vault 与逐请求固定传输；先只用本机合成上游验证，继续零真实第三方请求。
+- 2026-09-01 04:29：部署证据 PR #36 CI `33436046174` 全绿并合并为 docs-only main/origin `84f103f`；main CI `33436199094` 复验完整门。本地 clean；腾讯 runtime/current 仍为 `7da03c3`，health/401/双回环/artifact/state/vault 只读复核无漂移，不为 docs-only 后代重复发布。
+- 唯一最安全下一步：由 Codex 实现 FIX-BATCH-014D，把当前同指纹成功 ProbeResult 绑定到最小通用 tile runtime，并复用同一请求构造、vault 与逐请求固定传输；先只用本机合成上游验证，继续零真实第三方请求。
