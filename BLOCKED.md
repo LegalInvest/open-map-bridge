@@ -8,12 +8,12 @@
 4. AC-001 的最终 `rendered+saved` 仍需要从用户授权真实二维码解析出的配置通过后续 URL/SSRF、凭证和最小探测门；本切片先完成真实图片解码、脱敏预览和确认保存，未探测时不得标记可用。
 5. `.ovmap` 无公开完整线协议；首个 codec 只承诺经差分证据验证的 `record37-zlib` 家族，其他版本保持 `unsupported` 并等待合法样本，不能承诺“所有文件已全兼容”。
 6. 用户真实历史二维码的 `at/ad/al` 和 72 字符不透明 `ul` 已安全识别但未保存；FIX-BATCH-012 的标准 query/header vault 不解释或重建这些奥维私有字段。必须继续通过官方奥维回环桥接或后续有合法格式证据的专用适配器，不得把不透明载荷手工塞入通用 vault、请求真实源或宣称出图。
-7. 导入配置目前可保存为 `confirmed`；零外联静态策略、vault、Ovi ProbeResult 与 014B 请求计划真值已部署到腾讯 `ccd3cd8`。FIX-BATCH-014C 已在本地把同 UUID vault、请求时 DNS/IP/连接固定/重绑定传输和通用 ProbeResult 接入一个显式最小 probe 路由并达到 local-verified，但尚未进入 GitHub main 或腾讯 release。通用瓦片代理、temporal runtime 绑定、投影修正和真实源证明仍未实现；合成 probe 通过不能证明其他网络源可用。
-8. 开发者 V1 契约和合成适配器已贯通；真实 imported source UUID 现在可与 OviBridge 同 ID 绑定。FIX-BATCH-011 probe/ready 与 FIX-BATCH-014A ProbeResult 能力保留在当前 `ccd3cd8` 制品中；014C local-verified 成功只把持久 source 从 confirmed 晋级 probed，不向 runtime registry 授予 tiles/temporal-catalog。官方 Ovi 和通用 probe 均未对用户真实源执行，权威部署中的真实 imported source 仍必须保持 `metadata-only`。
-9. 本机容量：2026-09-01 03:57 根卷可用 `10,273,416 KiB`，高于 8 GiB 硬门；014C 全量单测、类型、build/smoke 与公开 E2E 已安全执行。仍须在每个重型动作前复核容量，低于门立即止写；不得通过删除用户数据、项目证据或真实运行数据规避。
+7. 导入配置目前可保存为 `confirmed`；零外联静态策略、vault、Ovi ProbeResult、014B 请求计划真值与 014C 显式通用最小 probe 已部署到腾讯 `7da03c3`。014C 把同 UUID vault、请求时 DNS/IP/连接固定/重绑定传输和通用 ProbeResult 接入 probe 路由；但通用瓦片代理、temporal runtime 绑定、投影修正和真实源证明仍未实现，合成 probe/部署健康不能证明其他网络源可用。
+8. 开发者 V1 契约和合成适配器已贯通；真实 imported source UUID 现在可与 OviBridge 同 ID 绑定。FIX-BATCH-011/014A/014C 能力保留在当前 `7da03c3` 制品中；014C 成功只把持久 source 从 confirmed 晋级 probed，不向 runtime registry 授予 tiles/temporal-catalog。官方 Ovi 和通用 probe 均未对用户真实源执行，权威部署中的真实 imported source 仍必须保持 `metadata-only`。
+9. 本机容量：2026-09-01 04:17 根卷可用约 `10,272,588 KiB`，高于 8 GiB 硬门；014C 全量单测、类型、build/smoke 与公开 E2E 已安全执行。仍须在每个重型动作前复核容量，低于门立即止写；不得通过删除用户数据、项目证据或真实运行数据规避。
 10. 全量审计：`docs/问题账本.md` 当前记录 40 组问题。FIX-BATCH-001–009 与 FIX-BATCH-012 已进入 main，16 组达到 main、24 组仍未闭合；其余问题不得因生产制品与服务器候选就绪而标记解决。
-11. 真实 ready 晋级：configured 隐藏、空 probe 失败、图片解码/内容验证、本地 gateway 入站信任边界、“不伪造日期目录”、回环 probe/ready、vault、固定传输、ProbeResult／输入指纹重启去重和 014B 请求计划真值均已进入 main；vault、014A/014B 均已 deployed。014C 通用合成 probe 只达到 local-verified。真实日期目录 provider、用户真实瓦片和第一条真实 ProbeResult 仍缺；官方客户端第三方接口的操作时开启与 loopback 监听验证需要用户确认。通用 tile/temporal runtime、真实通用源和 QR/`.ovmap` 长尾字段仍阻塞。`OMB-AUD-002/007/008` 保持部分开放，不能把 fixture/CI/部署晋级为真实源验收。
-12. 三端部署：运行源码 `ccd3cd8`、部署证据 main `601ac68`，GitHub main CI `33430487066` 全绿；腾讯 current 为 release `ccd3cd8`，gateway/Web hash、项目 Node、systemd、宝塔 nginx include、双回环、health/vault 和持久 state hash 均通过，保留 `16e805d` 等回退制品。014C 功能提交 `d3118b8` 的 PR #35 CI `33434618444` 已全绿，但尚未 main/deployed；真实 Ovi 与真实通用 source 业务验收均独立阻塞。
+11. 真实 ready 晋级：configured 隐藏、空 probe 失败、图片解码/内容验证、本地 gateway 入站信任边界、“不伪造日期目录”、回环 probe/ready、vault、固定传输、ProbeResult／输入指纹重启去重、014B 请求计划和 014C 通用合成 probe 均已进入 main/deployed-code。真实日期目录 provider、用户真实瓦片和第一条真实 ProbeResult 仍缺；官方客户端第三方接口的操作时开启与 loopback 监听验证需要用户确认。通用 tile/temporal runtime、真实通用源和 QR/`.ovmap` 长尾字段仍阻塞。`OMB-AUD-002/007/008` 保持部分开放，不能把 fixture/CI/部署晋级为真实源验收。
+12. 三端部署：GitHub main/runtime source/main CI 与腾讯 current 均为 `7da03c3`/`33435153343`；gateway/Web hash、项目 Node、systemd、宝塔 nginx include、双回环、health/vault 和持久 state/vault hash 均通过，保留 `ccd3cd8`/`16e805d` 等回退制品。重启窗口首次 nginx health 短暂 502 后恢复。真实 Ovi 与真实通用 source 业务验收均独立阻塞。
 13. QR 方言：公开样本新增观察到 `hs/mf/ml/ms/mt/pn/pt`。FIX-BATCH-008 只接受这些键并丢弃未知值；其业务语义、授权和服务器可用性仍未知，不能由“解析成功”晋级为 ready。
 
 ## 已解除的实施阻塞

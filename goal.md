@@ -7,9 +7,9 @@
 - 状态：Approved / Implementing；用户于 2026-08-28 明确最终结果必须能基于已导入奥维图源进行二次开发
 - 产品裁决者：用户
 - 当前整合者：本 Codex 主线程
-- 更新时间：2026-09-01 04:12（Asia/Shanghai）
+- 更新时间：2026-09-01 04:19（Asia/Shanghai）
 - 适用目录：`/Users/assis/Documents/Codex/2026-08-27/open-map-bridge`
-- 当前切片：`FIX-BATCH-014A/B deployed；014C PR-CI-verified / not main`。部署基线仍是 docs-only main `601ac68`（CI `33430487066`）与腾讯 runtime/current `ccd3cd8`。014C 分支新增显式 `POST /api/import/sources/:sourceId/probe`：只接受已确认的同一 source UUID 和一个瓦片坐标，不接受客户端 URL；按同 UUID 解引用 vault 并用 keyed HMAC 形成不泄密的凭证修订指纹，复核 014B 静态请求计划，逐请求执行 FIX-BATCH-013 DNS/IP/peer 固定传输，注入 query/header 凭证，通过 PNG/JPEG 完整解码门后才持久化脱敏 ProbeResult 并把 confirmed 晋级 probed。同一输入在并发/重启后复用结果，不重复请求。只用本机合成回环上游完成 53 项定向、256 Vitest＋3 Node、8 workspace typecheck、production build/smoke 与 4 条 Chrome E2E；PR #35 首轮 CI `33434618444` 亦全绿。没有使用用户二维码、真实凭证或真实第三方源。该批尚未进入 GitHub main 或腾讯 release，官方 Ovi 真实 ProbeResult、通用真实源 rendered/accepted 均未达到。
+- 当前切片：`FIX-BATCH-014A/B/C deployed-code / real probe blocked`。PR #35 的功能/证据 CI `33434618444`/`33434979533` 全绿，squash 合并为 main `7da03c3`，main CI `33435153343` 再次全绿。精确 main 本地 production build/smoke 生成 gateway `a3d69a0e…56a1d`、Web `42368f3e…04ad`，腾讯安装 immutable release `7da03c3` 并从 `ccd3cd8` 原子切换 current；首次重启健康检查短暂 502，随后 health 200、未鉴权 401、双回环、artifact/state/vault hash 和 0600 权限全部通过，旧 release 保留。014C 新增显式同 UUID 单坐标 probe，把 vault HMAC、014B 请求计划、逐请求 DNS/IP/peer 固定传输、受限凭证注入、完整图片门和脱敏 ProbeResult 贯通；但没有使用用户二维码、真实凭证或真实第三方源，也未把成功结果绑定为通用 tile/temporal runtime。官方 Ovi 真实 ProbeResult、通用真实源 rendered/accepted 均未达到。
 - 上版：V0.4 奥维兼容双入口导入实施版
 
 <!-- GOAL_CAPSULE_START -->
@@ -21,7 +21,7 @@
 
 硬约束：clean-room 独立实现；不得复制奥维专有代码、商标或绕过会员/设备绑定；不得内置、记录或传播第三方 token；解析前不联网，确认前不请求图源；未知版本、解压异常、内网目标或不安全 URL 必须 fail closed；“文件已解析”“探测成功”“成功出图”是不同事实；任何成功都要有导入回执和可复现实证。
 
-当前只允许修改本项目目录和用户已批准的腾讯 OpenMapBridge 专用路径；禁止清理用户文件、改动其他服务器项目、开放公网、批量抓取图源或离线下载 20 年整域瓦片。不得把真实秘密写入 fixture、日志、回执、普通 JSON 或前端。可用空间低于 8 GiB 立即停止本机构建、测试、截图和新增缓存；2026-09-01 03:57 本机实测 `10,273,416 KiB`，容量门恢复但仍保持轻量。014C 已执行全量单测、类型、构建、冒烟与公开浏览器门；继续禁止真实图源外联、影像下载和大文件写入，并在每个重型门前复核容量。发现越界需求写入 `BLOCKED.md`。
+当前只允许修改本项目目录和用户已批准的腾讯 OpenMapBridge 专用路径；禁止清理用户文件、改动其他服务器项目、开放公网、批量抓取图源或离线下载 20 年整域瓦片。不得把真实秘密写入 fixture、日志、回执、普通 JSON 或前端。可用空间低于 8 GiB 立即停止本机构建、测试、截图和新增缓存；2026-09-01 04:17 本机实测约 `10,272,588 KiB`，容量门恢复但仍保持轻量。014C 已执行全量单测、类型、构建、冒烟与公开浏览器门；继续禁止真实图源外联、影像下载和大文件写入，并在每个重型门前复核容量。发现越界需求写入 `BLOCKED.md`。
 
 `FIX-BATCH-001` 至 `FIX-BATCH-009` 已进入 GitHub main；`FIX-BATCH-010` 的项目 runtime、release、systemd、BaoTa nginx include、SSH tunnel 和重启证据已达到 `deployed`，证据回写正在进入 GitHub。技术部署不读取用户图源、不改变 source lifecycle，也不授予真实 Ovi 源 ready。
 
@@ -873,3 +873,5 @@ V1 公共类型和错误语义通过契约测试冻结；新增可选能力不�
 - 唯一最安全下一步：由 Codex 更新技术交底指纹并提交 014C PR，由 GitHub CI 复验；全绿合并 main 后才生成腾讯 versioned release。真实 Ovi 与真实通用图源继续零请求。
 - 2026-09-01：04:12 PR #35 首轮 CI `33434618444` 对功能提交 `d3118b8` 全绿；014C 达到 `PR CI verified / not main / not deployed / not accepted`，真实源阶段不变。
 - 唯一最安全下一步：由 Codex 回写该 CI 证据并等待证据提交复验；再次全绿后 squash 合并 PR #35、核验 main CI，再仅因运行制品变化更新腾讯 versioned release。
+- 2026-09-01：04:19 PR #35 证据提交 CI `33434979533` 全绿并 squash 合并为 main `7da03c3`，main CI `33435153343` 复验完整门。精确 main 本地 build/smoke 后部署腾讯 release `7da03c3`；health/401/双回环/artifact/state/vault/权限门通过，首次健康检查短暂 502 后恢复。014C 达到 `deployed-code`，真实源 ProbeResult、runtime ready、rendered、accepted 仍未达到。
+- 唯一最安全下一步：由 Codex 实现 FIX-BATCH-014D，把“当前同指纹成功 ProbeResult”安全绑定到最小通用 tile runtime，并复用同一请求构造、vault 与逐请求固定传输；先只用本机合成上游验证，继续零真实第三方请求。
