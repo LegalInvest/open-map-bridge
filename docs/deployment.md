@@ -28,12 +28,13 @@ npm run test:production
 ## Versioned installation
 
 1. Copy the artifact into `/opt/open-map-bridge/releases/<git-sha>/` without overwriting earlier releases.
-2. Install `deploy/systemd/open-map-bridge.service` and `deploy/nginx/open-map-bridge.conf` from that release.
-3. Create `/etc/open-map-bridge/gateway.env` and `/etc/open-map-bridge/nginx-gateway-secret.conf` from the examples; use the same generated token in both files, keep both `0600`, and never paste the value into Git, issue text, or logs.
-4. Create `/var/lib/open-map-bridge` owned by the `openmapbridge` service account. Preserve it across releases.
-5. Atomically point `/opt/open-map-bridge/current` at the new release, reload nginx, restart the service, and verify the tunneled UI plus authenticated `/api/health`.
+2. Provision a dedicated Node 24–26 runtime under `/opt/open-map-bridge/runtime/<exact-version>/` and point `/opt/open-map-bridge/runtime/current` at it. Do not replace the server-wide `/usr/bin/node` or another project's runtime.
+3. Install `deploy/systemd/open-map-bridge.service` and `deploy/nginx/open-map-bridge.conf` from that release. The service always executes the project-scoped runtime symlink.
+4. Create `/etc/open-map-bridge/gateway.env` and `/etc/open-map-bridge/nginx-gateway-secret.conf` from the examples; use the same generated token in both files, keep both `0600`, and never paste the value into Git, issue text, or logs.
+5. Create `/var/lib/open-map-bridge` owned by the `openmapbridge` service account. Preserve it across releases.
+6. Atomically point `/opt/open-map-bridge/current` at the new release, reload nginx, restart the service, and verify the tunneled UI plus authenticated `/api/health`.
 
-The exact host, service account, nginx layout, Node path, and release SHA must be read-only verified before installation. The templates are not authority to deploy to an arbitrary SSH alias.
+The exact host, service account, nginx layout, Node path, and release SHA must be read-only verified before installation. The templates are not authority to deploy to an arbitrary SSH alias. The first verified target is the Tencent host behind SSH alias `tencent-shuangying`; `/opt/open-map-bridge`, `/etc/open-map-bridge`, `/var/lib/open-map-bridge`, ports 4174/8080, and the `openmapbridge` account were absent before installation. Other project directories and system runtimes are out of scope.
 
 ## Rollback
 

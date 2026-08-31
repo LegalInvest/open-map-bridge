@@ -10,7 +10,7 @@ Group=openmapbridge
 WorkingDirectory=/opt/open-map-bridge/current
 Environment=NODE_ENV=production
 EnvironmentFile=/etc/open-map-bridge/gateway.env
-ExecStart=/usr/bin/node /opt/open-map-bridge/current/server.mjs
+ExecStart=/opt/open-map-bridge/runtime/current/bin/node /opt/open-map-bridge/current/server.mjs
 Restart=on-failure
 RestartSec=3
 TimeoutStopSec=15

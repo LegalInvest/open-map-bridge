@@ -63,7 +63,10 @@ try {
   if (createHash('sha256').update(index).digest('hex') !== manifest.webIndexSha256) {
     throw new Error('production Web index does not match its build manifest');
   }
-  await readFile(join(release, manifest.deploymentTemplates, 'systemd', 'open-map-bridge.service'));
+  const service = await readFile(join(release, manifest.deploymentTemplates, 'systemd', 'open-map-bridge.service'), 'utf8');
+  if (!service.includes('/opt/open-map-bridge/runtime/current/bin/node')) {
+    throw new Error('production service does not use the project-scoped Node runtime');
+  }
   if (!index.includes('OpenMapBridge') || index.includes(token)) throw new Error('production web artifact is invalid');
 
   const port = await availablePort();
