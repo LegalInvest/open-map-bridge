@@ -146,3 +146,4 @@
 - 当前阶段：`main=a92ff8c`、`runtime source/deployed=94e42b1`、`FIX-BATCH-012 final branch=local-candidate`、`real-source accepted=未达到`。
 - 唯一最安全下一步：由 Codex 提交并推送 FIX-BATCH-012＋OMB-AUD-040，完全依赖 GitHub PR CI 做最终分支复验；CI 全绿后合并，但在本机恢复至少 8 GiB 前不构建或部署该新运行制品。
 - 2026-08-31 19:21：PR #23 首次 CI `33386547512` 红灯。环境门先成功阻断前检查，随后静态契约准确发现 fixture acquisition 的 npm hook 拼成 `prefixures:acquire`，而 npm 约定应为 `prefixtures:acquire`；其余测试未运行。拼写已修正，失败证据保留并等待远端重跑；本机仍不运行重型门。
+- 2026-08-31 19:23：PR #23 第二次 CI `33386726268` 红灯。前置容量契约已通过，单元门发现 readiness 新分支把“凭证必需且 vault 已命中”也落入缺凭证阻塞，路由与纯函数两个正例准确失败；条件已收紧为仅在 `!credentialAvailable` 时阻塞，悬空引用独立分支保持 fail closed。类型、构建、smoke、Chrome 未运行，等待第三次远端验证。

@@ -154,7 +154,7 @@ export function buildSourceReadinessRun(
       nextAction: steps[2].nextAction,
       intervention: { kind: 'credential-vault', message: steps[2].message },
     };
-  } else if (credentialRequired === true) {
+  } else if (credentialRequired === true && !credentialAvailable) {
     steps[2] = evaluated(
       'credential-readiness',
       at,
