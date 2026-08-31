@@ -1,5 +1,10 @@
 import type { AoiGeometry, AreaOfInterest } from '@omb/aois';
-import { completeYearWindow, type TemporalDateEntry } from '@omb/temporal-source';
+import {
+  completeYearWindow,
+  type ComparisonReceipt,
+  type CreateComparisonReceipt,
+  type TemporalDateEntry,
+} from '@omb/temporal-source';
 import {
   OVMAP_FILE_MAX_BYTES,
   type AutomationRun,
@@ -21,6 +26,8 @@ export interface HistoryApi {
   listSources(): Promise<TemporalSourceSummary[]>;
   listAois(): Promise<AreaOfInterest[]>;
   listDates(sourceId: string, aoiId: string): Promise<TemporalDateEntry[]>;
+  listComparisons(): Promise<ComparisonReceipt[]>;
+  createComparison(input: CreateComparisonReceipt): Promise<ComparisonReceipt>;
   createAoi(input: { name: string; geometry: AoiGeometry }): Promise<AreaOfInterest>;
   confirmAoi(aoi: AreaOfInterest): Promise<AreaOfInterest>;
 }
@@ -75,6 +82,18 @@ export function createApiClient(baseUrl = '', currentYear = new Date().getUTCFul
       const query = new URLSearchParams({ aoiId, from: yearWindow.from, to: yearWindow.to });
       return readJson<TemporalDateEntry[]>(
         await fetch(`${baseUrl}/api/temporal/sources/${encodeURIComponent(sourceId)}/dates?${query}`),
+      );
+    },
+    async listComparisons() {
+      return readJson<ComparisonReceipt[]>(await fetch(`${baseUrl}/api/comparisons`));
+    },
+    async createComparison(input) {
+      return readJson<ComparisonReceipt>(
+        await fetch(`${baseUrl}/api/comparisons`, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(input),
+        }),
       );
     },
     async createAoi(input) {

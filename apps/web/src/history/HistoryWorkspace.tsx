@@ -1,6 +1,12 @@
 import { useCallback, useEffect, useMemo, useState, type ComponentType } from 'react';
 import type { AoiGeometry, AreaOfInterest } from '@omb/aois';
-import { completeYearWindow, selectFourFrameDates, type TemporalDateEntry } from '@omb/temporal-source';
+import {
+  completeYearWindow,
+  selectFourFrameDates,
+  type ComparisonFrameReceipt,
+  type ComparisonReceipt,
+  type TemporalDateEntry,
+} from '@omb/temporal-source';
 import type { HistoryApi, TemporalSourceSummary } from '../api/client.js';
 import { AoiCreator, type AoiCreatorProps } from './AoiCreator.js';
 import { AoiEditor } from './AoiEditor.js';
@@ -50,15 +56,32 @@ function statusLabel(index: number, status: PaneStatus): string {
   return `面板 ${index + 1}：${label}${counts}`;
 }
 
+function frameReceipt(date: TemporalDateEntry, status: PaneStatus): ComparisonFrameReceipt | null {
+  if (date.availability === 'missing') {
+    return { dateId: date.id, status: 'missing', expectedTileCount: 0, loadedTileCount: 0, failedTileCount: 0 };
+  }
+  if (date.availability === 'failed') return null;
+  if (!['loaded', 'partial', 'failed'].includes(status.state) || status.expected === 0) return null;
+  return {
+    dateId: date.id,
+    status: status.state as 'loaded' | 'partial' | 'failed',
+    expectedTileCount: status.expected,
+    loadedTileCount: status.loaded,
+    failedTileCount: status.failed,
+  };
+}
+
 export function HistoryWorkspace({ api, MapPaneComponent = MapPane, AoiCreatorComponent = AoiCreator }: HistoryWorkspaceProps) {
   const [sources, setSources] = useState<TemporalSourceSummary[]>([]);
   const [aois, setAois] = useState<AreaOfInterest[]>([]);
   const [sourceId, setSourceId] = useState('');
   const [aoiId, setAoiId] = useState('');
-  const viewSync = useMemo(() => createViewSync(), [aoiId]);
   const [dates, setDates] = useState<TemporalDateEntry[]>([]);
   const [panelDateIds, setPanelDateIds] = useState<string[]>([]);
   const [paneStatuses, setPaneStatuses] = useState<PaneStatus[]>(createInitialStatuses);
+  const [comparisons, setComparisons] = useState<ComparisonReceipt[]>([]);
+  const [savingComparison, setSavingComparison] = useState(false);
+  const [comparisonNotice, setComparisonNotice] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [confirming, setConfirming] = useState(false);
   const [creatingAoi, setCreatingAoi] = useState(false);
@@ -68,11 +91,12 @@ export function HistoryWorkspace({ api, MapPaneComponent = MapPane, AoiCreatorCo
 
   useEffect(() => {
     let active = true;
-    void Promise.all([api.listSources(), api.listAois()])
-      .then(([sourceRows, aoiRows]) => {
+    void Promise.all([api.listSources(), api.listAois(), api.listComparisons()])
+      .then(([sourceRows, aoiRows, comparisonRows]) => {
         if (!active) return;
         setSources(sourceRows);
         setAois(aoiRows);
+        setComparisons(comparisonRows);
         setSourceId(sourceRows[0]?.id ?? '');
         setAoiId(aoiRows[0]?.id ?? '');
       })
@@ -85,6 +109,7 @@ export function HistoryWorkspace({ api, MapPaneComponent = MapPane, AoiCreatorCo
   const visibleAois = latestAois(aois);
   const selectedAoi = visibleAois.find((aoi) => aoi.id === aoiId) ?? visibleAois[0] ?? null;
   const selectedSource = sources.find((source) => source.id === sourceId) ?? sources[0] ?? null;
+  const viewSync = useMemo(() => createViewSync(), [selectedAoi?.id, selectedAoi?.version]);
 
   useEffect(() => {
     if (!selectedSource || !selectedAoi) return;
@@ -92,6 +117,7 @@ export function HistoryWorkspace({ api, MapPaneComponent = MapPane, AoiCreatorCo
     setDates([]);
     setPanelDateIds([]);
     setPaneStatuses(createInitialStatuses());
+    setComparisonNotice(null);
     void api
       .listDates(selectedSource.id, selectedAoi.id)
       .then((rows) => {
@@ -108,6 +134,18 @@ export function HistoryWorkspace({ api, MapPaneComponent = MapPane, AoiCreatorCo
   const selectedDates = panelDateIds
     .map((id) => dates.find((date) => date.id === id))
     .filter((date): date is TemporalDateEntry => Boolean(date));
+  const selectedFrameReceipts = selectedDates.map((date, index) => frameReceipt(date, paneStatuses[index] ?? createInitialStatuses()[0]!));
+  const currentComparisonCount = comparisons.filter(
+    (receipt) => receipt.sourceId === selectedSource?.id && receipt.aoiId === selectedAoi?.id && receipt.aoiVersion === selectedAoi?.version,
+  ).length;
+  const comparisonReady = Boolean(
+    selectedSource &&
+    selectedAoi?.status === 'confirmed' &&
+    selectedDates.length === 4 &&
+    new Set(selectedDates.map((date) => date.id)).size === 4 &&
+    selectedFrameReceipts.every((frame) => frame !== null) &&
+    viewSync.current(),
+  );
 
   const handlePaneStatus = useCallback((index: number, status: PaneStatus) => {
     setPaneStatuses((current) => {
@@ -127,13 +165,44 @@ export function HistoryWorkspace({ api, MapPaneComponent = MapPane, AoiCreatorCo
 
   const handleTimelineFrame = useCallback((dateId: string) => {
     setPanelDateIds((current) => current.map((value, index) => (index === 3 ? dateId : value)));
+    setPaneStatuses((current) => current.map((status, index) => index === 3 ? createInitialStatuses()[0]! : status));
+    setComparisonNotice(null);
   }, []);
+
+  async function saveComparison() {
+    if (!selectedSource || !selectedAoi || selectedAoi.status !== 'confirmed') return;
+    const viewState = viewSync.current();
+    const frames = selectedDates.map((date, index) => frameReceipt(date, paneStatuses[index] ?? createInitialStatuses()[0]!));
+    if (!viewState || frames.some((frame) => frame === null) || new Set(selectedDates.map((date) => date.id)).size !== 4) return;
+    setSavingComparison(true);
+    setComparisonNotice(null);
+    setError(null);
+    try {
+      const receipt = await api.createComparison({
+        schemaVersion: 1,
+        sourceId: selectedSource.id,
+        aoiId: selectedAoi.id,
+        aoiVersion: selectedAoi.version,
+        dateIds: selectedDates.map((date) => date.id),
+        viewState,
+        frames: frames as ComparisonFrameReceipt[],
+      });
+      setComparisons((current) => [receipt, ...current.filter((entry) => entry.id !== receipt.id)]);
+      setComparisonNotice(`比较回执已保存：${receipt.id}`);
+    } catch (cause) {
+      setError((cause as Error).message);
+    } finally {
+      setSavingComparison(false);
+    }
+  }
 
   async function confirmAoi(aoi: AreaOfInterest) {
     setConfirming(true);
     setError(null);
     try {
       const confirmed = await api.confirmAoi(aoi);
+      setPaneStatuses(createInitialStatuses());
+      setComparisonNotice(null);
       setAois((current) => [...current, confirmed]);
     } catch (cause) {
       setError((cause as Error).message);
@@ -199,6 +268,15 @@ export function HistoryWorkspace({ api, MapPaneComponent = MapPane, AoiCreatorCo
         <span className="date-count">
           可请求 {dates.filter((date) => date.availability === 'available' || date.availability === 'unknown').length} / 20 年 · 自动 {selectedDates.length} 期
         </span>
+        <button
+          type="button"
+          className="primary"
+          disabled={!comparisonReady || savingComparison}
+          onClick={() => void saveComparison()}
+        >
+          {savingComparison ? '保存中…' : '保存四期比较回执'}
+        </button>
+        <span className="date-count">当前范围已保存 {currentComparisonCount} 条</span>
         <div className="view-mode" role="group" aria-label="对比模式">
           <button type="button" className={viewMode === 'grid' ? 'active' : ''} onClick={() => setViewMode('grid')}>四屏对比</button>
           <button type="button" className={viewMode === 'swipe' ? 'active' : ''} onClick={() => setViewMode('swipe')}>双屏卷帘</button>
@@ -215,7 +293,11 @@ export function HistoryWorkspace({ api, MapPaneComponent = MapPane, AoiCreatorCo
                 <select
                   aria-label="面板日期"
                   value={dateId}
-                  onChange={(event) => setPanelDateIds((current) => current.map((value, item) => item === index ? event.target.value : value))}
+                  onChange={(event) => {
+                    setPanelDateIds((current) => current.map((value, item) => item === index ? event.target.value : value));
+                    setPaneStatuses((current) => current.map((status, item) => item === index ? createInitialStatuses()[0]! : status));
+                    setComparisonNotice(null);
+                  }}
                 >
                   {dates.map((date) => (
                     <option key={date.id} value={date.id}>
@@ -248,6 +330,7 @@ export function HistoryWorkspace({ api, MapPaneComponent = MapPane, AoiCreatorCo
         </aside>
 
         <section className="map-stage">
+          {comparisonNotice ? <div className="success-banner" role="status">{comparisonNotice}</div> : null}
           <div className="pane-status-grid">
             {paneStatuses.map((status, index) => <span key={index}>{statusLabel(index, status)}</span>)}
           </div>

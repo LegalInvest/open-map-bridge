@@ -1,6 +1,6 @@
 import { mkdir, open, readFile, rename } from 'node:fs/promises';
 import { dirname } from 'node:path';
-import { normalizeViewState, type ViewState } from '@omb/temporal-source';
+import { parseComparisonReceipt, type ComparisonReceipt } from '@omb/temporal-source';
 import { parseAreaOfInterest, type AreaOfInterest } from '@omb/aois';
 import {
   parseAutomationRun,
@@ -11,23 +11,6 @@ import {
   type MapSourceDefinition,
   type ProbeResult,
 } from '@omb/source-schema';
-
-export interface FrameReceipt {
-  dateId: string;
-  status: 'loading' | 'loaded' | 'partial' | 'missing' | 'failed';
-  loadedTileCount: number;
-  failedTileCount: number;
-}
-
-export interface ComparisonReceipt {
-  id: string;
-  sourceId: string;
-  aoiId: string;
-  aoiVersion: number;
-  dateIds: string[];
-  viewState: ViewState;
-  frames: FrameReceipt[];
-}
 
 export interface GenericRuntimeBinding {
   schemaVersion: 1;
@@ -79,23 +62,7 @@ function parseImportReceipt(value: unknown): ImportReceipt {
 }
 
 function parseComparison(value: unknown): ComparisonReceipt {
-  if (typeof value !== 'object' || value === null) throw new Error('comparison must be an object');
-  const raw = value as Record<string, unknown>;
-  if (typeof raw.id !== 'string' || typeof raw.sourceId !== 'string' || typeof raw.aoiId !== 'string') {
-    throw new Error('comparison identifiers are required');
-  }
-  if (!Number.isInteger(raw.aoiVersion) || (raw.aoiVersion as number) <= 0) throw new Error('invalid AOI version');
-  if (!Array.isArray(raw.dateIds) || raw.dateIds.some((id) => typeof id !== 'string')) throw new Error('invalid dateIds');
-  if (!Array.isArray(raw.frames)) throw new Error('invalid frames');
-  return {
-    id: raw.id,
-    sourceId: raw.sourceId,
-    aoiId: raw.aoiId,
-    aoiVersion: raw.aoiVersion as number,
-    dateIds: [...(raw.dateIds as string[])],
-    viewState: normalizeViewState(raw.viewState),
-    frames: structuredClone(raw.frames as FrameReceipt[]),
-  };
+  return parseComparisonReceipt(value);
 }
 
 export class TemporalStateRepository {
@@ -217,6 +184,9 @@ export class TemporalStateRepository {
     const parsed = parseComparison(comparison);
     await this.mutate((state) => {
       if (state.comparisons.some((entry) => entry.id === parsed.id)) throw new Error('duplicate comparison');
+      if (!state.aois.some((entry) => entry.id === parsed.aoiId && entry.version === parsed.aoiVersion)) {
+        throw new Error('comparison AOI version not found');
+      }
       return { ...state, comparisons: [...state.comparisons, parsed] };
     });
   }

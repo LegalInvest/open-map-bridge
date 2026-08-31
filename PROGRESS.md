@@ -233,3 +233,8 @@
 - 唯一最安全下一步：由 Codex提交部署证据 docs-only PR，等待 PR/main CI 后三端收口；下一代码批次为 OMB-AUD-015 的 ComparisonReceipt 创建/持久化，不发真实上游请求。用户行动：无。
 - 2026-09-01 06:57：部署证据 PR #42 CI `33448263589` 全绿并合并为 docs-only main/origin `f506a12`，main CI `33448403058` 完整全绿。运行源码/腾讯 current 正确保留 `67a6a0e`，不为文档后代重复发布；FIX-BATCH-015 三端证据收口。
 - 唯一最安全下一步：由 Codex提交最终三端证据 docs-only PR；通过后下一代码批次收敛 OMB-AUD-015 ComparisonReceipt 创建/持久化，继续零真实外联。用户行动：无。
+- 2026-09-01 07:00：最终证据 PR #43 已合并为 docs-only main/origin `7f38543`，main CI `33448733929` 全绿；腾讯 runtime/current 继续为 `67a6a0e`，FIX-BATCH-015 三端最终收口。
+- 2026-09-01 07:10：FIX-BATCH-016 达到 `local-verified`。变更前只读确认腾讯权威 `temporal-state.json` 中 `comparisons=0`、`aois=2`，因此无需猜测旧回执迁移。共享 V1 schema 只接受四个互异日期、四帧顺序一致、终态计数守恒和严格 ViewState；服务端生成 ID/时间，核对 ready source、精确 confirmed AOI 版本、20 年日期目录及 missing 真值，repository 重开复用同一 schema 并拒绝悬空 AOI。
+- Web 只有在 AOI 已确认、四日期互异、共享视角存在且四帧均结算时才允许保存；日期/AOI 变化清空旧质量状态，页面显示当前 source/AOI/version 的已存回执数。隔离 Chrome 旅程完成“新建任意区域→四屏完整→保存→刷新→回访 1 条”。全门为 3 Node＋46 files/271 Vitest、8 workspace typecheck、production build/smoke、4 Chrome；根卷约 8.65 GiB。零真实图源、二维码载荷、凭证或外联。
+- 当前阶段：FIX-BATCH-016=`local-verified / not main / not deployed / not real-rendered / not accepted`。OMB-AUD-014 的持久质量回执子项形成候选；OMB-AUD-015 仍因 ObservationPanel 无保存闭环而 partial；OMB-AUD-016 仅完成 ComparisonReceipt schema/AOI/source/date 引用子项。唯一最安全下一步：由 Codex更新技术交底指纹并提交 PR，等待 GitHub CI；全绿前不合并、不部署。用户行动：无。
+- 2026-09-01 07:18：完成文档同步后的最终本地复验：交底指纹 189 files、3 Node＋46 files/271 Vitest、8 typecheck、production build/smoke、4 Chrome 和 diff check 全绿；根卷 `8,990,284 KiB`（约 8.57 GiB）。阶段和真实源边界不变。唯一最安全下一步：由 Codex提交并推送 FIX-BATCH-016 PR，等待 GitHub CI。用户行动：无。

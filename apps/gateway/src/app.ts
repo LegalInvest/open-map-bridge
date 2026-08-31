@@ -25,6 +25,7 @@ import {
 } from './probe/generic-source-probe.js';
 import { registerProbeRoutes } from './routes/probe.js';
 import { registerGenericTileRoutes } from './routes/generic-tiles.js';
+import { registerComparisonRoutes } from './routes/comparisons.js';
 
 export interface BuildAppOptions {
   dataPath: string | null;
@@ -96,9 +97,9 @@ export async function buildApp(options: BuildAppOptions): Promise<FastifyInstanc
     persistence: options.dataPath === null ? 'memory' : 'atomic-json',
     credentialVault: options.credentialVault ? 'encrypted-local' : 'disabled',
   }));
-  app.get('/api/comparisons', async () => repository.listComparisons());
   registerAoiRoutes(app, repository);
   registerTemporalRoutes(app, registry);
+  registerComparisonRoutes(app, repository, registry);
   registerImportRoutes(app, createImportInspector(), repository, undefined, options.credentialVault ?? null);
   const genericTiles = new GenericSourceTileService(
     repository,

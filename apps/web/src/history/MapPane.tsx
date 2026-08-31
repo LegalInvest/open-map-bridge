@@ -73,17 +73,8 @@ export function MapPane({ panelIndex, sourceId, date, aoi, viewSync, onStatus }:
     const exposeViewState = (state: ViewState) => {
       target.dataset.viewState = JSON.stringify(state);
     };
-    const initialCenter = view.getCenter();
-    const initialZoom = view.getZoom();
-    if (initialCenter && initialZoom !== undefined) {
-      exposeViewState({
-        center: [initialCenter[0] ?? 0, initialCenter[1] ?? 0],
-        zoom: initialZoom,
-        rotation: view.getRotation(),
-        projection: 'EPSG:3857',
-      });
-    }
     const paneId = `pane-${panelIndex}`;
+    const hadSharedView = viewSync.current() !== null;
     const unsubscribe = viewSync.subscribe(paneId, (state: ViewState) => {
       applyingRemote = true;
       view.setCenter(state.center);
@@ -93,6 +84,18 @@ export function MapPane({ panelIndex, sourceId, date, aoi, viewSync, onStatus }:
       map.render();
       applyingRemote = false;
     });
+    const initialCenter = view.getCenter();
+    const initialZoom = view.getZoom();
+    if (!hadSharedView && initialCenter && initialZoom !== undefined) {
+      const initialState: ViewState = {
+        center: [initialCenter[0] ?? 0, initialCenter[1] ?? 0],
+        zoom: initialZoom,
+        rotation: view.getRotation(),
+        projection: 'EPSG:3857',
+      };
+      exposeViewState(initialState);
+      viewSync.publish(paneId, initialState);
+    }
     map.on('moveend', () => {
       if (applyingRemote) return;
       const center = view.getCenter();

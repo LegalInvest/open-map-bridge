@@ -32,4 +32,8 @@ it('replays the last shared view to a pane that remounts after a date change', (
   expect(received).toEqual([
     { center: [13_260_000, 3_880_000], zoom: 10, rotation: 0, projection: 'EPSG:3857' },
   ]);
+  const snapshot = sync.current();
+  expect(snapshot).toEqual(received[0]);
+  snapshot!.center[0] = 0;
+  expect(sync.current()?.center[0]).toBe(13_260_000);
 });
