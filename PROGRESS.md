@@ -192,3 +192,7 @@
 - 唯一最安全下一步：由 Codex 实现 FIX-BATCH-014C 的通用 probe 编排，把同 UUID vault、014B 请求计划、FIX-BATCH-013 逐请求 DNS/IP 固定传输和脱敏 ProbeResult 只在本地合成上游夹具中接通；全门完成前不请求用户真实第三方图源。
 - 2026-09-01 03:27：部署证据 PR #33 CI `33430320616` 全绿并合并为 docs-only main `601ac68`；main CI `33430487066` 复验全门。本地/main/origin 同步；运行源码与腾讯 current 保持 `ccd3cd8`，不为 docs-only 后代重复发布。
 - 唯一最安全下一步：由 Codex 实现 FIX-BATCH-014C 的通用 probe 编排，把同 UUID vault、014B 请求计划、FIX-BATCH-013 逐请求 DNS/IP 固定传输和脱敏 ProbeResult 只在本地合成上游夹具中接通；全门完成前不请求用户真实第三方图源。
+- 2026-09-01 03:57：FIX-BATCH-014C 通用最小 probe 达到 `local-verified`。新增显式 `POST /api/import/sources/:sourceId/probe`，只接受已确认 source UUID、用户确认布尔值和单个 z/x/y；服务端按同 UUID vault 解引用、HMAC 凭证修订、014B 请求计划、逐请求 DNS/IP/peer 固定传输、query/header 注入和完整图片解码形成不含 URL/host/秘密/正文的 ProbeResult。同一指纹并发和重启复用；成功后只把 confirmed 晋级 probed，不自动授予 tile/temporal runtime。默认生产策略在 DNS 前阻止 HTTP、私网、未知 scheme/provenance/凭证需求。
+- 本地门：53 项定向测试、256 Vitest＋3 Node、8 workspace typecheck、production build/smoke 与 4 条 Chrome E2E 全绿。首次 gateway typecheck 仅发现测试 fixture 选中了 `createServer` 错误重载，改为显式 `IncomingMessage/ServerResponse` 后通过；生产逻辑未放宽。测试只使用本机回环合成上游，零用户二维码、零真实凭证、零真实 DNS/HTTP。
+- 当前阶段：014C=`local-verified / not main / not deployed / not accepted`；本地/GitHub main 仍为 docs-only `601ac68`，GitHub main CI `33430487066`，腾讯 runtime/current 仍为 `ccd3cd8`。真实 Ovi ProbeResult、真实通用源瓦片、rendered 和 accepted 均未达到。
+- 唯一最安全下一步：由 Codex 更新技术交底指纹并提交 014C PR，由 GitHub CI 复验；全绿合并 main 后才生成腾讯 versioned release，期间继续不请求任何真实第三方图源。

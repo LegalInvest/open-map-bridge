@@ -55,6 +55,9 @@ it('permanently blocks cloud metadata and unsafe paths', () => {
   expect(inspectSourceNetworkPolicy(source({ pathTemplate: '/tiles/%2e%2e/secret' }))).toEqual(
     expect.objectContaining({ decision: 'blocked', code: 'POLICY_PATH_TEMPLATE' }),
   );
+  expect(inspectSourceNetworkPolicy(source({ pathTemplate: '/tiles/{$z}.png?token=inline' }))).toEqual(
+    expect.objectContaining({ decision: 'blocked', code: 'POLICY_PATH_TEMPLATE' }),
+  );
 });
 
 it('requires explicit enterprise review for private and nonstandard endpoints', () => {

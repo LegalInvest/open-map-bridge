@@ -25,6 +25,14 @@ it('atomically stores only an authenticated encrypted envelope and reopens it', 
   expect(reopened.resolve(reference)).toEqual({
     fields: [{ placement: 'query', name: 'api_key', value: 'not-a-real-secret-fixture' }],
   });
+  const fingerprint = reopened.fingerprint(reference);
+  expect(fingerprint).toMatch(/^[a-f0-9]{64}$/);
+  expect(fingerprint).not.toContain('not-a-real-secret-fixture');
+  expect(reopened.fingerprint(reference)).toBe(fingerprint);
+  await reopened.put(sourceId, {
+    fields: [{ placement: 'query', name: 'api_key', value: 'rotated-fixture-value' }],
+  });
+  expect(reopened.fingerprint(reference)).not.toBe(fingerprint);
   await reopened.remove(reference);
   expect(reopened.has(reference)).toBe(false);
 });

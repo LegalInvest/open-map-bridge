@@ -111,6 +111,7 @@ export function inspectSourceNetworkPolicy(source: MapSourceDefinition): SourceP
     source.pathTemplate.startsWith('//') ||
     source.pathTemplate.includes('\\') ||
     source.pathTemplate.includes('#') ||
+    source.pathTemplate.includes('?') ||
     /[\u0000-\u001f\u007f]/.test(source.pathTemplate) ||
     source.pathTemplate.split('/').includes('..') ||
     lowerPath.includes('%2e') ||
