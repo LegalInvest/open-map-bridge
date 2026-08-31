@@ -8,11 +8,11 @@
 4. AC-001 的最终 `rendered+saved` 仍需要从用户授权真实二维码解析出的配置通过后续 URL/SSRF、凭证和最小探测门；本切片先完成真实图片解码、脱敏预览和确认保存，未探测时不得标记可用。
 5. `.ovmap` 无公开完整线协议；首个 codec 只承诺经差分证据验证的 `record37-zlib` 家族，其他版本保持 `unsupported` 并等待合法样本，不能承诺“所有文件已全兼容”。
 6. 用户真实历史二维码的 `at/ad/al` 和 72 字符不透明 `ul` 已安全识别但未保存；在本地凭证保险库或官方奥维回环桥接通过之前，无法从开放定义独立重建私有认证，也不得请求真实源或宣称出图。
-7. 导入配置目前可保存为 `confirmed`；零外联主机/端口/IP/云元数据/路径静态策略已进入 main，但请求时 DNS 解析后 IP、重绑定、最小探测、瓦片代理和投影修正尚未实现。当前策略通过不能视为网络可用。
-8. 开发者 V1 契约和合成适配器已贯通；真实 imported source UUID 现在可与 configured OviBridge 同 ID 绑定，但未完成 probe/ready，因此 SDK 中仍必须保持 `metadata-only`。不能用 configured 或合成源的 `ready` 能力替它晋级。
-9. 本机容量：2026-08-31 15:53 根卷可用空间从约 9.1 GiB 突降到约 5.4 GiB，swap 约 6.9 GiB，低于 8 GiB 执行门；已停止浏览器、构建、测试、下载和影像生成，不通过删除用户数据或项目证据规避。
+7. 导入配置目前可保存为 `confirmed`；零外联主机/端口/IP/云元数据/路径静态策略已进入 main。FIX-BATCH-011 只为固定回环 OviBridge 增加一个受控 probe/ready 候选；通用图源请求时 DNS 解析后 IP、连接固定/重绑定、瓦片代理和投影修正仍未实现。静态策略或 Ovi 候选通过不能证明其他网络源可用。
+8. 开发者 V1 契约和合成适配器已贯通；真实 imported source UUID 现在可与 OviBridge 同 ID 绑定。FIX-BATCH-011 只有在显式 probe 瓦片通过完整图片门时才赋予本次 runtime ready；该路径尚未进入 main，也未对用户真实源执行，因此当前权威部署中的真实 imported source 仍必须保持 `metadata-only`。
+9. 本机容量：2026-08-31 17:37 根卷可用约 9.0 GiB、swap 约 6.4 GiB，刚超过 8 GiB 执行门但余量仍低；本轮测试和类型检查已通过，build/production/E2E 交给 GitHub CI。若再次低于 8 GiB，立即恢复止写且不通过删除用户数据或项目证据规避。
 10. 全量审计：`docs/问题账本.md` 当前记录 39 组问题。FIX-BATCH-001–009 已进入 main，15 组达到 main、24 组仍未闭合；其余问题不得因生产制品与服务器候选就绪而标记解决。
-11. 真实 ready 晋级：configured 隐藏、空 probe 失败、图片解码/内容验证、本地 gateway 入站信任边界和“不伪造日期目录”已进入 main。但本地凭证保险库、上游请求时 DNS/IP/重绑定门、最小真实瓦片请求、探测证据/ready 编排和真实日期目录提供者仍缺；`OMB-AUD-002` 保持部分开放，004 已修复的只是伪目录问题；020/021 已达到 main，但不等于真实源验收。
+11. 真实 ready 晋级：configured 隐藏、空 probe 失败、图片解码/内容验证、本地 gateway 入站信任边界和“不伪造日期目录”已进入 main。FIX-BATCH-011 已在本地证明“单个授权回环瓦片通过完整图片门才 ready”的编排候选；但本地凭证保险库、通用上游请求时 DNS/IP/重绑定门、ProbeResult 持久化、真实日期目录 provider 和用户真实瓦片仍缺。`OMB-AUD-002` 保持部分开放，不能把本地 fixture 晋级为真实源验收。
 12. 三端部署：GitHub main `62ab114` 的 CI `33370752935` 与部署证据 PR CI `33371002982` 全绿；腾讯 current `62ab114` 的运行源码/制品哈希与当前 GitHub 运行输入一致，versioned release、项目 Node、systemd、宝塔 nginx include、双回环端口、隧道浏览器，以及 `62ab114 → 33f7f06 → 62ab114` 回滚/前滚均通过。后续仅文档证据提交不需要伪造新 runtime release；技术部署阻塞已解除，真实 Ovi source 业务验收仍独立阻塞。
 13. QR 方言：公开样本新增观察到 `hs/mf/ml/ms/mt/pn/pt`。FIX-BATCH-008 只接受这些键并丢弃未知值；其业务语义、授权和服务器可用性仍未知，不能由“解析成功”晋级为 ready。
 

@@ -125,3 +125,7 @@
 - 容量门：本机 15:53 可用空间突降至约 5.4 GiB、swap 约 6.9 GiB，低于 8 GiB；已停止构建、测试、截图、浏览器和影像生成，未删除用户文件或项目证据。
 - 唯一最安全下一步：由 Codex 在容量恢复到 8 GiB 后继续 `OMB-AUD-002` 主链，先实现本地凭证引用与请求时 DNS/IP/重绑定门，再执行最小真实 probe；当前用户无需操作。
 - 2026-08-31 16:00：部署证据 PR #18 合并为 GitHub main `62ab114`，main CI `33370752935` 全绿。服务器以未变化的运行制品建立 release `62ab114`，完成 `62ab114 → 33f7f06 → 62ab114`；三次 health 均为 `atomic-json`，state hash 不变，服务 active。部署证据分支 CI `33371002982` 亦全绿；其后只有文档变化，服务器运行制品仍与 GitHub main 的运行输入/哈希一致。
+- 2026-08-31 17:37：定时续跑核验 GitHub main/origin 均为 `9b73949`、CI `33371357929` 全绿；腾讯 current `62ab114`、service active、health `atomic-json`、4174/8080 两个监听均只在 `127.0.0.1`，服务器根卷可用约 359 GiB。本机可用空间约 9.0 GiB，刚超过 8 GiB 门，未运行浏览器/影像/下载。
+- 当前批次：`FIX-BATCH-011 / OMB-AUD-002 partial local-verified`。Ovi 配置现在可接收严格、非秘密的已核验日期元数据和一个已登记 probe 坐标；启动时只有该回环瓦片返回 200 非空并通过既有 PNG/JPEG 完整解码和尺寸门，registry 才为同一 imported UUID 标 ready。无 probe、403、损坏图片均保持 configured；182 个 Vitest＋2 个 Node 测试和 8 workspace typecheck 通过。
+- 当前边界：本批未接触用户真实二维码载荷、凭证或瓦片，未持久化 ProbeResult，未实现真实日期 provider、vault 或通用源请求时 DNS/IP/重绑定门；因此不是 main/deployed/accepted，OMB-AUD-002 仍为 partial。
+- 唯一最安全下一步：提交 FIX-BATCH-011 并用 GitHub PR CI 跑完整 test/typecheck/build/production smoke/Chrome 门；全绿合并后再按运行制品变化更新腾讯 versioned release，不在服务器未配置 OviBridge 时伪造真实源 ready。

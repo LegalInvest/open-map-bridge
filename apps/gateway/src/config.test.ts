@@ -36,6 +36,45 @@ it('validates and preserves the authorized Ovi map type', () => {
   ).toThrow(/SOURCE_ID/);
 });
 
+it('accepts only bounded verified Ovi date and probe metadata', () => {
+  const sourceId = '018f4d39-32f1-7a31-9f60-81c6b453b886';
+  const date = {
+    id: 'verified-scene-2018',
+    requestDate: '2018-06-30',
+    captureDate: null,
+    precision: 'request-date-only',
+    availability: 'available',
+  };
+  const base = { OMB_OVI_PORT: '19991', OMB_OVI_MAP_TYPE: '402', OMB_OVI_SOURCE_ID: sourceId };
+  expect(
+    parseOviBridgeConfig({
+      ...base,
+      OMB_OVI_VERIFIED_DATES_JSON: JSON.stringify([date]),
+      OMB_OVI_PROBE_JSON: JSON.stringify({ dateId: date.id, z: 8, x: 212, y: 102 }),
+    }),
+  ).toMatchObject({
+    verifiedDates: [{ ...date, provenance: 'authorized-operator-ovi-date' }],
+    probeRequest: { dateId: date.id, z: 8, x: 212, y: 102 },
+  });
+  expect(() => parseOviBridgeConfig({ ...base, OMB_OVI_PROBE_JSON: '{}' })).toThrow(/requires/);
+  expect(() =>
+    parseOviBridgeConfig({
+      ...base,
+      OMB_OVI_VERIFIED_DATES_JSON: JSON.stringify([date]),
+      OMB_OVI_PROBE_JSON: JSON.stringify({ dateId: 'unknown-date', z: 8, x: 212, y: 102 }),
+    }),
+  ).toThrow(/requestable verified date/);
+  expect(() => parseOviBridgeConfig({ OMB_OVI_VERIFIED_DATES_JSON: JSON.stringify([date]) })).toThrow(
+    /configured together/,
+  );
+  expect(() =>
+    parseOviBridgeConfig({
+      ...base,
+      OMB_OVI_VERIFIED_DATES_JSON: JSON.stringify([{ ...date, token: 'must-not-be-accepted' }]),
+    }),
+  ).toThrow(/non-public field/);
+});
+
 it('requires a strong gateway token and derives exact loopback trust values', () => {
   expect(() => parseGatewayServerConfig({})).toThrow(/OMB_GATEWAY_TOKEN/);
   expect(() => parseGatewayServerConfig({ OMB_GATEWAY_TOKEN: 'too-short' })).toThrow(/OMB_GATEWAY_TOKEN/);

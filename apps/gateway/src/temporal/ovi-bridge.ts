@@ -10,10 +10,11 @@ import {
 } from '@omb/temporal-source';
 import { validateDecodedTile } from './image-validation.js';
 
-interface OviBridgeOptions {
+export interface OviBridgeOptions {
   baseUrl: string;
   mapType: number;
   verifiedDates?: readonly TemporalDateEntry[];
+  probeRequest?: TemporalTileRequest;
   fetchImpl?: typeof fetch;
 }
 
@@ -63,6 +64,7 @@ export class OviBridgeAdapter implements TemporalSourceAdapter {
   private readonly baseUrl: URL;
   private readonly mapType: number;
   private readonly verifiedDates: Map<string, TemporalDateEntry>;
+  private readonly probeRequest: TemporalTileRequest | null;
   private readonly fetchImpl: typeof fetch;
 
   constructor(options: OviBridgeOptions) {
@@ -79,11 +81,29 @@ export class OviBridgeAdapter implements TemporalSourceAdapter {
     const verifiedDates = (options.verifiedDates ?? []).map(parseTemporalDateEntry);
     this.verifiedDates = new Map(verifiedDates.map((entry) => [entry.id, entry]));
     if (this.verifiedDates.size !== verifiedDates.length) throw new Error('Ovi verified date IDs must be unique');
+    this.probeRequest = options.probeRequest ? parseTemporalTileRequest(options.probeRequest) : null;
+    if (this.probeRequest) {
+      const probeDate = this.verifiedDates.get(this.probeRequest.dateId);
+      if (!probeDate || ['missing', 'failed'].includes(probeDate.availability)) {
+        throw new Error('Ovi probe date must reference a requestable verified date');
+      }
+    }
     this.fetchImpl = options.fetchImpl ?? fetch;
   }
 
   async probe(): Promise<{ ok: boolean; detail: string }> {
-    return { ok: false, detail: 'loopback configuration accepted; no tile has been verified' };
+    if (!this.probeRequest) {
+      return { ok: false, detail: 'loopback configuration accepted; no tile has been verified' };
+    }
+    try {
+      const response = await this.tile(this.probeRequest);
+      if (response.status !== 200 || response.body.byteLength === 0) {
+        return { ok: false, detail: `authorized loopback tile probe returned status ${response.status}` };
+      }
+      return { ok: true, detail: 'authorized loopback tile probe passed image validation' };
+    } catch {
+      return { ok: false, detail: 'authorized loopback tile probe failed image validation or transport checks' };
+    }
   }
 
   async listDates(input: TemporalDateWindow): Promise<TemporalDateEntry[]> {
