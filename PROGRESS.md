@@ -132,3 +132,7 @@
 - 2026-08-31 17:48：FIX-BATCH-011 由 PR #20 合并为 GitHub main/origin `94e42b1`；PR CI `33379147631` 与 main CI `33379302430` 全绿，包含 182 Vitest＋2 Node、8 workspace typecheck、build、production smoke 和 4 Chrome E2E。OMB-AUD-002 的最小 probe/ready 编排代码达到 main，但 ProbeResult 持久化和真实源验证仍开放。
 - 容量门重新触发：本机可用空间约 7.3 GiB、swap 约 6.4 GiB；已停止新的构建、测试、浏览器、下载和腾讯制品部署。腾讯 current 保持已核验健康的 `62ab114`，因此当前明确为 `main=94e42b1 / deployed=62ab114 / real-source accepted=未达到`。
 - 唯一最安全下一步：容量恢复到至少 8 GiB 后，由 Codex 从 GitHub main `94e42b1` 生成/核验 versioned artifact 并更新腾讯 current；部署前后保持双回环、health 和 state hash 门，不启用真实 Ovi 接口。
+- 2026-08-31 18:19：本地/GitHub docs-only main/origin 已核验为 `f21fefe`，CI `33380143272` 全绿；runtime source 保持 `94e42b1`。本机可用空间恢复至约 8.62 GiB，`npm run build && npm run test:production` 通过；新 gateway hash `08635f54…9ef`、Web index hash `82c87ad6…692`。
+- 腾讯已新增只读 versioned release `/opt/open-map-bridge/releases/94e42b1` 并原子切换 current。active service、health=`atomic-json`、4174/8080 双回环、服务器 artifact hash 均通过；状态 hash 从 `07648ee2…d6e2` 到 `07648ee2…d6e2` 不变。首次 health 请求在重启窗口返回 502，自动重试后恢复 200，该瞬态证据保留。
+- 阶段更新：`main=f21fefe`（docs-only descendant）、`runtime source=94e42b1`、`deployed=94e42b1`、`real-source accepted=未达到`。未启用官方 Ovi 接口、未请求用户真实图源、未新增凭证或 ProbeResult。
+- 唯一最安全下一步：由 Codex 实现本地 vault 引用与通用上游请求时 DNS/IP/连接固定/重绑定安全门，并先以合成恶意/重绑定反例验证；在该门和 ProbeResult 持久化完成前不请求真实第三方图源。

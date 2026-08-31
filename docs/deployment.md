@@ -38,17 +38,18 @@ The exact host, service account, nginx layout, Node path, and release SHA must b
 
 ## Verified Tencent release (2026-08-31)
 
-GitHub main `94e42b1` now contains FIX-BATCH-011 runtime changes, while the verified Tencent current release remains `62ab114`. The update is intentionally paused because the local workstation fell below the 8 GiB build/deploy gate. Until a new versioned artifact is built, verified, and switched, report `main=94e42b1`, `deployed=62ab114`; do not infer a deployed Ovi probe/ready path.
+GitHub docs-only main `f21fefe` contains FIX-BATCH-011 runtime source `94e42b1`. On 2026-08-31 18:19 the workstation recovered to about 8.62 GiB, the artifact passed `npm run build && npm run test:production`, and the verified Tencent current release was atomically switched to `94e42b1`. Report `main=f21fefe`, `runtime source=94e42b1`, `deployed=94e42b1`; do not infer a real Ovi source is ready because no authorized real probe was run and no ProbeResult was persisted.
 
-- GitHub main and deployed source tree: `62ab11494ae5e27b7bd8250fddf3e88d1c21c170`;
-- current release: `/opt/open-map-bridge/releases/62ab114`;
-- retained rollback release: `/opt/open-map-bridge/releases/33f7f06`;
+- GitHub docs-only main: `f21fefe109b6d6faaba12871ca7d80c6910a304f`;
+- deployed runtime source tree: `94e42b1e270541399fc8ff70d6657255567b0195`;
+- current release: `/opt/open-map-bridge/releases/94e42b1`;
+- retained releases: `/opt/open-map-bridge/releases/62ab114` and `/opt/open-map-bridge/releases/33f7f06`;
 - project runtime: `/opt/open-map-bridge/runtime/node-v24.19.0`, `v24.19.0`;
 - active nginx include: `/www/server/panel/vhost/nginx/open-map-bridge.conf`;
-- gateway bundle SHA-256: `63e8ed6eb09ec747bb941a25beff872f0bb895d8544d3cee517af565b4abbfd6`;
+- gateway bundle SHA-256: `08635f54f8e07bb51a889a4a8eb29c6014da93fafad6cbd9f71815193af5a9ef`;
 - Web index SHA-256: `82c87ad622055cbff03b7f5a4b3f23d790b2647b87c9e1312a265f78f1690572`.
 
-The service is active as `openmapbridge`, with `NoNewPrivileges=yes`, `ProtectSystem=strict`, and `ProtectHome=yes`. Nginx and the gateway listen only on `127.0.0.1:8080` and `127.0.0.1:4174`. The tunneled UI, `/api/health`, `/api/aois`, direct unauthenticated rejection, state-file ownership/mode, graceful restart, lifecycle logs, and state hash across restart were verified. The first attempted nginx install into `/etc/nginx/conf.d` did not create the 8080 listener because BaoTa nginx does not include that path; the active include was then discovered from `nginx -T`, installed, tested, and the unused project-created file removed.
+The service is active as `openmapbridge`, with `NoNewPrivileges=yes`, `ProtectSystem=strict`, and `ProtectHome=yes`. Nginx and the gateway listen only on `127.0.0.1:8080` and `127.0.0.1:4174`. The tunneled UI, `/api/health`, `/api/aois`, direct unauthenticated rejection, state-file ownership/mode, graceful restart, lifecycle logs, and state hash across restart were verified. The first attempted nginx install into `/etc/nginx/conf.d` did not create the 8080 listener because BaoTa nginx does not include that path; the active include was then discovered from `nginx -T`, installed, tested, and the unused project-created file removed. During the `94e42b1` restart, the first health request returned a transient 502; the bounded retry then returned `{"ok":true,"persistence":"atomic-json"}`, and the state SHA-256 was unchanged before and after restart.
 
 ## Rollback
 

@@ -7,9 +7,9 @@
 - 状态：Approved / Implementing；用户于 2026-08-28 明确最终结果必须能基于已导入奥维图源进行二次开发
 - 产品裁决者：用户
 - 当前整合者：本 Codex 主线程
-- 更新时间：2026-08-31 17:48（Asia/Shanghai）
+- 更新时间：2026-08-31 18:19（Asia/Shanghai）
 - 适用目录：`/Users/assis/Documents/Codex/2026-08-27/open-map-bridge`
-- 当前切片：`FIX-BATCH-011 Ovi probe/ready main`。PR #20 已合并为 GitHub main/origin `94e42b1`，PR CI `33379147631` 与 main CI `33379302430` 全绿；只有显式探针瓦片通过 200、非空、PNG/JPEG MIME/magic、完整解码和尺寸门后，同一 imported UUID 的 Ovi runtime 才在本次启动中晋级 ready。腾讯 current 仍为 `62ab114` 且服务健康；由于本机容量已跌至约 7.3 GiB，运行制品部署按门禁暂停。未对用户真实源发请求或形成持久化 ProbeResult，不能晋级真实源 deployed/accepted
+- 当前切片：`FIX-BATCH-011 Ovi probe/ready deployed-code`。PR #20 已合并为 GitHub runtime source `94e42b1`，PR CI `33379147631` 与 main CI `33379302430` 全绿；docs-only main/origin 为 `f21fefe`，CI `33380143272` 全绿。只有显式探针瓦片通过 200、非空、PNG/JPEG MIME/magic、完整解码和尺寸门后，同一 imported UUID 的 Ovi runtime 才在本次启动中晋级 ready。2026-08-31 18:19 本机容量恢复至约 8.62 GiB，按门禁完成本地 production build/smoke，并把运行制品原子切换到腾讯 current `94e42b1`；双回环、health、artifact hash 和持久状态 hash 均通过。未对用户真实源发请求或形成持久化 ProbeResult，不能晋级真实源 ready/rendered/accepted
 - 上版：V0.4 奥维兼容双入口导入实施版
 
 <!-- GOAL_CAPSULE_START -->
@@ -21,7 +21,7 @@
 
 硬约束：clean-room 独立实现；不得复制奥维专有代码、商标或绕过会员/设备绑定；不得内置、记录或传播第三方 token；解析前不联网，确认前不请求图源；未知版本、解压异常、内网目标或不安全 URL 必须 fail closed；“文件已解析”“探测成功”“成功出图”是不同事实；任何成功都要有导入回执和可复现实证。
 
-当前只允许修改本项目目录和用户已批准的腾讯 OpenMapBridge 专用路径；禁止清理用户文件、改动其他服务器项目、开放公网、批量抓取图源或离线下载 20 年整域瓦片。不得把真实秘密写入 fixture、日志、回执、普通 JSON 或前端。可用空间低于 8 GiB 立即停止本机构建、测试、截图和新增缓存；2026-08-31 17:48 实测约 7.3 GiB，门禁重新触发，本轮停止 build/test/browser/download/deploy，仅做只读诊断和小型状态收口。发现越界需求写入 `BLOCKED.md`。
+当前只允许修改本项目目录和用户已批准的腾讯 OpenMapBridge 专用路径；禁止清理用户文件、改动其他服务器项目、开放公网、批量抓取图源或离线下载 20 年整域瓦片。不得把真实秘密写入 fixture、日志、回执、普通 JSON 或前端。可用空间低于 8 GiB 立即停止本机构建、测试、截图和新增缓存；2026-08-31 18:19 实测约 8.62 GiB，门禁允许本轮一次 production build/smoke 与 versioned deployment，完成后继续逐动作复核容量。发现越界需求写入 `BLOCKED.md`。
 
 `FIX-BATCH-001` 至 `FIX-BATCH-009` 已进入 GitHub main；`FIX-BATCH-010` 的项目 runtime、release、systemd、BaoTa nginx include、SSH tunnel 和重启证据已达到 `deployed`，证据回写正在进入 GitHub。技术部署不读取用户图源、不改变 source lifecycle，也不授予真实 Ovi 源 ready。
 
@@ -853,3 +853,4 @@ V1 公共类型和错误语义通过契约测试冻结；新增可选能力不�
 - 2026-08-31：部署证据 PR #18 合并为 main `62ab114`，main CI `33370752935` 全绿。服务器复制未变化的运行制品为 release `62ab114`，完成 `62ab114 → 33f7f06 → 62ab114`，每次健康通过且状态哈希不变；后续证据提交只改变文档，不改变服务器运行内容。
 - 2026-08-31：容量恢复后启动 `FIX-BATCH-011`。候选只接受严格 `TemporalDateEntry[]` 和一个已登记、可请求的 probe 坐标；OviBridge 启动时发出一次受控回环请求，只有 200 非空图片通过既有完整解码/尺寸门才把同一 imported UUID 的 runtime 标为 ready，403/损坏图片/无 probe 均保持 configured。182 个 Vitest＋2 个 Node 测试与 8 workspace 类型检查通过；当前为 `local-verified`，不是 main/deployed/真实源 accepted，且探测结果持久化、真实目录 provider、vault 与请求时 DNS/IP/重绑定门仍开放。
 - 2026-08-31：FIX-BATCH-011 由 PR #20 合并为 main `94e42b1`；PR CI `33379147631`、main CI `33379302430` 完成 test/typecheck/build/production smoke/4 Chrome E2E 并全绿。该结果只把探针编排推进 main；本机空间随后降到约 7.3 GiB，腾讯 runtime 更新暂停，真实源 probe/render/accepted 仍未达到。
+- 2026-08-31：docs-only 证据 PR #21 合并为 current main `f21fefe`，CI `33380143272` 全绿。18:19 本机空间恢复到约 8.62 GiB；从该 main 构建的运行制品（runtime source `94e42b1`）通过 production smoke，并安装为腾讯 versioned release `94e42b1`。current 原子切换后 health=`atomic-json`、4174/8080 双回环、gateway/Web hash 与本地产物一致、持久状态 hash 前后不变；真实 Ovi 源仍未请求，accepted 未达到。
