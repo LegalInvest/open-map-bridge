@@ -145,3 +145,4 @@
 - 新增 `OMB-AUD-040`：root `test/typecheck/build/dev/production smoke/compat/E2E/fixture acquisition` 统一通过 npm `pre*` 自动运行 `env:check`，并以静态 Node 测试冻结映射，避免操作者忘记把容量读数写进 shell 条件。vault 核心仍保留先前的 `local-verified` 证据；加入守卫后的最终工作区整体为 `local-candidate`，等待 GitHub CI。
 - 当前阶段：`main=a92ff8c`、`runtime source/deployed=94e42b1`、`FIX-BATCH-012 final branch=local-candidate`、`real-source accepted=未达到`。
 - 唯一最安全下一步：由 Codex 提交并推送 FIX-BATCH-012＋OMB-AUD-040，完全依赖 GitHub PR CI 做最终分支复验；CI 全绿后合并，但在本机恢复至少 8 GiB 前不构建或部署该新运行制品。
+- 2026-08-31 19:21：PR #23 首次 CI `33386547512` 红灯。环境门先成功阻断前检查，随后静态契约准确发现 fixture acquisition 的 npm hook 拼成 `prefixures:acquire`，而 npm 约定应为 `prefixtures:acquire`；其余测试未运行。拼写已修正，失败证据保留并等待远端重跑；本机仍不运行重型门。

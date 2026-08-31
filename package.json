@@ -21,7 +21,7 @@
     "pretypecheck": "npm run env:check",
     "prebuild": "npm run env:check",
     "predev": "npm run env:check",
-    "prefixures:acquire": "npm run env:check",
+    "prefixtures:acquire": "npm run env:check",
     "fixtures:acquire": "node scripts/acquire-research-fixtures.mjs",
     "fixtures:verify": "node scripts/verify-local-fixtures.mjs",
     "disclosure:update": "node scripts/update-technical-disclosure.mjs update",
