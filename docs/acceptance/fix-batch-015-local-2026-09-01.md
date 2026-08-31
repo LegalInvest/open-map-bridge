@@ -24,6 +24,7 @@
 - 第三次公开 Chrome E2E 仍为 3/4：双湖用例返回宝应湖后的另一处旧文案先触发。随后全仓搜索一次性定位该文件剩余 5 处旧断言，并统一使用完整/失败质量正则；失败保留，待第四轮。
 - 第四次公开 Chrome E2E 4/4 全绿；本批达到 local-verified。三次红灯完整保留，不覆盖或改写为一次通过。
 - 全门完成后根卷于 05:56 突降至 `7,562,484 KiB`（约 7.21 GiB），低于 8 GiB 门；只读检查未发现 Playwright/Vite/项目 gateway 残留，swap 使用约 5.37 GiB。后续测试、构建、浏览器、推送和部署暂停，只做本地 checkpoint。
+- 06:42 根卷恢复到 `9,398,964 KiB`（约 8.96 GiB）；origin/main `c6cd5be` 与 CI `33441198030` 无漂移。腾讯 current `d350ac3`、service active、双回环、health/401、权威 state/vault 0600 与服务器容量均通过；只读复核不改变部署阶段。
 
 ## 未达到
 
@@ -31,4 +32,4 @@
 - ComparisonReceipt 创建与持久化仍未实现；没有真实浏览器画布回执。
 - 合成测试、瓦片 HTTP 成功和计数状态均不构成真实源 `rendered` 或用户 `accepted`。
 
-唯一最安全下一动作：本地 checkpoint 后保持 idle；待容量恢复至少 8 GiB，再推送 FIX-BATCH-015 PR，由 GitHub CI 完整复验。
+唯一最安全下一动作：推送 FIX-BATCH-015 PR，由 GitHub CI 完整复验；全绿前不合并、不部署。

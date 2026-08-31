@@ -224,3 +224,5 @@
 - 2026-09-01 05:55：第四轮公开 Chrome E2E 4/4 全绿。FIX-BATCH-015 达到 `local-verified`：3 Node＋260 Vitest、8 workspace typecheck、production build/smoke、4 Chrome、技术交底与 diff 门通过；三次旧文案断言红灯保留。真实源、持久 ComparisonReceipt、画布 rendered、腾讯部署和用户 accepted 均未达到。
 - 2026-09-01 05:56：本地全门完成后根卷从约 8.25 GiB 突降至 `7,562,484 KiB`，低于 8 GiB 硬门；swap 使用约 5.37 GiB。只读检查未发现 Playwright/Vite/本项目 gateway 残留，活动 agent 仅 root。已停止新测试、构建、浏览器、下载、影像和部署，不删除任何数据/证据。
 - 唯一最安全下一步：由 Codex只做本地 checkpoint 后保持 idle；待根卷恢复至少 8 GiB，再推送 FIX-BATCH-015 PR 并交由 GitHub CI 复验。用户行动：无。
+- 2026-09-01 06:42：根卷恢复到 `9,398,964 KiB`（约 8.96 GiB），容量门解除。只读复核 origin/main=`c6cd5be`、CI `33441198030` 全绿；腾讯 current=`d350ac3`、service active、4174/8080 双回环、nginx health 成功、直连 401、权威 state/vault 文件 0600、服务器根卷约 348 GiB 可用。首次误查不存在的 `state.json/credentials.vault` 路径失败，随后按部署契约 `temporal-state.json/credential-vault.json` 复核成功；未修改服务器。
+- 唯一最安全下一步：由 Codex推送本地 `96645f6` 后续证据提交并创建 FIX-BATCH-015 PR，等待 GitHub CI；全绿前不合并、不部署。用户行动：无。
