@@ -198,3 +198,7 @@
 - 唯一最安全下一步：由 Codex 更新技术交底指纹并提交 014C PR，由 GitHub CI 复验；全绿合并 main 后才生成腾讯 versioned release，期间继续不请求任何真实第三方图源。
 - 2026-09-01 04:12：PR #35 首轮 CI `33434618444` 对功能提交 `d3118b8` 全绿，完整远端门通过。当前阶段为 `PR CI verified / not main / not deployed / not accepted`；本地/GitHub main 仍为 `601ac68`，腾讯 runtime/current 仍为 `ccd3cd8`，零真实源请求。
 - 唯一最安全下一步：由 Codex 回写 CI 证据并等待 PR #35 的证据提交复验；全绿后 squash 合并、核验 main CI，再仅因 014C 运行制品变化更新腾讯 versioned release。
+- 2026-09-01 04:19：PR #35 证据提交 CI `33434979533` 全绿并 squash 合并为 main/origin `7da03c3`；main CI `33435153343` 再次通过交底、256 Vitest＋3 Node、8 workspace typecheck、production build/smoke 和 4 Chrome。014C 达到 main。
+- 精确 main 本地 build/smoke 后安装腾讯 immutable release `7da03c3`，current 从 `ccd3cd8` 原子切换。gateway/Web hash `a3d69a0e…56a1d`/`42368f3e…04ad` 与 manifest/服务器一致；首次 nginx health 在重启窗口短暂 502，随后 health=`atomic-json/encrypted-local`、直连 401、4174/8080 双回环、service active；state/vault hash 与 0600 权限不变，旧 release 保留。
+- 当前阶段：014C=`deployed-code / no real ProbeResult / not runtime-ready / not rendered / not accepted`。本轮没有读取用户二维码、写真实凭证或请求真实 Ovi/第三方源；合成 fixture、CI 绿和服务器健康都不替代真实源验收。
+- 唯一最安全下一步：由 Codex 实现 FIX-BATCH-014D，把当前同指纹成功 ProbeResult 绑定到最小通用 tile runtime，并复用同一请求构造、vault 与逐请求固定传输；先只用本机合成上游验证，继续零真实第三方请求。
