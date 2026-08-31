@@ -16,7 +16,7 @@
 - 2026-08-28 用户提出“数字化之后，就是可视化和自动化”，要求提高两者程度。当前整合结论是把可视化从地图展示升级为真实任务状态、质量、来源和下一动作，把自动化从纯函数选四期升级为可恢复工作流；该方向必须直接推进真实 source ID，不得再用合成消费端掩盖导入/绑定缺口。
 - 2026-08-28 用户随后批准继续优化架构和代码并要求同步全部文档。当前只把 `source-readiness` 零外联准备度任务作为第一实现子集；这不是对真实探测、一键四期或完整续跑的批准验收。
 - 2026-08-28 用户要求对整个仓库和文档做全量审计，并随后批准逐一修复、同步问题账本和解决进度 Markdown。当前以 `docs/问题账本.md` 的 38 项为完整审计边界，先修 P0 同 source UUID 与 configured/ready 真值；不得把单批 CI 绿写成全部问题关闭。
-- 2026-08-31 用户授权自主推进到本机、GitHub、服务器最新可验收。GitHub main `33f7f06` 和 CI `33369816054` 已全绿；同一制品已部署到腾讯私有 loopback 环境。39 组问题中 15 组达到 main、24 组仍未闭合，真实源验收继续独立开放。
+- 2026-08-31 用户授权自主推进到本机、GitHub、服务器最新可验收。GitHub main `62ab114` 的 CI `33370752935` 与部署证据分支 CI `33371002982` 已全绿；运行源码未因证据文档变化而改变，同一制品部署为腾讯 current `62ab114` 并通过回滚/前滚。39 组问题中 15 组达到 main、24 组仍未闭合，真实源验收继续独立开放。
 
 ### 本轮回答
 
@@ -307,7 +307,7 @@ fixtures/synthetic/temporal  无外网的 20 年彩色/带标签时序瓦片
 | 工作区基线 | GitHub main `873705b`；当前证据分支只回写 FIX-BATCH-007 的 main/CI 事实；约 5.2 GiB 低于 8 GiB 门 | product main / evidence candidate / capacity blocked | `git status/log/rev-parse`、`df`；2026-08-28 19:15 |
 | 自动测试 | 当前 main 的远端门通过 39 个 Vitest 文件/175 tests＋2 Node、8 workspace 类型检查、生产构建、4 Chrome E2E 和 143 文件交底新鲜度；既有 2 条授权本地 E2E 未在公共 CI 运行 | main CI verified / authorized-local historical | CI `33166313733`；2026-08-28 19:15 |
 | GitHub main | 公共唯一主仓 `LegalInvest/open-map-bridge`；FIX-BATCH-007 产品由 PR #13 合并为 `873705b` | main for 001A + FIX-BATCH-001/002/003/004/005/006/007；证据回写在独立分支 | PR #1–#13、CI `33166313733`；2026-08-28 19:15 |
-| 部署 | 腾讯私有 loopback release `33f7f06` | deployed for artifact / synthetic browser journey | `docs/acceptance/deployment-2026-08-31.md`；真实 Ovi 源未验收 |
+| 部署 | 腾讯私有 loopback current `62ab114`；rollback `33f7f06` | deployed for artifact / synthetic browser journey | 回滚/前滚与状态哈希通过；真实 Ovi 源未验收 |
 | 业务验收 | 真实 QR 安全预览和真实 `.ovmap` 五图层已过；真实 QR 瓦片渲染与用户独立签收未过 | import slice local-verified / AC-001 partial / accepted missing | `docs/acceptance/import-v0-local.md` |
 
 ## 13. 规格—代码—发布追踪矩阵
@@ -370,7 +370,7 @@ fixtures/synthetic/temporal  无外网的 20 年彩色/带标签时序瓦片
 | 本地资产 | 是否已有项目 | 工作区深度 2 目录/关键文件 | find 输出 | 高 | 深层无关项目未扫描，因绿地命名已足够 |
 | 二进制样本 | `.ovmap` 基本容器 | 一个公开 455-byte 样本 | 魔数、zlib、字符串 | 中 | 字段边界、历史版本、加密未知 |
 | 运行链 | Web UI 到真实出图 | 双入口/合成消费链有既有 CI；FIX-BATCH-001/002 修复同 UUID/configured 真值和响应解码门并进入 main | main + issue ledger | 高 | vault/SSRF/probe/真实 tile proxy 等仍缺 |
-| 发布链 | GitHub/CI/部署 | GitHub main `33f7f06`、CI `33369816054`；腾讯 versioned release、项目 Node、systemd、BaoTa nginx 与 SSH tunnel 已核验 | main verified / private deployment verified | 高 | 公网仍禁用；真实 Ovi 源、用户 accepted 与第二版本回滚演练未完成 |
+| 发布链 | GitHub/CI/部署 | GitHub main `62ab114`、CI `33370752935`；腾讯 current `62ab114`、rollback `33f7f06`、项目 Node、systemd、BaoTa nginx 与 SSH tunnel 已核验 | main verified / private deployment verified | 高 | 公网仍禁用；真实 Ovi 源与用户 accepted 未完成 |
 | 产品入口 | 可视化和自动化现实 | 本机空间低于 8 GiB，未操作浏览器；远端 Chrome 完成导入→任务→刷新恢复 | 源码与 CI E2E | 高 | main 已验证；本机和用户独立签收仍未做 |
 | 外部标准 | 时空元数据、任务与 telemetry | STAC、OGC Processes、OpenLayers、OpenTelemetry、STAC Browser 官方页 | 第 3 节链接；2026-08-28 | 高 | 尚未做依赖选型或标准合规测试 |
 
@@ -426,8 +426,8 @@ fixtures/synthetic/temporal  无外网的 20 年彩色/带标签时序瓦片
 
 ## 2026-08-31 腾讯私有部署证据
 
-- 部署基线为 GitHub main `33f7f06725cdce172c5c3bd070c7c91538cea646`，main CI `33369816054` 全绿。传输前后 gateway/Web 哈希分别为 `63e8ed6e…fd6`、`82c87ad6…0572`。
-- 版本化 release 为 `/opt/open-map-bridge/releases/33f7f06`；Node `v24.19.0` 仅复制到项目 runtime，不改变系统 Node。服务账号为 `openmapbridge`，状态文件 mode 600。
+- 部署基线现为 GitHub main `62ab11494ae5e27b7bd8250fddf3e88d1c21c170`，main CI `33370752935` 全绿。运行源码相对 `33f7f06` 未变化，gateway/Web 哈希仍为 `63e8ed6e…fd6`、`82c87ad6…0572`。
+- 当前 release 为 `/opt/open-map-bridge/releases/62ab114`，保留 `/opt/open-map-bridge/releases/33f7f06`；Node `v24.19.0` 仅在项目 runtime。服务账号为 `openmapbridge`，状态文件 mode 600。
 - 第一轮 UI 验证失败，因为宝塔 nginx 不读取 `/etc/nginx/conf.d`。从 `nginx -T` 解析到 `/www/server/panel/vhost/nginx/*.conf` 后安装同一模板并通过 `nginx -t`；8080/4174 均只监听 `127.0.0.1`。
 - 隧道 UI、health、AOI API 为 200，gateway 直连未鉴权为 401；重启后服务 active、状态哈希不变，日志包含 started/stopped。服务器 Web 浏览器无 warning/error，四屏 2006/2011/2019/2025 全加载，播放从 2006 前进到 2007。
-- 该证据把应用制品推进 `deployed`，不把合成源、HTTP 200 或浏览器加载冒充真实奥维源的 `ready/rendered/accepted`。首次发布没有上一 OpenMapBridge release，故只能验证原子 current symlink 和回滚书面契约，不能声称完成 release-to-release 回滚演练。
+- 服务器完成 `62ab114 → 33f7f06 → 62ab114` 回滚/前滚，每次 health 成功、state hash 不变。该证据把应用制品推进 `deployed`，不把合成源、HTTP 200 或浏览器加载冒充真实奥维源的 `ready/rendered/accepted`。
