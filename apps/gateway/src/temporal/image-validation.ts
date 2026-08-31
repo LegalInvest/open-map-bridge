@@ -1,4 +1,5 @@
-import { createRequire } from 'node:module';
+import { PNG } from 'pngjs';
+import jpeg from 'jpeg-js';
 
 interface DecodedImage {
   width: number;
@@ -14,14 +15,6 @@ interface ImageHeader {
 
 const MAX_IMAGE_DIMENSION = 2048;
 const MAX_IMAGE_PIXELS = MAX_IMAGE_DIMENSION ** 2;
-const localRequire = createRequire(import.meta.url);
-const { PNG } = localRequire('pngjs') as {
-  PNG: { sync: { read(bytes: Uint8Array, options: { checkCRC: boolean }): DecodedImage } };
-};
-const jpeg = localRequire('jpeg-js') as {
-  decode(bytes: Uint8Array, options: { useTArray: boolean; formatAsRGBA: boolean }): DecodedImage;
-};
-
 function imageHeader(bytes: Uint8Array): ImageHeader {
   const buffer = Buffer.from(bytes.buffer, bytes.byteOffset, bytes.byteLength);
   if (buffer.length >= 24 && buffer.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]))) {

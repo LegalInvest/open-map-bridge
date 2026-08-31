@@ -406,3 +406,12 @@ fixtures/synthetic/temporal  无外网的 20 年彩色/带标签时序瓦片
 - 新增 `OMB-AUD-039`：已观察但未解释的键为 `hs/mf/ml/ms/mt/pn/pt`。FIX-BATCH-008 只保存键名作为 `observedOpaqueFields`，未知值不得进入预览、持久层、日志或开放 SDK。
 - 服务器尚无项目级部署契约；SSH 别名只是候选访问线索，不是部署授权目标或当前运行证据。
 - FIX-BATCH-008 本地复验：34 张公开 QR 在浏览器内存逐张处理，29 张产生二维码载荷且 29/29 通过适配器、0 个格式拒绝；5 张保持二维码图像解码失败。此证据只证明已观察格式兼容，不证明源权利、凭证、服务器可达或瓦片有效。
+
+## 2026-08-31 生产制品证据
+
+- PR #15 将 OMB-AUD-039 合并为 main `382e0e6`；PR/main CI `33368112824`、`33368228496` 均全绿。
+- 原 gateway `build` 继承 `noEmit:true`，没有运行制品。FIX-BATCH-009 改为 Web 先构建、gateway 再以 esbuild 生成独立 ESM bundle，并复制 Web、部署模板和许可证到 `dist/open-map-bridge`。
+- 三次失败路径形成证据：全 bundle 的 CommonJS 动态 require、CJS 下 `import.meta`、独立 release 中 `pngjs` 外部解析。最终用 ESM createRequire banner 兼容 Fastify，并将图片解码依赖改为静态 import 纳入 bundle。
+- 两次连续构建 gateway SHA-256 相同为 `63e8ed6eb09ec747bb941a25beff872f0bb895d8544d3cee517af565b4abbfd6`；production smoke 从临时复制的 release 启动，证明不依赖仓库 TypeScript 源码。
+- 服务器首版采用 gateway `127.0.0.1:4174`、nginx `127.0.0.1:8080`、SSH tunnel 的私有模型；nginx 从服务器 `0600` include 注入 gateway token，真实秘密不进 Web bundle。候选 SSH 别名仍需只读核验后选择，不能由名称推断部署目标。
+- CI 安装前门现直接检查 Node 24–26、npm 11 和 8 GiB；技术交底指纹扩展到发布、安全、锁文件、CI、部署和验收控制面。本批因此同时推进 OMB-AUD-031/035，不把它们藏在 OMB-AUD-006 的实现细节中。

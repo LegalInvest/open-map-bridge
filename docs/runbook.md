@@ -125,3 +125,9 @@ npm run dev
 - 用户新建范围由网关生成 `area-*` ID 并保存为 `confirmed v1`；后续拖点并点击“确认当前范围”生成不可变新版本。
 - 用户参考图生成的双湖红框仍是 `approximate`，不能冒充精确湖区边界。
 - 影像只能记录可见变化。污染、过度养殖、渔猎或建设原因必须附独立监测、政府资料或论文证据。
+
+## 生产制品与服务器部署
+
+运行 `npm run build && npm run test:production` 生成并验证 `dist/open-map-bridge/`。制品包含独立 gateway、Web 静态资源、manifest、许可证和 loopback systemd/nginx 模板；冒烟测试会把制品复制到临时 release 目录，证明运行时不依赖仓库 TypeScript 源码，并验证鉴权健康、未鉴权拒绝、原子持久化和 SIGTERM 正常退出。
+
+首个服务器契约只允许 nginx 与 gateway 监听回环，由 SSH tunnel 访问。真实 token 只进入服务器 `0600` 环境文件和 nginx include，不进入仓库、Web bundle、命令回显或日志。完整安装、回滚和验收边界见 [`deployment.md`](deployment.md)。
