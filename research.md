@@ -17,6 +17,7 @@
 - 2026-08-28 用户随后批准继续优化架构和代码并要求同步全部文档。当前只把 `source-readiness` 零外联准备度任务作为第一实现子集；这不是对真实探测、一键四期或完整续跑的批准验收。
 - 2026-08-28 用户要求对整个仓库和文档做全量审计，并随后批准逐一修复、同步问题账本和解决进度 Markdown。当前以 `docs/问题账本.md` 的 38 项为完整审计边界，先修 P0 同 source UUID 与 configured/ready 真值；不得把单批 CI 绿写成全部问题关闭。
 - 2026-08-31 用户授权自主推进到本机、GitHub、服务器最新可验收。FIX-BATCH-012 已由腾讯 current `3bbcbfa` 部署；vault 运行态、401、双回环和 state hash 门通过，vault 为空、零真实外联。FIX-BATCH-013 经 PR #25/main CI 全门后合并为 main `32cb36d`；请求时 DNS/IP/连接固定/重绑定传输代码达到 main，但尚未接入 source probe/tile，真实源验收继续独立开放。
+- 2026-08-31 23:39 续跑复核本地/远端/GitHub main 为 `4252e92`、CI `33408261136` 全绿；腾讯 current `3bbcbfa` active，health=`atomic-json/encrypted-local`、未鉴权 401、双回环、state hash 不变。只读代码审查发现通用 probe 接线前置缺口：MapSourceDefinition 没有 transport scheme，导入归一化还会丢弃所有不能证明为非秘密的常量 query；因此不能猜测 URL 后直接注入 vault。用户的私有 Ovi QR 仍应由官方回环桥承接，通用 vault 不解释其不透明字段。
 
 ### 本轮回答
 
@@ -35,6 +36,7 @@
 - `FIX-BATCH-007` 已由 PR #13 合并为 main `873705b`：预览 store 主动 TTL 清理并以访问顺序实施 64 条/4 MiB LRU；QR 图片在 object URL/ZXing 前限制声明/实际 8 MiB，解析 PNG/JPEG/WebP 头并限制 16,777,216 像素，浏览器尺寸须一致，2×/3× 受缩放像素预算约束。首次 CI `33166210759` 红灯保留；`33166313733` 全绿。
 - `FIX-BATCH-012` 已进入 main 并部署到腾讯 current `3bbcbfa`：严格凭证 bundle、AES-256-GCM 独立私有 vault、同 source UUID 引用、原子写入/失败关闭、配置/移除 API、Web 密码输入、readiness 命中校验与 `OMB-AUD-040` 8 GiB 自动门均生效。服务器只生成未回显独立 key 和空 0600 vault；未写入真实凭证、未发上游请求。
 - `FIX-BATCH-013` 已由 PR #25 合并为 main `32cb36d`：`apps/gateway/src/security/upstream-network.ts` 在每次请求前解析并检查全部 DNS 地址，永久拒绝 metadata，默认拒绝私网/回环/链路本地/保留/转换地址，只允许按 authority＋精确地址显式批准企业私网；授权快照由 WeakSet 防结构伪造，传输禁自动重定向、固定单地址 lookup、连接后核对 remote peer，并阻止 Host/代理/跳级头覆盖。37 个专项断言含本机回环真实连接，PR/main CI `33406940553`/`33407144250` 全门通过且零外部 DNS/HTTP；模块尚未接入 source probe/tile 路由。
+- `FIX-BATCH-014` 当前仅达到 `discovered / contract`。阶段 A 将 OviBridge 的一次受控回环请求改为带安全输入指纹、可持久化且可幂等恢复的脱敏 ProbeResult，不使用通用 vault 重建 Ovi 私有认证；阶段 B 先关闭 OMB-AUD-007/008 的 scheme/常量参数事实缺口，再把普通 imported source 接入同 UUID vault 与 FIX-BATCH-013 传输。当前没有源码候选、测试或外联，不得写成 local-candidate。
 
 ### 搜索与核验边界
 

@@ -7,9 +7,9 @@
 - 状态：Approved / Implementing；用户于 2026-08-28 明确最终结果必须能基于已导入奥维图源进行二次开发
 - 产品裁决者：用户
 - 当前整合者：本 Codex 主线程
-- 更新时间：2026-08-31 23:15（Asia/Shanghai）
+- 更新时间：2026-08-31 23:39（Asia/Shanghai）
 - 适用目录：`/Users/assis/Documents/Codex/2026-08-27/open-map-bridge`
-- 当前切片：`FIX-BATCH-013 request-time DNS/IP pinning main / not wired`。PR #25 CI `33406940553` 和 main CI `33407144250` 完整通过，squash commit `32cb36d` 已进入本地/GitHub main。该模块对每次请求的全部 DNS 答案做公网/私网/metadata/转换地址检查，形成不可伪造授权快照，只向传输提供一个固定地址并在连接后核对 peer；禁自动重定向和 Host/代理头覆盖。它尚未被 server/probe/tile 导入，故不改变可达生产 bundle、不新部署腾讯 release；current 保持已验证 `3bbcbfa` vault 运行态。真实 ProbeResult、ready/rendered/accepted 未达到
+- 当前切片：`FIX-BATCH-014 probe truth contract discovered / not implemented`。本地、`origin/main` 与 GitHub main 为 docs-only `4252e92`，CI `33408261136` 全绿；腾讯 current 仍为已验证 `3bbcbfa` vault 运行态。只读代码审查确认不能把 FIX-BATCH-013 直接接到任意 imported source：当前开放模型尚未保存 transport scheme，且归一化器会丢弃无法证明为非秘密的常量 query；猜测 `http/https` 或补回 query 会违反事实门。FIX-BATCH-014 因此拆为：先让官方回环 OviBridge 以同一 source UUID 产生可幂等恢复的脱敏 ProbeResult；再先完成 OMB-AUD-007/008 的请求计划真值，之后才允许通用源使用 vault＋DNS pinning。真实 ProbeResult、ready/rendered/accepted 均未达到
 - 上版：V0.4 奥维兼容双入口导入实施版
 
 <!-- GOAL_CAPSULE_START -->
@@ -21,7 +21,7 @@
 
 硬约束：clean-room 独立实现；不得复制奥维专有代码、商标或绕过会员/设备绑定；不得内置、记录或传播第三方 token；解析前不联网，确认前不请求图源；未知版本、解压异常、内网目标或不安全 URL 必须 fail closed；“文件已解析”“探测成功”“成功出图”是不同事实；任何成功都要有导入回执和可复现实证。
 
-当前只允许修改本项目目录和用户已批准的腾讯 OpenMapBridge 专用路径；禁止清理用户文件、改动其他服务器项目、开放公网、批量抓取图源或离线下载 20 年整域瓦片。不得把真实秘密写入 fixture、日志、回执、普通 JSON 或前端。可用空间低于 8 GiB 立即停止本机构建、测试、截图和新增缓存；2026-08-31 23:15 实测约 8.08 GiB、swap 使用约 8.15 GiB，虽刚过阈值但没有安全余量，继续只做小型状态更新。发现越界需求写入 `BLOCKED.md`。
+当前只允许修改本项目目录和用户已批准的腾讯 OpenMapBridge 专用路径；禁止清理用户文件、改动其他服务器项目、开放公网、批量抓取图源或离线下载 20 年整域瓦片。不得把真实秘密写入 fixture、日志、回执、普通 JSON 或前端。可用空间低于 8 GiB 立即停止本机构建、测试、截图和新增缓存；2026-08-31 23:39 实测约 8.03 GiB、swap 使用约 7.72 GiB，虽刚过阈值但没有安全余量，本轮只做只读设计审查和小型状态更新。发现越界需求写入 `BLOCKED.md`。
 
 `FIX-BATCH-001` 至 `FIX-BATCH-009` 已进入 GitHub main；`FIX-BATCH-010` 的项目 runtime、release、systemd、BaoTa nginx include、SSH tunnel 和重启证据已达到 `deployed`，证据回写正在进入 GitHub。技术部署不读取用户图源、不改变 source lifecycle，也不授予真实 Ovi 源 ready。
 
@@ -37,6 +37,8 @@
 `FIX-BATCH-006` 关联 `OMB-AUD-010`，保护 JRN-002、BR-005、FR-002/004、IF-001 和 NFR-004。完成候选必须满足：1 MiB 原始 `.ovmap` 可越过 HTTP 信封门；base64 长度按 `4*ceil(bytes/3)` 计算；仅导入路由增加受限信封预算；1 MiB＋1 字节和超信封分别返回稳定 413；前端在读取/编码/fetch 前拒绝超限；其他 API body limit 不放宽。
 
 `FIX-BATCH-007` 关联 `OMB-AUD-018`，保护 JRN-001/002、BR-004/005、FR-001/002/004 和 NFR-004/006。完成候选必须满足：预览主动 TTL 清理、最多 64 条且总估算 4 MiB 的 LRU；单预览超预算稳定失败；QR 图片声明/实际字节≤8 MiB；在 object URL/ZXing 前从 PNG/JPEG/WebP 头验证尺寸与≤16,777,216 像素；浏览器尺寸与头一致；2×/3× 只在缩放后像素预算内运行；拒绝路径不调用解码器。
+
+`FIX-BATCH-014` 关联 `OMB-AUD-002/007/008`，保护 JRN-001/007/011/012、BR-004/006/015/017/020、FR-005/009/015/017 和 AC-001/004/011/017/019/021。阶段 A 只处理官方回环 OviBridge：同一 source UUID、已登记 probe 请求和安全输入指纹必须产生脱敏 ProbeResult；成功和失败均追加证据，重启不得无条件重复外联，只有完整图片门通过才可 ready。阶段 B 才处理普通 imported source：在 source schema 明确保留 transport scheme、非秘密常量 query 与推断来源之前，通用 probe 必须 fail closed；具备请求计划真值后才能解引用同 UUID vault、逐请求调用 DNS/IP 固定传输，并把凭证值排除在 URL 历史、日志、状态和回执之外。
 
 ## 一页产品定义
 
