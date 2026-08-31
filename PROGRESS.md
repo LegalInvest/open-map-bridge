@@ -170,3 +170,6 @@
 - 唯一最安全下一步：由 Codex 更新交底指纹并推送语法修复，等待 PR #29 第二轮完整 CI；全绿前不合并、不部署。
 - 2026-09-01 00:55：PR #29 第二轮 CI `33416581636` 全绿：技术交底新鲜度、3 Node、42 个文件/241 Vitest、8 workspace typecheck、production build/smoke 和 4 Chrome 全部通过。功能提交 `8f9d88f` 达到 `local-candidate / PR CI verified`，尚未 main/deployed/accepted；本机仍未运行重型门。
 - 唯一最安全下一步：由 Codex 回写 CI 证据后等待该证据提交的 PR CI，通过即合并 PR #29；合并后核验 main CI，并仅在本机容量有明确安全余量时部署运行制品。
+- 2026-09-01 01:01：PR #29 squash 合并为 main/origin `67ea901`；main CI `33417146165` 再次通过交底、3 Node、241 Vitest、8 typecheck、production build/smoke 和 4 Chrome。FIX-BATCH-014A 达到 `main`，不是 deployed/accepted。
+- 容量与部署：本机 `8,452,588 KiB` 可用，只高于 8 GiB 门约 62 MiB，swap 使用约 7.38 GiB；没有本地构建、测试或部署制品。腾讯 current 继续为已验证 `3bbcbfa`，服务健康/双回环/state/vault 证据沿用本轮只读复核，不包含 014A 运行代码。
+- 唯一最安全下一步：由 Codex 先合并本次 main 证据回写；待本机可用空间具有明确安全余量后，从精确 main 构建/冒烟并按 versioned release 契约部署 014A，再在用户授权启用官方 Ovi 回环接口后产生第一条真实 ProbeResult。

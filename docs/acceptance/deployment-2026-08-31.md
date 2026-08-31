@@ -56,3 +56,9 @@ This advances FIX-BATCH-012 to `deployed` only. The vault contains no real crede
 ## FIX-BATCH-013 main advance without a new release
 
 PR #25 CI `33406940553` and main CI `33407144250` fully verified request-time DNS/IP authorization and pinned-connection transport at main `32cb36d`. The new module is not imported by the server, probe, or tile production entry graph, so it does not change reachable runtime behavior and no new Tencent release was created. Tencent current remains the verified `3bbcbfa` vault release. This is `main / not wired / not deployed`, and no real upstream request or real-source acceptance occurred.
+
+## FIX-BATCH-014A main advance without deployment
+
+PR #29 merged the strict redacted ProbeResult schema, atomic source/fingerprint deduplication, OviBridge success/failure evidence, and restart reuse into main `67ea901`. The first PR run `33416353555` failed while collecting one new test file because a `vi.fn` call missed its closing parenthesis; 234 already executed tests passed and later gates did not run. The corrected PR run `33416581636` and main run `33417146165` then passed technical-disclosure freshness, 3 Node tests, 241 Vitest tests, all 8 workspace typechecks, production build/smoke, and four Chrome journeys.
+
+This is `main`, not `deployed`: at 01:01 Asia/Shanghai the workstation had only `8,452,588 KiB` available, about 62 MiB above the 8 GiB gate, so no local artifact or Tencent release was produced. Tencent current remains `3bbcbfa`. No authorized Ovi interface was enabled, no real probe was sent or persisted, and real-source `ready/rendered/accepted` remains unmet.
