@@ -1,7 +1,7 @@
-# FIX-BATCH-014D 本地验收回执
+# FIX-BATCH-014D 验收回执
 
 - 时间：2026-09-01 04:52（Asia/Shanghai）
-- 阶段：`PR CI verified / not main / not deployed / not real-probed / not rendered / not accepted`
+- 阶段：`main + deployed-code / not real-probed / not rendered / not accepted`
 - 工作树基线：`a98d096ff23c57145bec57f0d5f85fa23a74be22`
 - 真实外联：0；仅使用进程内本机回环合成上游
 
@@ -23,14 +23,16 @@
 - 浏览器：4 条公开 Chrome E2E 全绿。
 - 容量：执行前后根卷约 9.8 GiB 可用，高于 8 GiB 硬门。
 - GitHub：PR #38 功能提交 `72a054b` 的 CI `33439198444` 完整全绿。
+- GitHub：证据提交 CI `33439507170`、squash main `d350ac3` 与 main CI `33439685686` 全绿。
+- 腾讯：current=`d350ac3`；gateway/Web hash=`73808e31…4eb8d`/`42368f3e…04ad`，health/401/双回环/systemd/state/vault/0600 门通过；首次重启 health 短暂 502 后恢复。
 
 ## 阶段边界
 
 - `discovered`：真实奥维/通用源仍未产生受控真实 ProbeResult。
 - `local-candidate`：014D 代码已形成。
 - `local-verified`：上述本地门已通过。
-- `main`：未达到。
-- `deployed`：腾讯 current 仍为 `7da03c3`，未含 014D。
+- `main`：`d350ac3`，CI `33439685686` 全绿。
+- `deployed`：腾讯 current `d350ac3`，仅代码部署；未建立真实源绑定。
 - `accepted`：未达到；fixture、HTTP 200、图片解码、测试或服务器健康均不替代真实用户出图签收。
 
-唯一最安全下一动作：由 Codex 更新技术交底指纹并提交 014D PR，等待 GitHub CI 全门；只有合并 main 后才更新腾讯 versioned release，期间继续禁止真实第三方图源请求。
+唯一最安全下一动作：由 Codex 把部署证据提交 docs-only PR 并等待 PR/main CI；完成后三端状态收口，真实源仍留待单独授权验收。

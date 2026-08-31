@@ -28,6 +28,7 @@
 - 2026-09-01 04:29 部署证据 PR #36 CI `33436046174` 全绿并合并为 docs-only main `84f103f`；main CI `33436199094` 再次通过完整门。本地/main/origin clean；腾讯 runtime/current 正确保留 `7da03c3`，只读复核 health/401/双回环/artifact/state/vault 均通过。docs-only main 与 runtime source 分开记录，不制造第二个 release。
 - 2026-09-01 04:52 以 docs-only main `a98d096` 为基线完成 FIX-BATCH-014D 本地验证。普通 imported source 只有在同 UUID 的成功 ProbeResult 与当前请求计划/凭据 HMAC 修订完全匹配时才获得独立 `map-tiles`；服务端持久绑定仅含两个 SHA-256 指纹和时间。直接/V1 路由只接受 sourceId＋z/x/y，拒绝任意 query；每次 tile 都重新执行静态策略、DNS/IP/peer 固定、5 MiB、MIME 和完整 PNG/JPEG 解码。凭据轮换立即使旧绑定失效，失败 probe 不绑定，重启只复用脱敏证据。3 Node＋257 Vitest、8 workspace typecheck、production build/smoke 和 4 Chrome E2E 全绿，仅使用本机回环合成上游；当前为 `local-verified / not main / not deployed / not real-probed / not rendered / not accepted`。
 - 2026-09-01 05:03 PR #38 CI `33439198444` 对功能提交 `72a054b` 全绿，远端复验交底新鲜度、3 Node＋257 Vitest、8 workspace typecheck、production build/smoke 与 4 Chrome。当前为 `PR CI verified / not main / not deployed`；CI 绿不产生真实 ProbeResult、rendered 或 accepted。
+- 2026-09-01 05:10 PR #38 证据 CI `33439507170` 全绿并 squash 合并为 main `d350ac3`，main CI `33439685686` 再次全绿。精确 main 本地 build/smoke 后部署腾讯 immutable release/current `d350ac3`；gateway/Web hash `73808e31…4eb8d`/`42368f3e…04ad` 与 manifest/远端一致，health 在重启窗口首次 502 后恢复，直连 401、4174/8080 双回环、service active、state `07648ee2…d6e2`、vault `89c8d70d…db42` 和 0600 权限不变。014D 达到 `deployed-code`，真实源阶段不变。
 
 ### 本轮回答
 
