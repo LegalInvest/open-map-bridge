@@ -27,13 +27,16 @@ export function decodeOmsQr(payload: string): RawQrCandidate[] {
       name: source.name,
       host: source.hosts[0] ?? '',
       pathTemplate: source.pathTemplate,
+      transportScheme: source.transportScheme,
       projection: source.projection,
       rawCodes: {},
       opaqueFieldNames: [],
       containsSensitiveQuery:
         source.compatibilityExtension.credentialRequired === true || source.credentialRef !== null,
       queryParameters: source.queryParameters,
+      requestPlanProvenance: source.requestPlanProvenance,
       opaqueTemplate: false,
+      sourceDefinition: source,
     },
   ];
 }

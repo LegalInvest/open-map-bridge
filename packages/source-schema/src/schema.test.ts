@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { parseMapSourceDefinition, parseProbeResult } from './index.js';
+import { isSafeNonSecretQueryParameter, parseMapSourceDefinition, parseProbeResult } from './index.js';
 
 const validSource = {
   schemaVersion: 1,
@@ -13,9 +13,16 @@ const validSource = {
   maxZoom: 18,
   tileSize: 256,
   format: 'png',
+  transportScheme: 'https',
   hosts: ['tiles.example.invalid'],
   pathTemplate: '/{$z}/{$x}/{$y}.png',
   queryParameters: {},
+  requestPlanProvenance: {
+    transportScheme: 'parsed',
+    hosts: 'parsed',
+    pathTemplate: 'parsed',
+    queryParameters: {},
+  },
   credentialRef: null,
   attribution: null,
   license: null,
@@ -30,6 +37,37 @@ const validSource = {
 describe('MapSourceDefinition', () => {
   it('accepts a bounded secret-free definition', () => {
     expect(parseMapSourceDefinition(validSource).name).toBe('Fixture XYZ');
+  });
+
+  it('keeps old persisted definitions loadable but labels their request plan as legacy unknown', () => {
+    const { transportScheme: _scheme, requestPlanProvenance: _provenance, ...legacy } = validSource;
+    expect(parseMapSourceDefinition(legacy)).toMatchObject({
+      transportScheme: 'unknown',
+      requestPlanProvenance: {
+        transportScheme: 'legacy-unknown',
+        hosts: 'legacy-unknown',
+        pathTemplate: 'legacy-unknown',
+        queryParameters: {},
+      },
+    });
+  });
+
+  it('requires exact provenance for public query parameters and explicit provenance for a known scheme', () => {
+    expect(() => parseMapSourceDefinition({
+      ...validSource,
+      queryParameters: { style: 'satellite' },
+    })).toThrow(/provenance/i);
+    expect(() => parseMapSourceDefinition({
+      ...validSource,
+      requestPlanProvenance: { ...validSource.requestPlanProvenance, transportScheme: 'redacted' },
+    })).toThrow(/known transport scheme/i);
+  });
+
+  it('recognizes only bounded public constants or tile variables as safe query fields', () => {
+    expect(isSafeNonSecretQueryParameter('style', 'satellite')).toBe(true);
+    expect(isSafeNonSecretQueryParameter('x', '{$x}')).toBe(true);
+    expect(isSafeNonSecretQueryParameter('p', 'opaque-fixed-value')).toBe(false);
+    expect(isSafeNonSecretQueryParameter('token', '{$x}')).toBe(false);
   });
 
   it.each(['token', 'apiKey', 'client_secret', 'cookie', 'authorization'])('rejects inline secret key %s', (key) => {

@@ -12,9 +12,11 @@ describe('Ovital QR query adapter', () => {
       name: 'Fixture Map',
       host: 'tiles.example.invalid',
       pathTemplate: '/{$z}/{$x}/{$y}.png',
+      transportScheme: 'unknown',
       rawCodes: { t: '1', po: '1', he: '18', oy: '3', df: '0' },
       opaqueFieldNames: [],
       projection: 'unknown',
+      requestPlanProvenance: expect.objectContaining({ transportScheme: 'not-provided', pathTemplate: 'parsed' }),
     });
   });
 
@@ -50,5 +52,35 @@ describe('Ovital QR query adapter', () => {
 
   it('rejects duplicate opaque extension keys instead of choosing an ambiguous value', () => {
     expect(() => decodeQrPayload(`${fixture}&mt=one&mt=two`)).toThrow('FORMAT_QR_DUPLICATE');
+  });
+
+  it('preserves an explicit same-authority HTTPS scheme and public constant query fields', () => {
+    const path = encodeURIComponent('https://tiles.example.invalid/{$z}/{$x}/{$y}.png?style=satellite&x={$x}');
+    const [result] = decodeQrPayload(fixture.replace(/ul=.*/, `ul=${path}`));
+    expect(result).toMatchObject({
+      transportScheme: 'https',
+      pathTemplate: '/{$z}/{$x}/{$y}.png',
+      queryParameters: { style: 'satellite', x: '{$x}' },
+      containsSensitiveQuery: false,
+      requestPlanProvenance: {
+        transportScheme: 'parsed',
+        hosts: 'parsed',
+        pathTemplate: 'parsed',
+        queryParameters: { style: 'parsed', x: 'parsed' },
+      },
+    });
+  });
+
+  it('rejects an absolute template whose authority differs from hn', () => {
+    const path = encodeURIComponent('https://other.example.invalid/{$z}/{$x}/{$y}.png');
+    expect(() => decodeQrPayload(fixture.replace(/ul=.*/, `ul=${path}`))).toThrow('POLICY_QR_AUTHORITY');
+  });
+
+  it('redacts an unknown fixed query field instead of treating it as public configuration', () => {
+    const path = encodeURIComponent('/{$z}/{$x}/{$y}.png?p=opaque-fixed-value');
+    const [result] = decodeQrPayload(fixture.replace(/ul=.*/, `ul=${path}`));
+    expect(result?.containsSensitiveQuery).toBe(true);
+    expect(result?.queryParameters).toEqual({});
+    expect(JSON.stringify(result)).not.toContain('opaque-fixed-value');
   });
 });

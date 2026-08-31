@@ -7,9 +7,9 @@
 - 状态：Approved / Implementing；用户于 2026-08-28 明确最终结果必须能基于已导入奥维图源进行二次开发
 - 产品裁决者：用户
 - 当前整合者：本 Codex 主线程
-- 更新时间：2026-09-01 01:16（Asia/Shanghai）
+- 更新时间：2026-09-01 02:51（Asia/Shanghai）
 - 适用目录：`/Users/assis/Documents/Codex/2026-08-27/open-map-bridge`
-- 当前切片：`FIX-BATCH-014A deployed / real probe blocked`。功能 PR #29 已进入 runtime source `67ea901`，证据 main `16e805d` 的 CI `33417916800` 全绿；腾讯机在专用临时目录用 Node 24.19/npm 11.17 对精确 `16e805d` 通过 3 Node＋241 Vitest、8 workspace typecheck、production build/smoke，随后安装并原子切换 current release `16e805d`。gateway/Web SHA-256 匹配 manifest，health 200、未鉴权 401、双回环、state/vault hash 不变，旧 `3bbcbfa` 保留回滚。官方回环 OviBridge 现已 deployed 严格 ProbeResult、同 UUID 安全输入指纹、成功/失败原子证据与重启复用；但官方客户端接口尚未获操作时开启，真实 ProbeResult、rendered/accepted 均未达到。通用 imported source 仍受 OMB-AUD-007/008 阻塞
+- 当前切片：`FIX-BATCH-014A deployed / real probe blocked；014B local-verified / not main`。A 的腾讯 current 仍为证据 main/release `16e805d`，CI、制品、health、401、双回环和 state/vault hash 证据不变；官方客户端接口尚未获操作时开启，真实 ProbeResult、rendered/accepted 均未达到。B 已在分支 `codex/fix-batch-014b-request-plan-truth` 显式建模 transport scheme 与字段 provenance，保留保守白名单内的非秘密常量 query，脱敏未知固定值，完整保留 OMS 的协议/投影/缩放/格式/多主机/版权事实，并让未知、旧版、未确认或明文请求计划在通用外联前 fail closed；252 Vitest＋3 Node、8 workspace typecheck、production build/smoke 与交底新鲜度本地通过。该候选尚未进入 GitHub main、腾讯 release 或真实源验收，也尚未把 vault/DNS 固定传输接到通用 probe。
 - 上版：V0.4 奥维兼容双入口导入实施版
 
 <!-- GOAL_CAPSULE_START -->
@@ -21,7 +21,7 @@
 
 硬约束：clean-room 独立实现；不得复制奥维专有代码、商标或绕过会员/设备绑定；不得内置、记录或传播第三方 token；解析前不联网，确认前不请求图源；未知版本、解压异常、内网目标或不安全 URL 必须 fail closed；“文件已解析”“探测成功”“成功出图”是不同事实；任何成功都要有导入回执和可复现实证。
 
-当前只允许修改本项目目录和用户已批准的腾讯 OpenMapBridge 专用路径；禁止清理用户文件、改动其他服务器项目、开放公网、批量抓取图源或离线下载 20 年整域瓦片。不得把真实秘密写入 fixture、日志、回执、普通 JSON 或前端。可用空间低于 8 GiB 立即停止本机构建、测试、截图和新增缓存；2026-09-01 01:15 本机实测 `8,426,040 KiB`，只高于硬门约 36 MiB。当前只允许小型文档证据和远端 CI，不运行本机构建、测试、浏览器、下载或影像；本次运行制品在腾讯 350+ GiB 余量磁盘生成并已删除临时构建目录。发现越界需求写入 `BLOCKED.md`。
+当前只允许修改本项目目录和用户已批准的腾讯 OpenMapBridge 专用路径；禁止清理用户文件、改动其他服务器项目、开放公网、批量抓取图源或离线下载 20 年整域瓦片。不得把真实秘密写入 fixture、日志、回执、普通 JSON 或前端。可用空间低于 8 GiB 立即停止本机构建、测试、截图和新增缓存；2026-09-01 02:48 本机实测 `10,332,424 KiB`，容量门恢复但仍保持轻量。014B 已执行定向与全量单测、类型检查；继续禁止浏览器下载、影像和大文件写入，并在每个重型门前复核容量。发现越界需求写入 `BLOCKED.md`。
 
 `FIX-BATCH-001` 至 `FIX-BATCH-009` 已进入 GitHub main；`FIX-BATCH-010` 的项目 runtime、release、systemd、BaoTa nginx include、SSH tunnel 和重启证据已达到 `deployed`，证据回写正在进入 GitHub。技术部署不读取用户图源、不改变 source lifecycle，也不授予真实 Ovi 源 ready。
 
