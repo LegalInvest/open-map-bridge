@@ -18,6 +18,8 @@
 14. 帧质量与回执：FIX-BATCH-015 已 main+deployed-code（`67a6a0e`），能区分 expected/loaded/failed、完整/partial/全失败。FIX-BATCH-016 严格 ComparisonReceipt 创建、持久化和刷新回访已进入 main `3cf763a`，但尚未 deployed；变更前生产 `comparisons=0`。ObservationPanel 保存、真实图源画布像素和用户确认回执仍缺，因此 OMB-AUD-015/016 保持 partial，任何合成回执、四屏或服务器 200 都不是真实 `rendered/accepted`。
 15. 当前执行环境阻塞：2026-09-01 07:49 的 GitHub API 与腾讯 SSH 连接均被网络沙箱以 `Operation not permitted` 拒绝，本地回环监听也返回 `EPERM`。因此本轮只能完成精确构建、哈希与本地文档 checkpoint，不能安全发布或实时复核服务器；未发生远端修改。该限制不要求用户提供凭证或执行命令，下一次网络执行能力恢复后由 Codex续跑。
 16. 2026-09-01 08:46 容量门再次触发：根卷可用 `7,657,624 KiB`（约 7.30 GiB），比 8 GiB 门少 `730,984 KiB`。已停止构建、测试、浏览器、下载、影像和部署；`lsof` 未显示项目服务/测试进程，系统 `ps` 与 swap 查询则被沙箱拒绝，故诊断仍标记为不完全。GitHub API 仍不可达，腾讯 SSH 仍为 `Operation not permitted`；腾讯 current/health 不能实时刷新，最后可信 `67a6a0e` 不冒充本轮验证。
+17. 2026-09-01 09:46 根卷最低观测仅 `4,694,052 KiB`（约 4.48 GiB）。活动写入来自另一项目的 runner 下载：`curl` PID `8991` 持续扩大临时压缩包；本轮精确 `TERM` 被沙箱拒绝，未删除部分文件，也未触碰任何 data/db/source/rollout。由于该写入仍在进行且 GitHub/腾讯网络仍阻断，OpenMapBridge 只允许小型 checkpoint，不能推送、部署或运行任何重门。
+18. 09:48 最终复核时 PID `8991` 与临时 runner 路径均已由所属流程自行结束/收口，活动下载阻塞解除；根卷仍只有 `4,850,260 KiB`（约 4.63 GiB），容量阻塞和 GitHub/腾讯网络阻塞继续存在。
 
 ## 已解除的实施阻塞
 

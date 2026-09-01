@@ -100,3 +100,9 @@ FIX-BATCH-016 is therefore `main / not deployed / not real-rendered / not accept
 ## 2026-09-01 08:46 capacity-gated continuation
 
 The docs-only local and origin tips are both `31a1047`; the runtime source awaiting deployment remains `3cf763a`. The local root filesystem had only `7,657,624 KiB` available, about 7.30 GiB and below the mandatory 8 GiB gate. GitHub API access failed and the approved Tencent SSH alias was rejected by the execution sandbox with `Operation not permitted`. No build, test, browser, download, imagery operation, remote write, restart, symlink switch, or release installation was performed. Tencent `67a6a0e` remains only the last trusted observation, so FIX-BATCH-016 stays `main / not deployed / not real-rendered / not accepted`.
+
+## 2026-09-01 09:46 critical capacity continuation
+
+Local docs checkpoint `f713ab3` is one commit ahead of origin `31a1047`; runtime source `3cf763a` remains unchanged. Root capacity fell as low as `4,694,052 KiB`. Read-only inspection identified an unrelated runner download whose temporary archive was still growing; an exact `TERM` to that curl PID was denied by the sandbox, and no partial file or authoritative data was deleted. GitHub API and Tencent SSH remained unavailable. No OpenMapBridge push, build, test, browser, remote write, restart, or deployment occurred, so FIX-BATCH-016 remains `main / not deployed / not real-rendered / not accepted`.
+
+At 09:48 the curl PID and temporary runner path were both absent: the owning workflow had ended and cleaned up without any Codex deletion. Root capacity was still only `4,850,260 KiB`, so the deployment gate remains closed.

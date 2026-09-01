@@ -499,3 +499,5 @@ fixtures/synthetic/temporal  无外网的 20 年彩色/带标签时序瓦片
 - PR #44 首轮完整 CI `33450167879` 对功能/本地证据提交 `5d3adac` 全绿；阶段更新为 `PR CI verified / not main / not deployed`。证据提交仍需复验后才可合并。
 - PR #44 证据 CI `33450368931` 全绿后 squash 合并为 main `3cf763a`，main CI `33450486867` 全绿；阶段更新为 `main / not deployed`。本轮精确 main 构建和哈希门通过，但执行沙箱阻止 SSH 发布与本地监听复跑；没有远端变更或真实上游请求。
 - 2026-09-01 08:46 实时复核：本地与 origin 均为 docs-only `31a1047`，工作树在复核前干净；根卷从上轮约 11.04 GiB 降至 `7,657,624 KiB`（约 7.30 GiB），低于 8 GiB 门。`lsof` 仅在项目路径看到本轮 shell/诊断命令，没有发现 Vite、Playwright、gateway 或项目端口监听；`ps` 与 swap sysctl 受沙箱拒绝，故不把活动写入诊断写成完全排除。GitHub API 无法连接，腾讯 SSH 返回 `Operation not permitted`，未发生服务器读写、重启或 release 切换；016 仍为 `main / not deployed`。
+- 2026-09-01 09:46 只读容量追踪：根卷先后观测 `4,908,672`、`4,694,052 KiB`，远低于 8 GiB。`lsof` 锁定跨项目 `curl` PID `8991`，cwd=`data-truth-skill`，输出为临时 runner 压缩包；文件在采样间从 88,977,408 增至 115,863,552 字节，证明仍在写入。向该精确 PID 发送 `TERM` 被沙箱以 `operation not permitted` 拒绝；没有删除部分文件。项目路径仍无 Vite/Playwright/gateway/项目端口监听，活动 agent 仅当前 root。GitHub API 与腾讯 SSH 复核仍失败，服务器状态未知且未修改。
+- 09:48 最终 `lsof -p 8991` 无记录，临时 runner 路径也已消失，说明所属流程自行结束/清理；这不是 Codex 删除结果。最终根卷 `4,850,260 KiB`，仍低于 8 GiB。
