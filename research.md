@@ -503,3 +503,13 @@ fixtures/synthetic/temporal  无外网的 20 年彩色/带标签时序瓦片
 - 09:48 最终 `lsof -p 8991` 无记录，临时 runner 路径也已消失，说明所属流程自行结束/清理；这不是 Codex 删除结果。最终根卷 `4,850,260 KiB`，仍低于 8 GiB。
 - 2026-09-01 10:00 用户改定 GitHub-only 交付：实时 origin/main=`31a1047`、CI `33452723127` success；本地 `da34098` ahead 2。根卷 `4,539,068 KiB`，故不重跑重型门；新增 `HANDOFF.md`、merge-readiness 矩阵和 GitHub 交接回执，并将腾讯 `67a6a0e` 降为历史部署证据。目标合并项目尚未指定，不猜测仓库形态或 canonical owner。
 - 2026-09-01 10:17 GitHub 交接内容提交 `efb8305` 已与 origin/main 同步，CI `33461854773` 在远端完整通过交底新鲜度、单元/契约、typecheck、build、production smoke 和浏览器旅程。该 run 证明仓库可复现，不证明真实奥维源；云端明确 deferred。心跳已同步为 GitHub-only，后续不得因历史发布脚本存在而自动续发腾讯。
+
+## 2026-09-01 最终跨项目交接纠偏
+
+- 用户确认早期“最快真实遥感 Spike”才是更高层产品主结果：任意真实 AOI、跨约 20 年、一次四张并可导出视频。OpenMapBridge 是奥维 QR/`.ovmap` 输入、安全和二次开发能力层，不是遥感计算引擎。
+- 独立仓库 `LegalInvest/real-remote-sensing-spike` 保存 Landsat 2000–2025 Earth Engine 探针；它仍为 `local-candidate / auth-blocked / closed-without-export / not accepted`。
+- 新增 `AGENT_HANDOFF.md`，把用户裁决时间线、两仓边界、附件索引、阶段真值和接手顺序整合为零上下文包。
+- 用户表示聊天日志、OAuth/账号信息、二维码载荷、附件、真实影像和私有数据均可上传。安全裁决不因此放宽：公共 Git 不保存可用凭据、Cookie、token、私钥、原始二维码载荷或私人原件；只记录类型、用途、状态和安全取得方式。
+- 复核用户此前提供的 PDF、三张临时图片原路径均已不存在。不存在可恢复原件，不能生成伪副本；会话中已确认的非敏感可见事实已进入 `AGENT_HANDOFF.md`。
+
+`EV-CAND-006 | 2026-09-01 | 长会话多次在奥维复刻、双湖四屏、导入主链和真实遥感 Spike 之间漂移，用户指出最初真实遥感 Spike 才是主目标 | goal/research 的变更记录和两个独立仓库 | 根因是把支撑能力仓库逐步扩张成总体产品主线 | 当前项目明确两仓职责并创建跨项目完整交接 | 待后续 agent 零上下文接手复验 | 同项目第五次主线纠偏 | 不修改全局 Skill；先用项目交接防复发 | 若再次把安全兼容层冒充遥感计算成果，会直接破坏验收真值 | proposed`

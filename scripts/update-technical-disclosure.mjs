@@ -15,6 +15,7 @@ const sourcePaths = [
   'README.md',
   'SECURITY.md',
   'CONTRIBUTING.md',
+  'AGENT_HANDOFF.md',
   'HANDOFF.md',
   'apps',
   'deploy',

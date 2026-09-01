@@ -9,7 +9,7 @@
 - 当前整合者：本 Codex 主线程
 - 更新时间：2026-09-01 07:49（Asia/Shanghai）
 - 适用目录：`/Users/assis/Documents/Codex/2026-08-27/open-map-bridge`
-- 当前切片：`FIX-BATCH-016 / OMB-AUD-014/015/016 comparison receipts main / not deployed`。PR #44 的证据提交 CI `33450368931` 全绿后 squash 合并为本地/GitHub main/origin `3cf763a`，main CI `33450486867` 全绿；本轮精确 main 构建成功，gateway/Web 入口 SHA-256 为 `fcc835ec…d0762`/`9f2aa734…ee90`。腾讯 runtime/current 最后可信证据仍为 `67a6a0e`，本轮因执行环境禁止 SSH/GitHub 网络而未刷新、未发布；不得把最后可信值写成实时复核。阶段是 `main / not deployed / not real-rendered / not accepted`；Observation 保存、真实 Ovi 日期/影像和用户验收继续开放。
+- 当前切片：`HANDOFF-MERGE-001 / GitHub-only / cloud-deferred`。FIX-BATCH-016 运行代码 `3cf763a` 已进入 main 且 CI `33450486867` 全绿；后续 GitHub-only 交接提交和 CI 以实时 `origin/main` 为准。腾讯 runtime/current 最后可信证据仍为 `67a6a0e`，用户已明确暂停续发；不得把历史值写成实时复核。更高层产品主目标已重新确认是真实遥感 AOI→20 年四期/视频，本仓作为奥维兼容输入与二次开发支撑层。真实 Ovi 日期/影像、Observation 保存和用户验收继续开放。
 - 上版：V0.4 奥维兼容双入口导入实施版
 
 <!-- GOAL_CAPSULE_START -->
@@ -894,3 +894,4 @@ V1 公共类型和错误语义通过契约测试冻结；新增可选能力不�
 - 09:48 复核：上述 curl 已自行退出、临时路径已由其所属流程收口；Codex 未删除文件。根卷仍仅约 4.63 GiB，唯一最安全下一步调整为等待容量恢复至少 8 GiB后由 Codex续跑；用户行动：无。
 - 2026-09-01 10:00：用户明确将当前交付改为 GitHub-only，暂不更新腾讯；未来由另一个项目与本仓做能力对照后再决定合并。新增阶段性决策 `DEC-20260901-001`：OpenMapBridge 以图源兼容/安全边界和 SDK 为默认可复用层，目标项目身份与仓库形态保持 unknown；云部署不再是当前完成门，真实源 `probed/rendered/accepted` 仍不随 GitHub 交接晋级。唯一最安全下一步：由 Codex把零上下文交接包与全部本地 checkpoint 推入 GitHub main并等待 CI。用户行动：无。
 - 2026-09-01 10:17：GitHub-only 交接内容已进入 main `efb8305`，CI `33461854773` 完整全绿；定时主线也已改为禁止腾讯/云端写入，只维护 GitHub、交接包和真实证据边界。当前=`GitHub main verified / cloud-deferred / not real-probed / not rendered / not accepted`。唯一最安全下一步：未来合并负责人先只读盘点目标项目并填写 merge-readiness canonical owner 矩阵；用户行动：无。
+- 2026-09-01：用户最终澄清早期“最快真实遥感 Spike”才是更高层产品一直想要的主结果。OpenMapBridge 不再被误写成遥感计算引擎；它继续负责合法奥维兼容输入、安全、能力和 SDK，独立真实遥感仓库负责 Landsat/GEE 计算探针。新增 `AGENT_HANDOFF.md` 固化两仓职责、会话决策和附件索引。用户允许上传原始敏感材料，但公共 Git 仍不保存可用凭据、Cookie、二维码载荷或私人原件。

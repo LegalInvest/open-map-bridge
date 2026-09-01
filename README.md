@@ -80,6 +80,7 @@ Execution accepts only `{ "sourceId": "..." }`; it never accepts an upstream URL
 
 ## Project truth and handoff
 
+- [`AGENT_HANDOFF.md`](AGENT_HANDOFF.md): complete sanitized decision timeline, two-repository ownership, attachment index, and takeover guardrails.
 - [`HANDOFF.md`](HANDOFF.md): zero-context GitHub handoff, exact evidence stages, merge boundary, and safest next action.
 - [`goal.md`](goal.md): approved product and acceptance truth.
 - [`research.md`](research.md): evidence, implementation map, and stage ledger.

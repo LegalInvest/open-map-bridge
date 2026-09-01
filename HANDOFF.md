@@ -120,14 +120,15 @@ npm run test:e2e
 
 ## 10. 权威阅读顺序
 
-1. `HANDOFF.md`
-2. `goal.md`
-3. `research.md`
-4. `PROGRESS.md`
-5. `BLOCKED.md`
-6. `docs/问题账本.md`
-7. `docs/merge-readiness.md`
-8. `docs/acceptance/github-handoff-2026-09-01.md`
+1. `AGENT_HANDOFF.md`（完整会话裁决、两仓职责和附件索引）
+2. `HANDOFF.md`
+3. `goal.md`
+4. `research.md`
+5. `PROGRESS.md`
+6. `BLOCKED.md`
+7. `docs/问题账本.md`
+8. `docs/merge-readiness.md`
+9. `docs/acceptance/github-handoff-2026-09-01.md`
 
 冲突口径：产品/验收冲突以 `goal.md` 为准；代码/证据冲突以实时 GitHub `main`、CI 和源码为准；部署文档只说明历史状态，不授权新部署。
 
@@ -136,3 +137,9 @@ npm run test:e2e
 未来合并负责人先只读盘点目标项目，并填写 `docs/merge-readiness.md` 的目标项目列和 canonical owner 决策；在该矩阵完成前不移动代码、不迁移数据、不改两个项目的 `main`。
 
 用户行动：无。
+
+## 12. 2026-09-01 最终上下文补充
+
+用户澄清：更高层产品真正主目标始终是“真实框选区域 -> 跨约 20 年真实影像 -> 一次四张/播放/视频”；OpenMapBridge 是奥维兼容输入和二次开发支撑层。完整脱敏决策线、两仓关系、附件状态和后续 agent 防误读清单已写入 `AGENT_HANDOFF.md`。
+
+用户随后允许上传聊天原始日志、账号信息、二维码载荷和私人附件。项目仍遵循秘密最小化：公共 Git 只保存决策、资产索引、状态和安全获取方式，不保存可用凭据、Cookie、原始二维码载荷或私人原件。原附件临时路径已不存在，未伪造或恢复。
