@@ -17,6 +17,7 @@
 13. QR 方言：公开样本新增观察到 `hs/mf/ml/ms/mt/pn/pt`。FIX-BATCH-008 只接受这些键并丢弃未知值；其业务语义、授权和服务器可用性仍未知，不能由“解析成功”晋级为 ready。
 14. 帧质量与回执：FIX-BATCH-015 已 main+deployed-code（`67a6a0e`），能区分 expected/loaded/failed、完整/partial/全失败。FIX-BATCH-016 严格 ComparisonReceipt 创建、持久化和刷新回访已进入 main `3cf763a`，但尚未 deployed；变更前生产 `comparisons=0`。ObservationPanel 保存、真实图源画布像素和用户确认回执仍缺，因此 OMB-AUD-015/016 保持 partial，任何合成回执、四屏或服务器 200 都不是真实 `rendered/accepted`。
 15. 当前执行环境阻塞：2026-09-01 07:49 的 GitHub API 与腾讯 SSH 连接均被网络沙箱以 `Operation not permitted` 拒绝，本地回环监听也返回 `EPERM`。因此本轮只能完成精确构建、哈希与本地文档 checkpoint，不能安全发布或实时复核服务器；未发生远端修改。该限制不要求用户提供凭证或执行命令，下一次网络执行能力恢复后由 Codex续跑。
+16. 2026-09-01 08:46 容量门再次触发：根卷可用 `7,657,624 KiB`（约 7.30 GiB），比 8 GiB 门少 `730,984 KiB`。已停止构建、测试、浏览器、下载、影像和部署；`lsof` 未显示项目服务/测试进程，系统 `ps` 与 swap 查询则被沙箱拒绝，故诊断仍标记为不完全。GitHub API 仍不可达，腾讯 SSH 仍为 `Operation not permitted`；腾讯 current/health 不能实时刷新，最后可信 `67a6a0e` 不冒充本轮验证。
 
 ## 已解除的实施阻塞
 

@@ -498,3 +498,4 @@ fixtures/synthetic/temporal  无外网的 20 年彩色/带标签时序瓦片
 - 阶段与开放项：FIX-BATCH-016=`main / not deployed / not real-rendered / not accepted`；OMB-AUD-014 的持久质量回执子项进入 main，OMB-AUD-015 因 ObservationPanel 无业务动作仍 partial，OMB-AUD-016 的其他 receipt／备份恢复仍开放。唯一最安全下一动作是部署精确 main 并执行服务器持久化回访门；网络执行能力恢复前不虚构 deployed。
 - PR #44 首轮完整 CI `33450167879` 对功能/本地证据提交 `5d3adac` 全绿；阶段更新为 `PR CI verified / not main / not deployed`。证据提交仍需复验后才可合并。
 - PR #44 证据 CI `33450368931` 全绿后 squash 合并为 main `3cf763a`，main CI `33450486867` 全绿；阶段更新为 `main / not deployed`。本轮精确 main 构建和哈希门通过，但执行沙箱阻止 SSH 发布与本地监听复跑；没有远端变更或真实上游请求。
+- 2026-09-01 08:46 实时复核：本地与 origin 均为 docs-only `31a1047`，工作树在复核前干净；根卷从上轮约 11.04 GiB 降至 `7,657,624 KiB`（约 7.30 GiB），低于 8 GiB 门。`lsof` 仅在项目路径看到本轮 shell/诊断命令，没有发现 Vite、Playwright、gateway 或项目端口监听；`ps` 与 swap sysctl 受沙箱拒绝，故不把活动写入诊断写成完全排除。GitHub API 无法连接，腾讯 SSH 返回 `Operation not permitted`，未发生服务器读写、重启或 release 切换；016 仍为 `main / not deployed`。
