@@ -10,6 +10,7 @@
 - 交接前本地基线：`da34098649c003394718c031f4f1e65797b17a2b`
 - 交接前 origin 基线：`31a1047a3fda65ab20d4d98c5d755578a9a49120`
 - 最近运行代码提交：`3cf763a8ae0807f7e6b369f636c57d9380ef838f`
+- GitHub 交接内容提交：`efb8305a93acc27009b11b4dd07ff15bb26a8613`；CI `33461854773` success
 - 当前交付策略：GitHub-only；腾讯部署暂停，不属于本轮完成条件
 
 本文件不自称“最终提交哈希”。接手者必须先运行 `git fetch origin && git rev-parse origin/main`，以 GitHub 实时 `main` 为准。
@@ -48,7 +49,7 @@ OpenMapBridge 不是奥维客户端复刻品，也不是历史影像数据供应
 |---|---|
 | GitHub 运行代码 | `3cf763a` 已在 `main`；CI `33450486867` 成功 |
 | GitHub 文档基线 | 交接前 origin `31a1047`；CI `33452723127` 成功 |
-| 本地交接候选 | `da34098` 之后新增 GitHub-only 交接更新；必须以最终 push/CI 回执为准 |
+| GitHub 交接包 | `efb8305` 已在 `main`；CI `33461854773` 完整成功 |
 | 腾讯 | 最后可信 runtime/current=`67a6a0e`；用户已明确暂停续发，本轮不实时复核、不修改 |
 | 真实奥维源 | `not real-probed / not rendered / not accepted` |
 | 双湖结论 | 只有 approximate AOI 与合成回归；没有真实污染、开发或渔猎因果结论 |

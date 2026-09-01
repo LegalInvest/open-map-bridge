@@ -502,3 +502,4 @@ fixtures/synthetic/temporal  无外网的 20 年彩色/带标签时序瓦片
 - 2026-09-01 09:46 只读容量追踪：根卷先后观测 `4,908,672`、`4,694,052 KiB`，远低于 8 GiB。`lsof` 锁定跨项目 `curl` PID `8991`，cwd=`data-truth-skill`，输出为临时 runner 压缩包；文件在采样间从 88,977,408 增至 115,863,552 字节，证明仍在写入。向该精确 PID 发送 `TERM` 被沙箱以 `operation not permitted` 拒绝；没有删除部分文件。项目路径仍无 Vite/Playwright/gateway/项目端口监听，活动 agent 仅当前 root。GitHub API 与腾讯 SSH 复核仍失败，服务器状态未知且未修改。
 - 09:48 最终 `lsof -p 8991` 无记录，临时 runner 路径也已消失，说明所属流程自行结束/清理；这不是 Codex 删除结果。最终根卷 `4,850,260 KiB`，仍低于 8 GiB。
 - 2026-09-01 10:00 用户改定 GitHub-only 交付：实时 origin/main=`31a1047`、CI `33452723127` success；本地 `da34098` ahead 2。根卷 `4,539,068 KiB`，故不重跑重型门；新增 `HANDOFF.md`、merge-readiness 矩阵和 GitHub 交接回执，并将腾讯 `67a6a0e` 降为历史部署证据。目标合并项目尚未指定，不猜测仓库形态或 canonical owner。
+- 2026-09-01 10:17 GitHub 交接内容提交 `efb8305` 已与 origin/main 同步，CI `33461854773` 在远端完整通过交底新鲜度、单元/契约、typecheck、build、production smoke 和浏览器旅程。该 run 证明仓库可复现，不证明真实奥维源；云端明确 deferred。心跳已同步为 GitHub-only，后续不得因历史发布脚本存在而自动续发腾讯。

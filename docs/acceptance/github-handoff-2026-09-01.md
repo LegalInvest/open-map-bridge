@@ -7,7 +7,9 @@
 - 交接前 origin/main：`31a1047a3fda65ab20d4d98c5d755578a9a49120`
 - 最近运行代码：`3cf763a8ae0807f7e6b369f636c57d9380ef838f`
 - 交接前 GitHub CI：`33452723127`，`success`
-- 最终 GitHub 提交/CI：待本回执进入 `main` 后实时填写或由 `gh run list --branch main` 核验
+- GitHub 交接内容提交：`efb8305a93acc27009b11b4dd07ff15bb26a8613`
+- 交接内容 CI：`33461854773`，`success`（交底、单元/契约、类型、构建、production smoke、浏览器旅程全部通过）
+- 本回执后续证据提交：以实时 `origin/main` 和 `gh run list --branch main` 为准，避免自引用提交循环
 
 ## 本次交付
 
@@ -25,6 +27,6 @@
 
 ## 唯一最安全下一动作
 
-等待本交接提交的 GitHub CI；成功后以 GitHub `main` 为唯一交接源，未来合并负责人先填写 merge-readiness 矩阵。
+未来合并负责人先只读确认目标项目身份、license、运行时和等价能力，再填写 merge-readiness 矩阵；矩阵完成前不移动代码或数据。
 
 用户行动：无。
