@@ -80,6 +80,7 @@ Execution accepts only `{ "sourceId": "..." }`; it never accepts an upstream URL
 
 ## Project truth and handoff
 
+- [`HANDOFF.md`](HANDOFF.md): zero-context GitHub handoff, exact evidence stages, merge boundary, and safest next action.
 - [`goal.md`](goal.md): approved product and acceptance truth.
 - [`research.md`](research.md): evidence, implementation map, and stage ledger.
 - [`PROGRESS.md`](PROGRESS.md): current checkpoint and safest next action.
@@ -89,6 +90,7 @@ Execution accepts only `{ "sourceId": "..." }`; it never accepts an upstream URL
 - [`docs/可视化与自动化路线图.md`](docs/可视化与自动化路线图.md): observable workflow, one-click four-frame automation, human gates, and staged acceptance plan.
 - [`docs/automation-api.md`](docs/automation-api.md): the implemented zero-network readiness job contract and its explicit non-goals.
 - [`docs/runbook.md`](docs/runbook.md): local operations.
+- [`docs/merge-readiness.md`](docs/merge-readiness.md): capability ownership matrix for the future cross-project integration.
 
 Stages are reported separately: `discovered → local-candidate → local-verified → main → deployed → accepted`. A passing test, HTTP 200, or synthetic source does not prove a real Ovi source has rendered.
 
